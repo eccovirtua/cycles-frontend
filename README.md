@@ -1,2 +1,2 @@
 # cycles-frontend
-frontend fro cycles
+frontend for cycles
