@@ -22,4 +22,6 @@ class WelcomeViewModel @Inject constructor(): ViewModel() {
         // Simula una pequeña carga o inicialización
         _isScreenReady.value = true
     }
+
+
 }

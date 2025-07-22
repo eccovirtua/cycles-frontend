@@ -19,8 +19,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.cycles.R
 import com.example.cycles.ui.theme.CyclesTheme
-import com.example.cycles.ui.theme.LightBlue
-import com.example.cycles.ui.theme.Purple80
 import com.example.cycles.viewmodel.WelcomeViewModel
 import androidx.compose.ui.unit.sp // Importa sp para el tamaño de fuente
 
