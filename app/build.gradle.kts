@@ -3,6 +3,11 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     kotlin("plugin.serialization") version "2.0.21"
+    id("kotlin-kapt")
+    id("com.google.dagger.hilt.android") version "2.57"
+}
+hilt {
+    enableAggregatingTask = false
 }
 
 android {
@@ -64,6 +69,9 @@ dependencies {
 
     // Navigation Compose
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.navigation.fragment)
+    implementation(libs.androidx.navigation.ui)
+
 
     // ViewModel + Compose integration
     implementation(libs.androidx.lifecycle.viewmodel.compose)
@@ -74,4 +82,16 @@ dependencies {
 
     // Optional - Preview en IDE
     debugImplementation(libs.ui.tooling)
+
+    // Hilt
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.compiler)
+
+    // Hilt con Jetpack Compose
+    implementation(libs.androidx.hilt.navigation.compose)
+
+    implementation(libs.javapoet)
+    kapt(libs.javapoet)
+
+
 }
