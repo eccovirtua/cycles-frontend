@@ -98,4 +98,10 @@ dependencies {
     implementation(libs.javapoet)
     kapt(libs.javapoet)
 
+    //ktor
+    implementation(libs.ktor.client.okhttp)
+
+    //retrofit
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
 }

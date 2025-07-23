@@ -24,7 +24,7 @@ fun RegisterScreen(
     val errorMsg by viewModel.error.collectAsState()
     val dob by viewModel.dateOfBirth.collectAsState() // Estado de la fecha de nacimiento del ViewModel
 
-    val snackbarHostState = remember { SnackbarHostState() } //snackbar (solo para la validación local)
+    val snackbarHostState = remember { SnackbarHostState() } //snackbar
 
     LaunchedEffect(Unit) {
         viewModel.uiEvent.collect { message ->

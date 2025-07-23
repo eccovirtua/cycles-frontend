@@ -26,47 +26,67 @@ fun LoginScreen(
     val isLoading by viewModel.isLoading.collectAsState() // Observa el estado isLoading del ViewModel
     val errorMsg by viewModel.error.collectAsState()
 
-    Surface(modifier = Modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(24.dp),
-            verticalArrangement = Arrangement.Center
-        ) {
-            OutlinedTextField(
-                value = email,
-                onValueChange = viewModel::onEmailChange,
-                label = { Text("Nombre de usuario o Email") },
-                modifier = Modifier.fillMaxWidth()
+
+    val snackbarHostState = remember { SnackbarHostState() } //snackbar
+
+    LaunchedEffect(Unit) {
+        viewModel.uiEvent.collect { message ->
+            snackbarHostState.showSnackbar(
+                message = message,
+                duration = SnackbarDuration.Short
             )
-            Spacer(Modifier.height(16.dp))
-            OutlinedTextField(
-                value = password,
-                onValueChange = viewModel::onPasswordChange,
-                label = { Text("Contraseña") },
-                modifier = Modifier.fillMaxWidth(),
-                visualTransformation = PasswordVisualTransformation()
-            )
-            Spacer(Modifier.height(24.dp))
-            if (errorMsg.isNotEmpty()) {
-                Text(errorMsg, color = MaterialTheme.colorScheme.error)
-                Spacer(Modifier.height(16.dp))
-            }
-            Button(
-                onClick = { viewModel.onLoginClick() },
-                modifier = Modifier.fillMaxWidth(),
-                enabled = !isLoading
+        }
+    }
+
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        modifier = Modifier.fillMaxSize()
+    ) { paddingValues ->
+        Surface(
+            modifier = Modifier.fillMaxSize()
+                .padding(paddingValues)) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+                verticalArrangement = Arrangement.Center
             ) {
-                if (isLoading) CircularProgressIndicator(modifier = Modifier.size(20.dp))
-                else Text("Iniciar sesión")
-            }
-            Spacer(Modifier.height(16.dp))
+                OutlinedTextField(
+                    value = email,
+                    onValueChange = viewModel::onEmailChange,
+                    label = { Text("Nombre de usuario o Email") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(Modifier.height(16.dp))
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = viewModel::onPasswordChange,
+                    label = { Text("Contraseña") },
+                    modifier = Modifier.fillMaxWidth(),
+                    visualTransformation = PasswordVisualTransformation()
+                )
+                Spacer(Modifier.height(24.dp))
+                if (errorMsg.isNotEmpty()) {
+                    Text(errorMsg, color = MaterialTheme.colorScheme.error)
+                    Spacer(Modifier.height(16.dp))
+                }
+                Button(
+                    onClick = { viewModel.onLoginClick() },
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = !isLoading
+                ) {
+                    if (isLoading) CircularProgressIndicator(modifier = Modifier.size(20.dp))
+                    else Text("Iniciar sesión")
+                }
+                Spacer(Modifier.height(16.dp))
+
 //            TextButton(onClick = { navController.navigate(Screen.ForgotPassword.route) }) {
 //                Text("¿Olvidaste tu contraseña?")
 //            }
-            Spacer(Modifier.height(8.dp))
-            TextButton(onClick = { navController.navigate(Screen.Register.route) }) {
-                Text("¿No tienes cuenta? Regístrate")
+                Spacer(Modifier.height(8.dp))
+                TextButton(onClick = { navController.navigate(Screen.Register.route) }) {
+                    Text("¿No tienes cuenta? Regístrate")
+                }
             }
         }
     }
