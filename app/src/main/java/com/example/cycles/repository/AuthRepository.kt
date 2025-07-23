@@ -3,6 +3,7 @@ package com.example.cycles.repository
 
 import com.example.cycles.data.AuthenticationRequest
 import com.example.cycles.data.AuthenticationResponse
+import com.example.cycles.data.ForgotPasswordRequest
 import com.example.cycles.data.RegisterRequest
 import com.example.cycles.network.AuthApiService
 import javax.inject.Inject
@@ -20,4 +21,15 @@ class AuthRepository @Inject constructor(
     suspend fun login(request: AuthenticationRequest): AuthenticationResponse {
         return api.login(request)
     }
+
+    suspend fun sendPasswordRecoveryEmail(email: String): String {
+        val request = ForgotPasswordRequest(email)
+        val response = api.forgotPassword(request)
+        return if (response.isSuccessful) {
+            response.body()?.message ?: "Instrucciones enviadas"
+        } else {
+            "No se pudo enviar el correo"
+        }
+    }
+
 }

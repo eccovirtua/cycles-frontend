@@ -7,6 +7,7 @@ import androidx.navigation.compose.composable
 import com.example.cycles.ui.screens.LoginScreen
 import com.example.cycles.ui.screens.RegisterScreen
 import com.example.cycles.ui.screens.WelcomeScreen
+import com.example.cycles.ui.screens.ForgotPasswordScreen
 
 
 //defines las rutas en código con un NavHost. AppNavHost es tu “mapa” de pantallas.
@@ -31,10 +32,9 @@ fun AppNavHost(navController: NavHostController) {
             RegisterScreen(navController)
         }
 
-//        //forgot password
-//        composable(Screen.ForgotPassword.route) {
-//            Screen.ForgotPassword(navController)
-//        }
+        //forgot password
+        composable(Screen.ForgotPassword.route) {
+            ForgotPasswordScreen(navController) }
 
-    }
+        }
 }
