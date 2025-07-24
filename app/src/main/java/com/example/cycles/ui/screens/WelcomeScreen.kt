@@ -89,11 +89,8 @@ fun WelcomeScreen(
                         Text("Registrarse")
                     }
 
-                    Spacer(modifier = Modifier.height(20.dp))
+                    Spacer(modifier = Modifier.height(20.dp)) //este space innecesario por si en el futuro se deben ageregar elemtnos a la WelcomeScreen
 
-                    TextButton(onClick = { navController.navigate("forgot_password") }) {
-                        Text("¿Olvidaste tu contraseña?", color = Color.Gray)
-                    }
                 }
             }
         }

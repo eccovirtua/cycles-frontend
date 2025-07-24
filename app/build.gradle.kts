@@ -104,4 +104,6 @@ dependencies {
     //retrofit
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
+
+    implementation(libs.logging.interceptor) //logs http
 }

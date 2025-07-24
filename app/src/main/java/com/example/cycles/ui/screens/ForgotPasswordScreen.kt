@@ -16,9 +16,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-
-//import com.example.cycles.navigation.Screen
-
+import java.net.URLEncoder
 
 
 @Composable
@@ -29,13 +27,19 @@ fun ForgotPasswordScreen(
     val email by viewModel.email.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val message by viewModel.message.collectAsState()
-
     val context = LocalContext.current
+
 
     LaunchedEffect(message) {
         message?.let {
             Toast.makeText(context, it, Toast.LENGTH_LONG).show()
             viewModel.clearMessage()
+            if (it.contains("Código enviado")) {
+                // Navegamos a VerifyCodeScreen pasando el email como argumento
+                val encodedEmail = URLEncoder.encode(email, "UTF-8")
+                navController.navigate("verify_code/$encodedEmail")
+            }
+
         }
     }
     Surface(
@@ -53,7 +57,7 @@ fun ForgotPasswordScreen(
             OutlinedTextField(
                 value = email,
                 onValueChange = { viewModel.onEmailChanged(it) },
-                label = { Text("Correo electrónico") },
+                label = { Text("Ingresa tu email") },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -65,7 +69,7 @@ fun ForgotPasswordScreen(
                 enabled = !isLoading && email.isNotBlank(),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Enviar instrucciones")
+                Text("Enviar código")
             }
             if (isLoading) {
                 Spacer(modifier = Modifier.height(16.dp))

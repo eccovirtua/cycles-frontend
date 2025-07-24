@@ -1,5 +1,6 @@
 package com.example.cycles.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -27,13 +28,16 @@ fun RegisterScreen(
     val snackbarHostState = remember { SnackbarHostState() } //snackbar
 
     LaunchedEffect(Unit) {
-        viewModel.uiEvent.collect { message ->
-            snackbarHostState.showSnackbar(
-                message = message,
-                duration = SnackbarDuration.Short
-            )
+        viewModel.uiEvent.collect {
+            val token = viewModel.jwtToken.value
+                ?: return@collect
+
+            Log.d("NAV_DEBUG", "Navegando a: choose_username/$token")
+            navController.navigate(Screen.ChooseUsername.createRoute(token))
+
         }
     }
+
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) }, // El anclaje del Snackbar
@@ -89,10 +93,7 @@ fun RegisterScreen(
                     else Text("Registrarse")
                 }
                 Spacer(Modifier.height(16.dp))
-                TextButton(onClick = { navController.navigate(Screen.ForgotPassword.route) }) {
-                    Text("¿Olvidaste tu contraseña?")
-                }
-                Spacer(Modifier.height(8.dp))
+
                 TextButton(onClick = { navController.navigate(Screen.Login.route) }) {
                     Text("¿Ya tienes cuenta? Inicia sesión")
                 }

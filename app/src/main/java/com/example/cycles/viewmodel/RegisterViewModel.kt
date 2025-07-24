@@ -36,8 +36,12 @@ class RegisterViewModel @Inject constructor(
     private val _error       = MutableStateFlow("")
     val error               = _error.asStateFlow()
 
-    private val _uiEvent     = MutableSharedFlow<String>()
-    val uiEvent: SharedFlow<String> = _uiEvent.asSharedFlow()
+    private val _uiEvent     = MutableSharedFlow<Unit>()
+    val uiEvent = _uiEvent.asSharedFlow()
+
+    private val _jwtToken = MutableStateFlow<String?>(null)
+    val jwtToken = _jwtToken.asStateFlow()
+
 
     // --- Actualizaciones de estado ---
     fun onEmailChange(new: String) { _email.value = new; _error.value = "" }
@@ -128,7 +132,8 @@ class RegisterViewModel @Inject constructor(
                     password = password.value
                 )
                 val response = repository.register(request)
-                _uiEvent.emit("Registro exitoso. Token: ${response.jwtToken}")
+                _jwtToken.value = response.jwtToken
+                _uiEvent.emit(Unit)
             } catch (e: Exception) {
                 _error.value = "Error al registrar: ${e.message}"
             } finally {
