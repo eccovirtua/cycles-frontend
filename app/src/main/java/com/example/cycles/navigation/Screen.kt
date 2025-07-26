@@ -3,6 +3,9 @@ package com.example.cycles.navigation
 
 sealed class Screen(val route: String) {
 
+
+    data object Welcome : Screen("welcome")
+
     data object Login          : Screen("login")
 
     data object Register       : Screen("register")
@@ -18,7 +21,7 @@ sealed class Screen(val route: String) {
 
     }
 
-    object Home           : Screen("home")
+    data object Home           : Screen("home")
 
 
     // añadir profile, home, en el futuro.

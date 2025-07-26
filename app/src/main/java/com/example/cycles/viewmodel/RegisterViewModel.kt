@@ -116,7 +116,7 @@ class RegisterViewModel @Inject constructor(
             }
             // 4) Fecha y edad mínima
             if (!isValidDateOfBirth(dateOfBirth.value)) {
-                _error.value     = "Debes ser mayor de 9 años y usar formato DD/MM/YYYY"
+                _error.value     = "Debes ser mayor de 9 años para continuar"
                 _isLoading.value = false
                 return@launch
             }
@@ -126,7 +126,7 @@ class RegisterViewModel @Inject constructor(
                 val age = userAge.value
                     ?: throw IllegalArgumentException("Edad inválida")
                 val request = RegisterRequest(
-                    name     = "",  // si tienes un campo `name`, pásalo aquí
+                    name     = "",
                     email    = email.value,
                     age      = age,
                     password = password.value

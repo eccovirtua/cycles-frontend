@@ -11,17 +11,9 @@ import javax.inject.Inject
 class WelcomeViewModel @Inject constructor(): ViewModel() {
 
     // Estado que indica si la pantalla está lista
-    private val _isScreenReady = MutableStateFlow(false)
-    val isScreenReady: StateFlow<Boolean> = _isScreenReady
+
 
     // Mensaje de bienvenida, por ejemplo
     private val _welcomeMessage = MutableStateFlow("Cycles")
     val welcomeMessage: StateFlow<String> = _welcomeMessage
-
-    init {
-        // Simula una pequeña carga o inicialización
-        _isScreenReady.value = true
-    }
-
-
 }

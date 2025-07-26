@@ -106,4 +106,9 @@ dependencies {
     implementation(libs.converter.gson)
 
     implementation(libs.logging.interceptor) //logs http
+
+    //datastore para mantener sesion iniciada (guardar tokens de autenticacion)
+    implementation(libs.androidx.datastore.preferences)
+
+
 }

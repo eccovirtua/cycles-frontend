@@ -1,11 +1,9 @@
 package com.example.cycles.navigation
-//"NavHost"
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Text
+//Nav Host Para definir las rutas de las pantallas!
+//conveniente usar route = "nombre de las pantallas" y NombreDeLaPantalla(navController)
+
+
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -16,19 +14,20 @@ import com.example.cycles.ui.screens.LoginScreen
 import com.example.cycles.ui.screens.RegisterScreen
 import com.example.cycles.ui.screens.WelcomeScreen
 import com.example.cycles.ui.screens.ForgotPasswordScreen
+import com.example.cycles.ui.screens.HomeScreen
 import com.example.cycles.ui.screens.ResetPasswordScreen
 import com.example.cycles.ui.screens.VerifyCodeScreen
 
 
-//defines las rutas en código con un NavHost. AppNavHost es tu “mapa” de pantallas.
+
 @Composable
 fun AppNavHost(navController: NavHostController) {
     NavHost(
         navController = navController,
-        startDestination = "welcome"
+        startDestination = Screen.Home.route
     ) {
         //ruta de pantalla principal
-        composable("welcome") {
+        composable(Screen.Welcome.route) {
             WelcomeScreen(navController)
         }
 
@@ -133,17 +132,9 @@ fun AppNavHost(navController: NavHostController) {
 //            ChooseUsernameScreen(navController = navController, token = tokenArg)
 //        }
 
-        composable("home") {
-            // Un Composable vacío para prueba
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("¡Bienvenido a Home!")
-            }
+        composable(Screen.Home.route) {
+            HomeScreen(navController)
         }
-
-
-
-
-
 
 
     }//esta llave cierra el bloque de codigo de las rutas!

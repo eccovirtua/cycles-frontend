@@ -2,7 +2,9 @@ package com.example.cycles.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavController
 import com.example.cycles.data.AuthenticationRequest
+import com.example.cycles.data.UserPreferences
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -15,7 +17,10 @@ import com.example.cycles.repository.AuthRepository
 
 
 @HiltViewModel
-class LoginViewModel @Inject constructor(private val repository: AuthRepository): ViewModel() {
+class LoginViewModel @Inject constructor(
+    private val repository: AuthRepository,
+    private val userPreferences: UserPreferences
+    ): ViewModel() {
     private val _email = MutableStateFlow("")
     val email = _email.asStateFlow()
 
@@ -29,14 +34,14 @@ class LoginViewModel @Inject constructor(private val repository: AuthRepository)
     private val _error = MutableStateFlow("")
     val error = _error.asStateFlow()
 
-   //shrared flow para eventos UI
+   //shared flow para eventos UI
     private val _uiEvent = MutableSharedFlow<String>()
     val uiEvent: SharedFlow<String> = _uiEvent.asSharedFlow()
 
     fun onEmailChange(new: String) { _email.value = new }
     fun onPasswordChange(new: String) { _password.value = new}
 
-    fun onLoginClick() {
+    fun onLoginClick(nav: NavController) {
         viewModelScope.launch {
             // Set isLoading to true at the start of the operation
             _isLoading.value = true
@@ -51,9 +56,12 @@ class LoginViewModel @Inject constructor(private val repository: AuthRepository)
                     )
                 )
                 // si el login es correcto:
-                _uiEvent.emit("Login exitoso, token: ${response.jwtToken}")
+                val token = response.jwtToken
+//                _uiEvent.emit("Login exitoso, token: ${response.jwtToken}") esto emite un evento de ui que literalmente muestra el token en pantalla XD (para testeo)
+                userPreferences.saveToken(token) //aqui se guarda el token
+                nav.navigate(route = "home")
 
-                // limpiar valores de los campos despues de un login exitoso
+                // limpiar valores de los campos despues de un login exitoso(visual)
                 _email.value = ""
                 _password.value = ""
 
