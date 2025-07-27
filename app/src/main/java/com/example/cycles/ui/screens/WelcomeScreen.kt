@@ -31,24 +31,32 @@ import com.example.cycles.viewmodel.AuthViewModel
 fun WelcomeScreen(
     navController: NavHostController,
     welcomeViewModel: WelcomeViewModel = hiltViewModel(),
-    authViewModel: AuthViewModel = hiltViewModel()
+//    authViewModel: AuthViewModel = hiltViewModel()
 ) {
 
     //Observa el token (null = aún no leído o no existe) Si token es no‑nulo y no vacío, das por logueado al usuario.
     //La UI reacciona en tiempo real a cualquier cambio de tokenFlow.
-    val token by authViewModel.tokenFlow.collectAsState(initial = null)
+//    val token by authViewModel.tokenFlow.collectAsState(initial = null)
+
+    //recordar si ya se ignoro la primera emision de tokenflow
+//    var hasChecked by remember { mutableStateOf(false) }
 
     // 2) Mensaje de bienvenida
     val message by welcomeViewModel.welcomeMessage.collectAsState()
 
     // 3) Cuando token sea distinto de null y no vacío, navega a Home
-    LaunchedEffect(token) {
-        if (!token.isNullOrEmpty()) {
-            navController.navigate(Screen.Home.route) {
-                popUpTo(route = Screen.Welcome.route) { inclusive = true }
-            }
-        }
-    }
+//    LaunchedEffect(token) {
+//
+//        if (!hasChecked) {
+//            hasChecked = true
+//            return@LaunchedEffect
+//        }
+//        if (!token.isNullOrEmpty()) {
+//            navController.navigate(Screen.Home.route) {
+//                popUpTo(route = Screen.Welcome.route) { inclusive = true }
+//            }
+//        }
+//    }
 
 
 

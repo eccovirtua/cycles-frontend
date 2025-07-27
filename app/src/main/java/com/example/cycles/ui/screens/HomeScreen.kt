@@ -10,27 +10,28 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.cycles.navigation.Screen
-import com.example.cycles.viewmodel.HomeViewModel
 import com.example.cycles.viewmodel.AuthViewModel
+import com.example.cycles.viewmodel.HomeViewModel
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.first
 
 @Composable
 fun HomeScreen (
-    navController: NavHostController,
-    authViewModel: AuthViewModel = hiltViewModel(), //este viewmodel adicional para la verificacion en segundo plano de la autenticacion existente (token)
-    viewModel: HomeViewModel = hiltViewModel() //importante instanciar siempre Hilt ya que los viewModel son Hilt
+    navController: NavHostController
 ) {
 
-    val isValid by authViewModel.isTokenValid.collectAsState(initial = true)
+    val authViewModel: AuthViewModel = hiltViewModel()
+    val viewModel: HomeViewModel = hiltViewModel()
 
     // Flag para saber si ya consumimos la primera emisión de isValid(que es el valor inicial) y solo reaccionar a cambios posteriores
 
-    var hasChecked by remember { mutableStateOf(false) }
+
 
 
 
@@ -51,27 +52,26 @@ fun HomeScreen (
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             TextButton(
-                onClick = { viewModel.onLogoutClick(navController) },
-//              modifier = Modifier.fillMaxWidth() no se necesita que el boton cubra toda la puta pantalla
-                ) {
-                    Text("Cerrar sesión")
+                onClick = {
+                    viewModel.onLogoutClick(
+                        navController = navController,
+                        authViewModel = authViewModel
+                    )
                 }
+                ) { Text("Cerrar sesión") }
         }
     }
 
 
+    // Verifica si el token está vacío y redirige al welcome
+    LaunchedEffect(Unit) {
+        val token = authViewModel.rawTokenFlow.first()
+        // Esto suspende hasta que DataStore emita su primer valor real
 
-    //en segundo plano, en cuanto isValid sea false, tira de una al welcome (login/reg)
-    LaunchedEffect(isValid) {
-
-        // Ignora la primera vez que entra aquí:
-        if (!hasChecked) {
-            hasChecked = true
-            return@LaunchedEffect
-        }
-        if (!isValid)
+        if (token.isNullOrEmpty()) {
             navController.navigate(Screen.Welcome.route) {
-                popUpTo(Screen.Home.route) {inclusive = true} //siempre usar popupto para borrar la pila de pantallas y no volver si no hay autentication (logica)
+                popUpTo(Screen.Home.route) { inclusive = true }
             }
+        }
     }
 }

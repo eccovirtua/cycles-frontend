@@ -19,11 +19,12 @@ import com.example.cycles.ui.screens.ResetPasswordScreen
 import com.example.cycles.ui.screens.VerifyCodeScreen
 
 
-
 @Composable
-fun AppNavHost(navController: NavHostController) {
+fun AppNavHost(
+    navController: NavHostController) {
+
     NavHost(
-        navController = navController,
+        navController,
         startDestination = Screen.Home.route
     ) {
         //ruta de pantalla principal

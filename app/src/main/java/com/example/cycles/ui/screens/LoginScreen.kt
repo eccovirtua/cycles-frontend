@@ -21,7 +21,7 @@ fun LoginScreen(
     viewModel: LoginViewModel = hiltViewModel() // Obtén una instancia del ViewModel
 ) {
     //estados
-    val email by viewModel.email.collectAsState()
+    val email by viewModel.usernameOrEmail.collectAsState()
     val password by viewModel.password.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState() // Observa el estado isLoading del ViewModel
     val errorMsg by viewModel.error.collectAsState()
@@ -53,7 +53,7 @@ fun LoginScreen(
             ) {
                 OutlinedTextField(
                     value = email,
-                    onValueChange = viewModel::onEmailChange,
+                    onValueChange = viewModel::onUsernameOrEmailChange,
                     label = { Text("Nombre de usuario o Email") },
                     modifier = Modifier.fillMaxWidth()
                 )

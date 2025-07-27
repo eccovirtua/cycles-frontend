@@ -21,8 +21,11 @@ class LoginViewModel @Inject constructor(
     private val repository: AuthRepository,
     private val userPreferences: UserPreferences
     ): ViewModel() {
-    private val _email = MutableStateFlow("")
-    val email = _email.asStateFlow()
+//    private val _email = MutableStateFlow("")
+
+    private val _usernameOrEmail = MutableStateFlow("")
+    val usernameOrEmail = _usernameOrEmail.asStateFlow()
+//    val email = _email.asStateFlow()
 
     private val _password = MutableStateFlow("")
     val password = _password.asStateFlow()
@@ -38,7 +41,7 @@ class LoginViewModel @Inject constructor(
     private val _uiEvent = MutableSharedFlow<String>()
     val uiEvent: SharedFlow<String> = _uiEvent.asSharedFlow()
 
-    fun onEmailChange(new: String) { _email.value = new }
+    fun onUsernameOrEmailChange(new: String) { _usernameOrEmail.value = new }
     fun onPasswordChange(new: String) { _password.value = new}
 
     fun onLoginClick(nav: NavController) {
@@ -51,7 +54,7 @@ class LoginViewModel @Inject constructor(
                 // hacer login
                 val response = repository.login(
                     AuthenticationRequest(
-                        email    = email.value,
+                        email    = usernameOrEmail.value,
                         password = password.value
                     )
                 )
@@ -62,7 +65,7 @@ class LoginViewModel @Inject constructor(
                 nav.navigate(route = "home")
 
                 // limpiar valores de los campos despues de un login exitoso(visual)
-                _email.value = ""
+                _usernameOrEmail.value = ""
                 _password.value = ""
 
 

@@ -1,13 +1,15 @@
 package com.example.cycles.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.cycles.data.UserPreferences
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 
 @HiltViewModel
@@ -15,19 +17,14 @@ class AuthViewModel @Inject constructor(
     private val userPreferences: UserPreferences
 ) : ViewModel() {
 
+    // El Flow directo de DataStore, sin stateIn ni valor inicial fake
+    val rawTokenFlow: Flow<String?> = userPreferences.token
+
+
     val tokenFlow: StateFlow<String?> = userPreferences.token
+        .onEach { Log.d("AuthVM", "tokenFlow emits: $it") }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000),null)
     //para saber si el token existe
-
-    // Usuario autenticado si token != null
-    val isTokenValid: StateFlow<Boolean> = tokenFlow
-        .map { token -> !token.isNullOrEmpty() }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
-
-    //se sugiere:
-    //Para un chequeo real de expiración, reemplaza el .map { !token.isNullOrEmpty() } por tu función de decodificar y comparar exp.
-
-
 
     //exponer el token al resto de la interfaz con un stateflow llamando los metodos de userPreferences en un contexto viewModel
     suspend fun saveToken(token: String){
@@ -36,6 +33,7 @@ class AuthViewModel @Inject constructor(
 
     //para cerrar sesión(limpiar el token)
     suspend fun logout(){
+        Log.d("AuthVM", "Calling clearToken()")
         userPreferences.clearToken() // borra prefs[TOKEN_KEY]
     }
 }
