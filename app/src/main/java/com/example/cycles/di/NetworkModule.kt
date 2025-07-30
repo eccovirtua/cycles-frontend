@@ -2,6 +2,7 @@ package com.example.cycles.di
 
 
 import com.example.cycles.network.AuthApiService
+import com.example.cycles.network.RecsApiService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -12,7 +13,6 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
-
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -46,9 +46,19 @@ object NetworkModule {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
+
+
     @Provides
     @Singleton
     fun provideAuthApiService(
         retrofit: Retrofit): AuthApiService = retrofit.create(
         AuthApiService::class.java)
+
+
+
+    @Provides
+    @Singleton
+    fun provideRecsApiService(
+        retrofit: Retrofit): RecsApiService = retrofit.create(
+        RecsApiService::class.java)
 }

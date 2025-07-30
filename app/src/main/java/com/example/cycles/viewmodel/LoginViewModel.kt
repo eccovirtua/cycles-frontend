@@ -54,7 +54,7 @@ class LoginViewModel @Inject constructor(
                 // hacer login
                 val response = repository.login(
                     AuthenticationRequest(
-                        email    = usernameOrEmail.value,
+                        usernameOrEmail    = usernameOrEmail.value,
                         password = password.value
                     )
                 )

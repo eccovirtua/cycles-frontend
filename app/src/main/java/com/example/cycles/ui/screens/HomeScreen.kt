@@ -18,7 +18,6 @@ import androidx.navigation.NavHostController
 import com.example.cycles.navigation.Screen
 import com.example.cycles.viewmodel.AuthViewModel
 import com.example.cycles.viewmodel.HomeViewModel
-import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
 
 @Composable
@@ -28,17 +27,7 @@ fun HomeScreen (
 
     val authViewModel: AuthViewModel = hiltViewModel()
     val viewModel: HomeViewModel = hiltViewModel()
-
-    // Flag para saber si ya consumimos la primera emisión de isValid(que es el valor inicial) y solo reaccionar a cambios posteriores
-
-
-
-
-
-//    val isLoading by viewModel.isLoading.collectAsState()
-    //val errorMsg by viewModel.error.collectAsState()
-
-
+    val myItemId = 1
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -59,6 +48,15 @@ fun HomeScreen (
                     )
                 }
                 ) { Text("Cerrar sesión") }
+
+            Spacer(Modifier.height(16.dp)) //espacio entre los dos botones
+            TextButton(
+                onClick = {
+                    navController.navigate("${Screen.Recommendations.route}/$myItemId")
+                }
+            ) {
+                Text("Ver recomendaciones")
+            }
         }
     }
 

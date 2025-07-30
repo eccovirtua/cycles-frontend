@@ -15,6 +15,7 @@ import com.example.cycles.ui.screens.RegisterScreen
 import com.example.cycles.ui.screens.WelcomeScreen
 import com.example.cycles.ui.screens.ForgotPasswordScreen
 import com.example.cycles.ui.screens.HomeScreen
+import com.example.cycles.ui.screens.RecommendationsScreen
 import com.example.cycles.ui.screens.ResetPasswordScreen
 import com.example.cycles.ui.screens.VerifyCodeScreen
 
@@ -135,6 +136,15 @@ fun AppNavHost(
 
         composable(Screen.Home.route) {
             HomeScreen(navController)
+        }
+
+        composable("recommendations/{itemId}", arguments = listOf(navArgument("itemId") { type = NavType.IntType})
+        ) { backStackEntry ->
+            val itemId = backStackEntry.arguments!!.getInt("itemId")
+            RecommendationsScreen(
+                itemId = itemId,
+                navController = navController
+            )
         }
 
 

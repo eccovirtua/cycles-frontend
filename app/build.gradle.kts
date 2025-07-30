@@ -110,5 +110,8 @@ dependencies {
     //datastore para mantener sesion iniciada (guardar tokens de autenticacion)
     implementation(libs.androidx.datastore.preferences)
 
+    implementation(libs.converter.moshi)
+    implementation(libs.moshi.kotlin)
+
 
 }
