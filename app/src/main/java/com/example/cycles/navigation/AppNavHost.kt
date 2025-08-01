@@ -15,7 +15,7 @@ import com.example.cycles.ui.screens.RegisterScreen
 import com.example.cycles.ui.screens.WelcomeScreen
 import com.example.cycles.ui.screens.ForgotPasswordScreen
 import com.example.cycles.ui.screens.HomeScreen
-import com.example.cycles.ui.screens.RecommendationsScreen
+import com.example.cycles.ui.screens.MusicRecScreen
 import com.example.cycles.ui.screens.ResetPasswordScreen
 import com.example.cycles.ui.screens.VerifyCodeScreen
 
@@ -74,35 +74,6 @@ fun AppNavHost(
             VerifyCodeScreen(navController, email)
         }
 
-        //VerifyCode recibe el email
-//        composable(
-//            route = "verify_code/{email}",
-//            arguments = listOf(navArgument("email") { type = NavType.StringType })
-//        ) { back ->
-//            val emailArg = back.arguments!!.getString("email")!!
-//            VerifyCodeScreen(
-//                navController = navController,
-//                email = URLDecoder.decode(emailArg, "UTF-8")
-//            )
-//        }
-
-        //ResetPassword recibe email y code
-//        composable(
-//            route = "reset_password/{email}/{code}",
-//            arguments = listOf(
-//                navArgument("email") { type = NavType.StringType },
-//                navArgument("code")  { type = NavType.StringType }
-//            )
-//        ) { back ->
-//            val emailArg = URLDecoder.decode(back.arguments!!.getString("email")!!, "UTF-8")
-//            val codeArg  = back.arguments!!.getString("code")!!
-//            ResetPasswordScreen(
-//                navController = navController,
-//                email = emailArg,
-//                code  = codeArg
-//            )
-//        }
-
         composable(
             route = Screen.ResetPassword.route,
             arguments = listOf(
@@ -138,13 +109,8 @@ fun AppNavHost(
             HomeScreen(navController)
         }
 
-        composable("recommendations/{itemId}", arguments = listOf(navArgument("itemId") { type = NavType.IntType})
-        ) { backStackEntry ->
-            val itemId = backStackEntry.arguments!!.getInt("itemId")
-            RecommendationsScreen(
-                itemId = itemId,
-                navController = navController
-            )
+        composable(Screen.MusicRecommendation.route) {
+            MusicRecScreen()
         }
 
 

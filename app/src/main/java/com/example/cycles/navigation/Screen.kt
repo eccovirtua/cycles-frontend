@@ -23,7 +23,8 @@ sealed class Screen(val route: String) {
 
     data object Home           : Screen("home")
 
-    data object Recommendations: Screen("recommendations")
+    data object MusicRecommendation: Screen("musicReco")
+
 
 
     // añadir profile, home, en el futuro.

@@ -1,6 +1,6 @@
 package com.example.cycles.di
 
-
+import com.example.cycles.BuildConfig
 import com.example.cycles.network.AuthApiService
 import com.example.cycles.network.RecsApiService
 import dagger.Module
@@ -12,15 +12,15 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
+import javax.inject.Named
 import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
-    private const val BASE_URL = "https://cycles-backend.onrender.com"
 
-
-    @Provides @Singleton
+    @Provides
+    @Singleton
     fun provideLoggingInterceptor(): HttpLoggingInterceptor =
         HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
@@ -37,28 +37,39 @@ object NetworkModule {
             .addInterceptor(logging)
             .build()
 
+    // ------------------ Retrofit para AUTENTICACIÓN ------------------
     @Provides
     @Singleton
-    fun provideRetrofit(client: OkHttpClient): Retrofit =
+    @Named("auth")
+    fun provideAuthRetrofit(client: OkHttpClient): Retrofit =
         Retrofit.Builder()
-            .baseUrl(BASE_URL)
+            .baseUrl(BuildConfig.AUTH_BASE_URL)
             .client(client)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
+    // ------------------ Retrofit para RECOMENDACIONES ------------------
+    @Provides
+    @Singleton
+    @Named("recs")
+    fun provideRecsRetrofit(client: OkHttpClient): Retrofit =
+        Retrofit.Builder()
+            .baseUrl(BuildConfig.RECS_BASE_URL)
+            .client(client)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
 
+    // ------------------ Servicios API ------------------
 
     @Provides
     @Singleton
     fun provideAuthApiService(
-        retrofit: Retrofit): AuthApiService = retrofit.create(
-        AuthApiService::class.java)
-
-
+        @Named("auth") retrofit: Retrofit
+    ): AuthApiService = retrofit.create(AuthApiService::class.java)
 
     @Provides
     @Singleton
     fun provideRecsApiService(
-        retrofit: Retrofit): RecsApiService = retrofit.create(
-        RecsApiService::class.java)
+        @Named("recs") retrofit: Retrofit
+    ): RecsApiService = retrofit.create(RecsApiService::class.java)
 }

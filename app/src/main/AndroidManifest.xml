@@ -4,12 +4,12 @@
 
     <uses-permission android:name="android.permission.INTERNET"/>
 
+
+
 <!--para testear conexion a bd en entorno local usar en el tag de abajo android:usesCleartextTraffic="true"-->
-
-
     <application
         android:name=".MyApp"
-
+        android:usesCleartextTraffic="true"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"

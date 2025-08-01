@@ -27,7 +27,7 @@ fun HomeScreen (
 
     val authViewModel: AuthViewModel = hiltViewModel()
     val viewModel: HomeViewModel = hiltViewModel()
-    val myItemId = 1
+
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -52,10 +52,10 @@ fun HomeScreen (
             Spacer(Modifier.height(16.dp)) //espacio entre los dos botones
             TextButton(
                 onClick = {
-                    navController.navigate("${Screen.Recommendations.route}/$myItemId")
+                    navController.navigate(Screen.MusicRecommendation.route)
                 }
             ) {
-                Text("Ver recomendaciones")
+                Text("Ver recomendaciones de música")
             }
         }
     }

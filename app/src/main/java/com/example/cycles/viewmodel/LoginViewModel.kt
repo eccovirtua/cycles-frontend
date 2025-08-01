@@ -1,8 +1,10 @@
 package com.example.cycles.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
+import com.example.cycles.BuildConfig
 import com.example.cycles.data.AuthenticationRequest
 import com.example.cycles.data.UserPreferences
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -71,6 +73,7 @@ class LoginViewModel @Inject constructor(
 
 
             } catch (e: Exception) {
+                Log.d("BaseURL", "Base URL usada: ${BuildConfig.AUTH_BASE_URL}")
 
                 _error.value = "Error al autenticar: ${e.message}"
 

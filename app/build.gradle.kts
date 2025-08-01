@@ -28,7 +28,13 @@ android {
     }
 
     buildTypes {
+        debug {
+            buildConfigField("String", "AUTH_BASE_URL", "\"http://192.168.1.7:8080/\"")
+            buildConfigField("String", "RECS_BASE_URL", "\"http://192.168.1.7:8000/\"")
+        }
         release {
+            buildConfigField( "String", "AUTH_BASE_URL", "\"https://cycles-backend.onrender.com\"")
+            buildConfigField( "String", "RECS_BASE_URL", "\"https://cycles-backend.onrender.com\"")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -46,6 +52,7 @@ android {
         }
     }
     buildFeatures {
+        android.buildFeatures.buildConfig = true
         compose = true
     }
 }
@@ -112,6 +119,8 @@ dependencies {
 
     implementation(libs.converter.moshi)
     implementation(libs.moshi.kotlin)
+
+    implementation(libs.coil.compose) //coil: libreria para el proceso de carga de imagenes desde api
 
 
 }

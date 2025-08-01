@@ -9,14 +9,20 @@ import com.example.cycles.data.RegisterRequest
 import com.example.cycles.data.ResetPasswordRequest
 import com.example.cycles.data.VerifyCodeRequest
 import com.example.cycles.network.AuthApiService
+import retrofit2.Retrofit
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Singleton
 
 
 @Singleton
 class AuthRepository @Inject constructor(
-    private val api: AuthApiService
+    @Named("auth") retrofit: Retrofit,
 ) {
+    private val api = retrofit.create(AuthApiService::class.java)
+
+
+
     suspend fun register(request: RegisterRequest): AuthenticationResponse {
         return api.register(request)
     }
