@@ -6,7 +6,6 @@
 //import androidx.compose.foundation.lazy.LazyRow
 //import androidx.compose.foundation.lazy.items
 //import androidx.compose.material3.*
-//import androidx.compose.material3.HorizontalDivider
 //import androidx.compose.runtime.*
 //import androidx.compose.ui.Alignment
 //import androidx.compose.ui.Modifier
@@ -14,53 +13,53 @@
 //import androidx.hilt.navigation.compose.hiltViewModel
 //import coil.compose.AsyncImage
 //import com.example.cycles.data.RecommendationItem
-//import com.example.cycles.viewmodel.MusicRecViewModel
+//import com.example.cycles.viewmodel.BookRecViewModel
+//
 //
 //@Composable
-//fun MusicRecScreen(
-//    viewModel: MusicRecViewModel = hiltViewModel()
+//fun BookRecScreen(
+//    viewModel: BookRecViewModel = hiltViewModel()
 //) {
 //    val state by viewModel.uiState.collectAsState()
 //
-//    val initialItems = listOf(
+//    // 3 libros semilla
+//    val initialBooks = listOf(
 //        RecommendationItem(
-//            itemId = "lf-Nirvana_Smells Like Teen Spirit",
-//            title = "Smells Like Teen Spirit",
+//            itemId = "gb-icKmd-tlvPMC",
+//            title = "Journey to the Center of the Earth",
 //            distance = 0.0,
-//            imageUrl = "https://lastfm.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png"
+//            imageUrl = "http://books.google.com/books/content?id=XdMBT"
 //        ),
 //        RecommendationItem(
-//            itemId = "lf-A\$AP Rocky_Fashion Killa",
-//            title = "Fashion Killa",
+//            itemId = "gb-UiRdEQAAQBAJ",
+//            title = "The History of the Peloponnesian War",
 //            distance = 0.0,
-//            imageUrl = "https://lastfm.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png"
+//            imageUrl = "https://…/hobbit.jpg"
 //        ),
 //        RecommendationItem(
-//            itemId = "lf-Tyler, The Creator_SUGAR ON MY TONGUE",
-//            title = "SUGAR ON MY TONGUE",
+//            itemId = "gb-6vGiDwAAQBAJ",
+//            title = "The Picture of Dorian Gray",
 //            distance = 0.0,
-//            imageUrl = "https://lastfm.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png"
+//            imageUrl = "https://…/charlottes_web.jpg"
 //        )
 //    )
 //
 //    Column(Modifier.fillMaxSize().padding(16.dp)) {
-//        Text("¿Qué podrías escuchar hoy?", style = MaterialTheme.typography.headlineSmall)
+//        Text("¿Qué libro quieres leer hoy?", style = MaterialTheme.typography.headlineSmall)
 //        Spacer(Modifier.height(8.dp))
 //
-//        // Álbumes iniciales
+//        // Carrusel de portadas iniciales
 //        LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-//            items(initialItems) { item ->
+//            items(initialBooks) { book ->
 //                Card(
 //                    modifier = Modifier
 //                        .size(120.dp)
-//                        .clickable {
-//                            viewModel.loadRecommendations(item.itemId)
-//                        },
+//                        .clickable { viewModel.loadRecommendations(book.itemId) },
 //                    elevation = CardDefaults.cardElevation(2.dp)
 //                ) {
 //                    AsyncImage(
-//                        model = item.imageUrl,
-//                        contentDescription = item.title,
+//                        model = book.imageUrl,
+//                        contentDescription = book.title,
 //                        modifier = Modifier.fillMaxSize()
 //                    )
 //                }
@@ -69,16 +68,16 @@
 //
 //        Spacer(Modifier.height(16.dp))
 //
-//        // Recomendaciones
+//        // Lista de recomendaciones
 //        when (state) {
-//            is MusicRecViewModel.UiState.Idle -> {}
-//            MusicRecViewModel.UiState.Loading -> {
+//            BookRecViewModel.UiState.Idle -> { /* mensaje inicial opcional */ }
+//            BookRecViewModel.UiState.Loading -> {
 //                CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
 //            }
-//            is MusicRecViewModel.UiState.Success -> {
-//                val list = (state as MusicRecViewModel.UiState.Success).list
+//            is BookRecViewModel.UiState.Success -> {
+//                val recs = (state as BookRecViewModel.UiState.Success).list
 //                LazyColumn {
-//                    items(list) { rec ->
+//                    items(recs) { rec ->
 //                        ListItem(
 //                            headlineContent = { Text(rec.title) },
 //                            supportingContent = { Text("Distancia: %.2f".format(rec.distance)) },
@@ -90,17 +89,13 @@
 //                                )
 //                            }
 //                        )
-//                        HorizontalDivider(
-//                            Modifier,
-//                            DividerDefaults.Thickness,
-//                            DividerDefaults.color
-//                        )
+//                        HorizontalDivider()
 //                    }
 //                }
 //            }
-//            is MusicRecViewModel.UiState.Error -> {
+//            is BookRecViewModel.UiState.Error -> {
 //                Text(
-//                    text = "Error: ${(state as MusicRecViewModel.UiState.Error).message}",
+//                    text = "Error: ${(state as BookRecViewModel.UiState.Error).message}",
 //                    color = MaterialTheme.colorScheme.error
 //                )
 //            }

@@ -6,7 +6,6 @@
 //import androidx.compose.foundation.lazy.LazyRow
 //import androidx.compose.foundation.lazy.items
 //import androidx.compose.material3.*
-//import androidx.compose.material3.HorizontalDivider
 //import androidx.compose.runtime.*
 //import androidx.compose.ui.Alignment
 //import androidx.compose.ui.Modifier
@@ -14,53 +13,53 @@
 //import androidx.hilt.navigation.compose.hiltViewModel
 //import coil.compose.AsyncImage
 //import com.example.cycles.data.RecommendationItem
-//import com.example.cycles.viewmodel.MusicRecViewModel
+//import com.example.cycles.viewmodel.MovieRecViewModel
+//
 //
 //@Composable
-//fun MusicRecScreen(
-//    viewModel: MusicRecViewModel = hiltViewModel()
+//fun MovieRecScreen(
+//    viewModel: MovieRecViewModel = hiltViewModel()
 //) {
 //    val state by viewModel.uiState.collectAsState()
 //
-//    val initialItems = listOf(
+//    // 3 películas/series semilla (reemplaza itemId y imageUrl por tus datos reales)
+//    val initialMovies = listOf(
 //        RecommendationItem(
-//            itemId = "lf-Nirvana_Smells Like Teen Spirit",
-//            title = "Smells Like Teen Spirit",
+//            itemId = "ml-1",  // ej. "ml-1" corresponde a la primera película en tu dataset
+//            title = "Toy Story (1995)",
 //            distance = 0.0,
-//            imageUrl = "https://lastfm.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png"
+//            imageUrl = "https://link_a_poster1.jpg"
 //        ),
 //        RecommendationItem(
-//            itemId = "lf-A\$AP Rocky_Fashion Killa",
-//            title = "Fashion Killa",
+//            itemId = "ml-2",
+//            title = "The Godfather (1972)",
 //            distance = 0.0,
-//            imageUrl = "https://lastfm.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png"
+//            imageUrl = "https://link_a_poster2.jpg"
 //        ),
 //        RecommendationItem(
-//            itemId = "lf-Tyler, The Creator_SUGAR ON MY TONGUE",
-//            title = "SUGAR ON MY TONGUE",
+//            itemId = "ml-3",
+//            title = "The Dark Knight (2008)",
 //            distance = 0.0,
-//            imageUrl = "https://lastfm.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png"
+//            imageUrl = "https://link_a_poster3.jpg"
 //        )
 //    )
 //
 //    Column(Modifier.fillMaxSize().padding(16.dp)) {
-//        Text("¿Qué podrías escuchar hoy?", style = MaterialTheme.typography.headlineSmall)
+//        Text("¿Qué película o serie quieres ver hoy?", style = MaterialTheme.typography.headlineSmall)
 //        Spacer(Modifier.height(8.dp))
 //
-//        // Álbumes iniciales
+//        // Carrusel de portadas iniciales
 //        LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-//            items(initialItems) { item ->
+//            items(initialMovies) { movie ->
 //                Card(
 //                    modifier = Modifier
 //                        .size(120.dp)
-//                        .clickable {
-//                            viewModel.loadRecommendations(item.itemId)
-//                        },
+//                        .clickable { viewModel.loadRecommendations(movie.itemId) },
 //                    elevation = CardDefaults.cardElevation(2.dp)
 //                ) {
 //                    AsyncImage(
-//                        model = item.imageUrl,
-//                        contentDescription = item.title,
+//                        model = movie.imageUrl,
+//                        contentDescription = movie.title,
 //                        modifier = Modifier.fillMaxSize()
 //                    )
 //                }
@@ -69,16 +68,16 @@
 //
 //        Spacer(Modifier.height(16.dp))
 //
-//        // Recomendaciones
+//        // Lista de recomendaciones
 //        when (state) {
-//            is MusicRecViewModel.UiState.Idle -> {}
-//            MusicRecViewModel.UiState.Loading -> {
+//            MovieRecViewModel.UiState.Idle -> { /* mensaje inicial opcional */ }
+//            MovieRecViewModel.UiState.Loading -> {
 //                CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
 //            }
-//            is MusicRecViewModel.UiState.Success -> {
-//                val list = (state as MusicRecViewModel.UiState.Success).list
+//            is MovieRecViewModel.UiState.Success -> {
+//                val recs = (state as MovieRecViewModel.UiState.Success).list
 //                LazyColumn {
-//                    items(list) { rec ->
+//                    items(recs) { rec ->
 //                        ListItem(
 //                            headlineContent = { Text(rec.title) },
 //                            supportingContent = { Text("Distancia: %.2f".format(rec.distance)) },
@@ -90,17 +89,13 @@
 //                                )
 //                            }
 //                        )
-//                        HorizontalDivider(
-//                            Modifier,
-//                            DividerDefaults.Thickness,
-//                            DividerDefaults.color
-//                        )
+//                        HorizontalDivider()
 //                    }
 //                }
 //            }
-//            is MusicRecViewModel.UiState.Error -> {
+//            is MovieRecViewModel.UiState.Error -> {
 //                Text(
-//                    text = "Error: ${(state as MusicRecViewModel.UiState.Error).message}",
+//                    text = "Error: ${(state as MovieRecViewModel.UiState.Error).message}",
 //                    color = MaterialTheme.colorScheme.error
 //                )
 //            }

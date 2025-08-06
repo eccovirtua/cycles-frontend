@@ -29,8 +29,8 @@ android {
 
     buildTypes {
         debug {
-            buildConfigField("String", "AUTH_BASE_URL", "\"http://192.168.1.7:8080/\"")
-            buildConfigField("String", "RECS_BASE_URL", "\"http://192.168.1.7:8000/\"")
+            buildConfigField("String", "AUTH_BASE_URL", "\"http://192.168.1.8:8080/\"")
+            buildConfigField("String", "RECS_BASE_URL", "\"http://192.168.1.8:8000/\"")
         }
         release {
             buildConfigField( "String", "AUTH_BASE_URL", "\"https://cycles-backend.onrender.com\"")

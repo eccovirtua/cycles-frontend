@@ -29,6 +29,7 @@ fun HomeScreen (
     val viewModel: HomeViewModel = hiltViewModel()
 
 
+
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
@@ -49,15 +50,43 @@ fun HomeScreen (
                 }
                 ) { Text("Cerrar sesión") }
 
-            Spacer(Modifier.height(16.dp)) //espacio entre los dos botones
+            Spacer(Modifier.height(11.dp)) //espacio entre los dos botones
             TextButton(
                 onClick = {
-                    navController.navigate(Screen.MusicRecommendation.route)
+                    navController.navigate("interactive_music")
                 }
             ) {
                 Text("Ver recomendaciones de música")
             }
+
+            Spacer(Modifier.height(11.dp)) //espacio para el boton de rec de libros
+            TextButton(
+                onClick = {
+                    navController.navigate("interactive_books")
+                }
+            ) {
+                Text("Ver las recomendaciones de libros")
+            }
+
+
+            Spacer(Modifier.height(11.dp)) //espacio para el boton de rec de libros (verificar ya q no se si funcoina esta meirda)
+            TextButton(
+                onClick = {
+                    navController.navigate("interactive_movies")
+
+                }
+            ) {
+                Text("Ver las recomendaciones de películas/shows")
+            }
+
+
+
+
+
         }
+
+
+
     }
 
 

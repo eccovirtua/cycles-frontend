@@ -15,9 +15,10 @@ import com.example.cycles.ui.screens.RegisterScreen
 import com.example.cycles.ui.screens.WelcomeScreen
 import com.example.cycles.ui.screens.ForgotPasswordScreen
 import com.example.cycles.ui.screens.HomeScreen
-import com.example.cycles.ui.screens.MusicRecScreen
 import com.example.cycles.ui.screens.ResetPasswordScreen
 import com.example.cycles.ui.screens.VerifyCodeScreen
+import com.example.cycles.ui.screens.InteractiveRecScreen
+
 
 
 @Composable
@@ -109,9 +110,16 @@ fun AppNavHost(
             HomeScreen(navController)
         }
 
-        composable(Screen.MusicRecommendation.route) {
-            MusicRecScreen()
+        composable("interactive_music") {
+            InteractiveRecScreen(domain = "music")
         }
+        composable("interactive_books") {
+            InteractiveRecScreen(domain = "book")
+        }
+        composable("interactive_movies") {
+            InteractiveRecScreen(domain = "movie")
+        }
+
 
 
     }//esta llave cierra el bloque de codigo de las rutas!

@@ -1,17 +1,18 @@
 //package com.example.cycles.viewmodel
 //
+//
 //import androidx.lifecycle.ViewModel
 //import androidx.lifecycle.viewModelScope
 //import com.example.cycles.data.RecommendationItem
 //import com.example.cycles.repository.RecsRepository
 //import dagger.hilt.android.lifecycle.HiltViewModel
-//import kotlinx.coroutines.flow.MutableStateFlow
-//import kotlinx.coroutines.flow.StateFlow
+//import kotlinx.coroutines.flow.*
 //import kotlinx.coroutines.launch
 //import javax.inject.Inject
 //
+//
 //@HiltViewModel
-//class MusicRecViewModel @Inject constructor(
+//class MovieRecViewModel @Inject constructor(
 //    private val repo: RecsRepository
 //) : ViewModel() {
 //

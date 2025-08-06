@@ -17,8 +17,10 @@ class HomeViewModel @Inject constructor(
 
     private val _isLoading = MutableStateFlow(false)
 
+
     // Estado expuesto al Composable (solo lectura)
     val isLoading = _isLoading.asStateFlow()
+
 
 
     private val _error = MutableStateFlow("")
