@@ -36,4 +36,9 @@ class RecsRepository @Inject constructor(
         val resp  = api.sendFeedback(domain, request, bearer())
         return resp.seed_item
     }
+
+    suspend fun reset(domain: String): RecommendationItem {
+        val token = userPrefs.token.first() ?: throw Exception("Token no disponible")
+        return api.reset(domain, "Bearer $token").seed_item
+    }
 }

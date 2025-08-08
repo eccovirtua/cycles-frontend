@@ -32,4 +32,14 @@ interface RecsApiService {
         @Body request: FeedbackRequest,
         @Header("Authorization") token: String
     ): SeedResponse
+
+
+    @POST("reset/{domain}")
+    suspend fun reset(
+        @Path("domain") domain: String,
+        @Header("Authorization") token: String
+    ): SeedResponse
+
+
+
 }

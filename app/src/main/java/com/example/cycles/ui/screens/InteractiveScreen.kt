@@ -55,6 +55,11 @@ fun InteractiveRecScreen(
                         Button(onClick = { viewModel.sendFeedback( -1) }) {
                             Text("No me gusta")
                         }
+                        TextButton(onClick = {
+                            viewModel.resetRecommendations()
+                        }) {
+                            Text("Reiniciar")
+                        }
                         Button(onClick = { viewModel.sendFeedback(+1) }) {
                             Text("Me gusta")
                         }

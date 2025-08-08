@@ -17,6 +17,7 @@ class InteractiveRecViewModel @Inject constructor(
 ) : ViewModel() {
 
     private var currentDomain: String? = null
+    private var currentItemId: String? = null
 
 
 
@@ -31,12 +32,16 @@ class InteractiveRecViewModel @Inject constructor(
 
     /** Carga el ítem semilla inicial para este usuario y dominio */
     fun loadInitialSeed(domain: String) {
-        currentDomain = domain
+        val current = (_uiState.value as? UiState.Success)?.seed
+        if (current != null) return
+
         viewModelScope.launch {
             _uiState.value = UiState.Loading
             try {
-                val seed = repo.getInitialSeed(domain)
+                val seed = repo.getInitialSeed(domain) //llama  get /seed/domain
+                currentItemId = seed.itemId
                 _uiState.value = UiState.Success(seed)
+                currentDomain = domain
             } catch (e: Exception) {
                 _uiState.value = UiState.Error(e.message ?: "Error al cargar semilla")
             }
@@ -57,9 +62,25 @@ class InteractiveRecViewModel @Inject constructor(
                     current.itemId,
                     feedback
                 )
+                currentItemId = newSeed.itemId
                 _uiState.value = UiState.Success(newSeed)
             } catch (e: Exception) {
                 _uiState.value = UiState.Error(e.message ?: "Error al procesar feedback")
+            }
+        }
+    }
+
+
+    fun resetRecommendations() { //para reinicar las recomendaciones
+        val domain = currentDomain ?: return
+        viewModelScope.launch {
+            _uiState.value = UiState.Loading
+            try {
+                val seed = repo.reset(domain)
+                currentItemId = seed.itemId
+                _uiState.value = UiState.Success(seed)
+            } catch (e: Exception) {
+                _uiState.value = UiState.Error(e.message ?: "Error al reiniciar")
             }
         }
     }
