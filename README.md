@@ -1,2 +1,2 @@
 # cycles-frontend
-frontend for cycles
+Android Client Front/Backend
