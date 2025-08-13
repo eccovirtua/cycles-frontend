@@ -34,7 +34,7 @@ android {
         }
         release {
             buildConfigField( "String", "AUTH_BASE_URL", "\"https://cycles-backend.onrender.com\"")
-            buildConfigField( "String", "RECS_BASE_URL", "\"https://cycles-backend.onrender.com\"")
+            buildConfigField( "String", "RECS_BASE_URL", "\"https://knn-ann-algorithm.onrender.com\"")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),

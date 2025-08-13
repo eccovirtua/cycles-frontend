@@ -28,8 +28,6 @@ fun HomeScreen (
     val authViewModel: AuthViewModel = hiltViewModel()
     val viewModel: HomeViewModel = hiltViewModel()
 
-
-
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
