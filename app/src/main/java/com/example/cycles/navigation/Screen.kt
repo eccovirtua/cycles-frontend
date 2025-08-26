@@ -20,20 +20,10 @@ sealed class Screen(val route: String) {
         fun createRoute(token: String) = "choose_username/$token"
 
     }
-
     data object Home           : Screen("home")
-
-    data object MusicRecommendation: Screen("musicReco")
-
-    data object BookRecommendation: Screen("bookReco")
-
-    data object MovieRecommendation: Screen("movieReco")
-
     data object InteractiveMusic   : Screen("interactive_music")
     data object InteractiveBooks   : Screen("interactive_books")
     data object InteractiveMovies  : Screen("interactive_movies")
-
-
 
     // añadir profile, home, en el futuro.
 }

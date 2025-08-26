@@ -10,6 +10,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.cycles.ui.screens.ChooseUsernameScreen
+import com.example.cycles.ui.screens.FinalRecommendationsScreen
 import com.example.cycles.ui.screens.LoginScreen
 import com.example.cycles.ui.screens.RegisterScreen
 import com.example.cycles.ui.screens.WelcomeScreen
@@ -18,7 +19,6 @@ import com.example.cycles.ui.screens.HomeScreen
 import com.example.cycles.ui.screens.ResetPasswordScreen
 import com.example.cycles.ui.screens.VerifyCodeScreen
 import com.example.cycles.ui.screens.InteractiveRecScreen
-
 
 
 @Composable
@@ -48,25 +48,6 @@ fun AppNavHost(
         composable(Screen.ForgotPassword.route) {
             ForgotPasswordScreen(navController) }
 
-
-//        //verificar codigo de resetpassword
-//        composable(Screen.VerifyCode.route) {
-//            VerifyCodeScreen(navController)
-//        }
-//
-//        //resetpassword
-//        composable(Screen.ResetPassword.route) {
-//            ResetPasswordScreen(navController)
-//        }
-
-//        composable( //nav arg para saber QUE MAIl se tiene que verificar
-//            "verify_code/{email}",
-//            arguments = listOf(navArgument("email") { type = NavType.StringType })
-//        ) { backStackEntry ->
-//            val emailArg = backStackEntry.arguments!!.getString("email")!!
-//            VerifyCodeScreen(navController, email = URLDecoder.decode(emailArg, "UTF-8"))
-//        }
-
         composable(
             route = Screen.VerifyCode.route,
             arguments = listOf(navArgument("email") { type = NavType.StringType })
@@ -95,30 +76,25 @@ fun AppNavHost(
             ChooseUsernameScreen(navController, token)
         }
 
-
-//        composable("choose_username/{token}",
-//            arguments = listOf(navArgument("token")
-//            {
-//                type = NavType.StringType
-//            })
-//            ) { backStackEntry ->
-//            val tokenArg = backStackEntry.arguments!!.getString("token")!!
-//            ChooseUsernameScreen(navController = navController, token = tokenArg)
-//        }
-
         composable(Screen.Home.route) {
             HomeScreen(navController)
         }
 
-        composable("interactive_music") {
-            InteractiveRecScreen(domain = "music")
+        composable(Screen.InteractiveMusic.route) {
+            InteractiveRecScreen(navController = navController, domain = "music")
         }
-        composable("interactive_books") {
-            InteractiveRecScreen(domain = "book")
+        composable(Screen.InteractiveBooks.route) {
+            InteractiveRecScreen(navController = navController, domain = "book")
         }
-        composable("interactive_movies") {
-            InteractiveRecScreen(domain = "movie")
+        composable(Screen.InteractiveMovies.route) {
+            InteractiveRecScreen(navController = navController, domain = "movie")
         }
+
+        composable("final_recs/{sessionId}") { backStackEntry ->
+            val sessionId = backStackEntry.arguments?.getString("sessionId")!!
+            FinalRecommendationsScreen(sessionId = sessionId)
+        }
+
 
 
 

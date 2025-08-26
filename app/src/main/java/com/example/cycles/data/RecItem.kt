@@ -1,4 +1,5 @@
 package com.example.cycles.data
+
 import com.google.gson.annotations.SerializedName
 
 data class RecommendationItem(

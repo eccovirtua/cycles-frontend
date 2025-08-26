@@ -27,10 +27,15 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+
+    // usar
+    // buildConfigField("String", "AUTH_BASE_URL", "\"http://192.168.1.8:8080/\"")
+    // buildConfigField("String", "RECS_BASE_URL", "\"http://192.168.1.8:8000/\"")
+    //para probar localmente
     buildTypes {
         debug {
-            buildConfigField("String", "AUTH_BASE_URL", "\"http://192.168.1.8:8080/\"")
-            buildConfigField("String", "RECS_BASE_URL", "\"http://192.168.1.8:8000/\"")
+            buildConfigField("String", "AUTH_BASE_URL", "\"https://cycles-backend.onrender.com\"")
+            buildConfigField("String", "RECS_BASE_URL", "\"https://knn-ann-algorithm.onrender.com\"")
         }
         release {
             buildConfigField( "String", "AUTH_BASE_URL", "\"https://cycles-backend.onrender.com\"")
@@ -40,6 +45,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
     compileOptions {
