@@ -90,7 +90,10 @@ fun AppNavHost(
             InteractiveRecScreen(navController = navController, domain = "movie")
         }
 
-        composable("final_recs/{sessionId}") { backStackEntry ->
+        composable(
+            "final_recs/{sessionId}",
+            arguments = listOf(navArgument("sessionId") { type = NavType.StringType })
+        ) { backStackEntry ->
             val sessionId = backStackEntry.arguments?.getString("sessionId")!!
             FinalRecommendationsScreen(sessionId = sessionId)
         }

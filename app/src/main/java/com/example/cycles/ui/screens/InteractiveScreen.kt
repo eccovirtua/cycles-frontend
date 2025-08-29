@@ -1,5 +1,4 @@
 package com.example.cycles.ui.screens
-
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -19,7 +18,10 @@ fun InteractiveRecScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    // Cargar seed inicial
+
+
+
+    // carga inicial
     LaunchedEffect(domain) {
         viewModel.loadInitialSeed(domain)
     }
@@ -46,8 +48,8 @@ fun InteractiveRecScreen(
             }
         }
 
-        is InteractiveRecViewModel.UiState.Success -> {
-            val seed = (uiState as InteractiveRecViewModel.UiState.Success).seed
+        is InteractiveRecViewModel.UiState.Seed -> {
+            val seed = (uiState as InteractiveRecViewModel.UiState.Seed).seed
 
             Column(
                 modifier = Modifier
@@ -56,48 +58,34 @@ fun InteractiveRecScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                // Portada del item
                 AsyncImage(
                     model = seed.imageUrl,
                     contentDescription = seed.title,
                     modifier = Modifier.size(200.dp)
                 )
+
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(seed.title, style = MaterialTheme.typography.titleLarge)
-
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Botones de feedback
                 Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Button(onClick = { viewModel.sendFeedback(1) }) {
+                    Button(onClick = {
+                        viewModel.sendFeedback(1) { finalList ->
+                            navController.navigate("final_recs/${viewModel.sessionId}")
+                        }
+                    }) {
                         Text("👍")
                     }
-                    Button(onClick = { viewModel.sendFeedback(0) }) {
+                    Button(onClick = {
+                        viewModel.sendFeedback(0) { finalList ->
+                            navController.navigate("final_recs/${viewModel.sessionId}")
+                        }
+                    }) {
                         Text("👎")
                     }
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Botón de reset
-                Button(onClick = { viewModel.resetRecommendations() }) {
-                    Text("Resetear Sesión")
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Botón de finalizar
-                Button(
-                    onClick = {
-                        viewModel.finalizeSession { sessionId ->
-                            // Pasamos la lista al siguiente destino
-                            navController.currentBackStackEntry
-                            navController.navigate("final_recs/$sessionId")
-                        }
-                    }
-                ) {
-                    Text("Finalizar Sesión")
-                }
+//                Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }
