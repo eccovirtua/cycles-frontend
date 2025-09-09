@@ -7,4 +7,5 @@ data class RecommendationItem(
     @SerializedName("title")     val title: String,
     @SerializedName("distance")  val distance: Double,
     @SerializedName("image_url") val imageUrl: String?
+//    val domain: String
 )

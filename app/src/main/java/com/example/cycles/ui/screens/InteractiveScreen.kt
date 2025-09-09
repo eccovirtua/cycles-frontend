@@ -9,6 +9,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.cycles.viewmodel.InteractiveRecViewModel
+import com.example.cycles.viewmodel.SessionCache
+import kotlinx.coroutines.launch
 
 @Composable
 fun InteractiveRecScreen(
@@ -17,13 +19,32 @@ fun InteractiveRecScreen(
     viewModel: InteractiveRecViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-
-
-
+    val scope = rememberCoroutineScope()
 
     // carga inicial
     LaunchedEffect(domain) {
-        viewModel.loadInitialSeed(domain)
+        if (viewModel.navigatingToFinalGrid) return@LaunchedEffect
+
+        val existing = SessionCache.getSession(domain)
+        if (existing != null) {
+            viewModel.navigatingToFinalGrid = true
+            navController.navigate("final/$domain/$existing") {
+                popUpTo("home") { inclusive = false }
+            }
+        } else {
+            viewModel.loadInitialSeed(domain) { finalList ->
+                scope.launch {
+                    val sessionId = viewModel.sessionId
+                    if (sessionId != null) {
+                        SessionCache.saveSession(domain, sessionId)
+                        viewModel.navigatingToFinalGrid = true
+                        navController.navigate("final/$domain/$sessionId") {
+                            popUpTo("home") { inclusive = false }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     when (uiState) {
@@ -42,7 +63,18 @@ fun InteractiveRecScreen(
             ) {
                 Text("Error: $message")
                 Spacer(modifier = Modifier.height(8.dp))
-                Button(onClick = { viewModel.loadInitialSeed(domain) }) {
+                Button(onClick = {
+                    viewModel.loadInitialSeed(domain) { finalList ->
+                        scope.launch {
+                            val sessionId = viewModel.sessionId
+                            if (sessionId != null) {
+                                navController.navigate("final/$domain/$sessionId") {
+                                    popUpTo("home") { inclusive = false }
+                                }
+                            }
+                        }
+                    }
+                }) {
                     Text("Reintentar")
                 }
             }
@@ -70,22 +102,37 @@ fun InteractiveRecScreen(
 
                 Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                     Button(onClick = {
-                        viewModel.sendFeedback(1) { finalList ->
-                            navController.navigate("final_recs/${viewModel.sessionId}")
-                        }
+                        viewModel.sendFeedback(
+                            feedback = 1,
+                            onSuccess = { finalList ->
+                                val sessionId = viewModel.sessionId
+                                if (sessionId != null) {
+                                    navController.navigate("final/$domain/$sessionId") {
+                                        popUpTo("home") { inclusive = false }
+                                    }
+                                }
+                            }
+                        )
                     }) {
                         Text("👍")
                     }
+
                     Button(onClick = {
-                        viewModel.sendFeedback(0) { finalList ->
-                            navController.navigate("final_recs/${viewModel.sessionId}")
-                        }
+                        viewModel.sendFeedback(
+                            feedback = 0,
+                            onSuccess = { finalList ->
+                                val sessionId = viewModel.sessionId
+                                if (sessionId != null) {
+                                    navController.navigate("final/$domain/$sessionId") {
+                                        popUpTo("home") { inclusive = false }
+                                    }
+                                }
+                            }
+                        )
                     }) {
                         Text("👎")
                     }
                 }
-
-//                Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }

@@ -90,12 +90,33 @@ fun AppNavHost(
             InteractiveRecScreen(navController = navController, domain = "movie")
         }
 
+//        composable(
+//            "final_recs/{sessionId}",
+//            arguments = listOf(navArgument("sessionId") { type = NavType.StringType })
+//        ) { backStackEntry ->
+//            val sessionId = backStackEntry.arguments?.getString("sessionId")!!
+//            FinalRecommendationsScreen(sessionId = sessionId)
+//        }
+
         composable(
-            "final_recs/{sessionId}",
-            arguments = listOf(navArgument("sessionId") { type = NavType.StringType })
+            route = "final/{domain}/{sessionId}",
+            arguments = listOf(
+                navArgument("domain") { type = NavType.StringType },
+                navArgument("sessionId") { type = NavType.StringType }
+            )
         ) { backStackEntry ->
-            val sessionId = backStackEntry.arguments?.getString("sessionId")!!
-            FinalRecommendationsScreen(sessionId = sessionId)
+            val domain = backStackEntry.arguments?.getString("domain") ?: return@composable
+            val sessionId = backStackEntry.arguments?.getString("sessionId") ?: return@composable
+
+            FinalRecommendationsScreen(
+                domain = domain,
+                sessionId = sessionId,
+                onRestart = { restartedDomain ->
+                    navController.navigate("interactive/$restartedDomain") {
+                        popUpTo("final/$domain/$sessionId") { inclusive = true }
+                    }
+                }
+            )
         }
 
 

@@ -3,7 +3,7 @@ package com.example.cycles.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.cycles.data.RecommendationItem
-import com.example.cycles.data.SessionCreateResponse
+//import com.example.cycles.data.SessionCreateResponse
 import com.example.cycles.repository.RecsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -30,20 +30,23 @@ class InteractiveRecViewModel @Inject constructor(
     val sessionId: String?
         get() = currentSessionId
 
-    /** Crea sesión y obtiene seed inicial */
-    fun loadInitialSeed(domain: String) {
-        if (currentSessionId != null) return
+    var navigatingToFinalGrid = false
 
+
+    /** Crea sesión y obtiene seed inicial */
+    fun loadInitialSeed(domain: String, onSuccess: (List<RecommendationItem>) -> Unit) {
         viewModelScope.launch {
             _uiState.value = UiState.Loading
+
             try {
-                val sessionResponse: SessionCreateResponse = repo.createSession(domain)
+                val sessionResponse = repo.createSession(domain)
                 currentSessionId = sessionResponse.session_id
                 currentDomain = domain
-                currentIteration = 0
+                currentIteration = 1
 
                 val seed = repo.getInitialSeed(domain)
                 _uiState.value = UiState.Seed(seed, currentIteration)
+                onSuccess(listOf(seed))
             } catch (e: Exception) {
                 _uiState.value = UiState.Error(e.message ?: "Error al crear sesión")
             }
@@ -51,7 +54,10 @@ class InteractiveRecViewModel @Inject constructor(
     }
 
     /** Envía feedback y avanza iteración; llama callback si se finaliza la sesión */
-    fun sendFeedback(feedback: Int, onSessionFinalized: (List<RecommendationItem>) -> Unit) {
+    fun sendFeedback(
+        feedback: Int,
+        onSuccess: (List<RecommendationItem>) -> Unit
+    ) {
         val sessionId = currentSessionId ?: return
         val currentSeed = (_uiState.value as? UiState.Seed)?.seed ?: return
 
@@ -63,9 +69,13 @@ class InteractiveRecViewModel @Inject constructor(
                 if (newSeed != null) {
                     currentIteration += 1
                     _uiState.value = UiState.Seed(newSeed, currentIteration)
+
+                    if (currentIteration >= 10) {
+                        finalizeSession(onSuccess)
+                    }
                 } else {
-                    // ya no hay más seeds → finalizar sesión automáticamente
-                    finalizeSession(onSessionFinalized)
+                    // Ya no hay más seeds → finalizar sesión automáticamente
+                    finalizeSession(onSuccess)
                 }
             } catch (e: Exception) {
                 _uiState.value = UiState.Error("Error al enviar feedback: ${e.message}")
@@ -76,11 +86,19 @@ class InteractiveRecViewModel @Inject constructor(
     /** Finaliza sesión y devuelve lista final de recomendaciones */
     fun finalizeSession(onSuccess: (List<RecommendationItem>) -> Unit) {
         val sessionId = currentSessionId ?: return
+        val domain = currentDomain ?: return // ⚠️ necesitas domain para SessionCache
 
         viewModelScope.launch {
             try {
                 val response = repo.finalizeSession(sessionId)
-                onSuccess(response.recommendations)
+
+                SessionCache.saveSession(domain, sessionId)
+
+                if (!navigatingToFinalGrid) {
+                    navigatingToFinalGrid = true
+                    onSuccess(response.recommendations)
+                }
+
             } catch (e: Exception) {
                 _uiState.value = UiState.Error("Error al finalizar sesión: ${e.message}")
             }

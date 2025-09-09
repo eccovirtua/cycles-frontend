@@ -42,4 +42,8 @@ class FinalRecommendationsViewModel @Inject constructor(
             }
         }
     }
+    suspend fun restartSession(domain: String) {
+        SessionCache.clearSession(domain)
+        _uiState.value = UiState.Loading
+    }
 }

@@ -7,7 +7,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     kotlin("plugin.serialization") version "2.0.21"
     id("kotlin-kapt")
-    id("com.google.dagger.hilt.android") version "2.57"
+    id("com.google.dagger.hilt.android") version "2.57.1"
 }
 hilt {
     enableAggregatingTask = false
@@ -71,6 +71,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.foundation)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

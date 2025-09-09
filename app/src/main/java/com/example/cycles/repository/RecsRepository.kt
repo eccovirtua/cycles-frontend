@@ -42,4 +42,13 @@ class RecsRepository @Inject constructor(
         val token = bearer()
         return api.createSession(domain, token)
     }
+
+    suspend fun getFinalGridForDomain(domain: String): FinalListResponse? {
+        return try {
+            val token = bearer()
+            api.getFinalGridForDomain(domain, token) // este metodo debe estar en tu RecsApiService
+        } catch (_: Exception) {
+            null // si no existe, devuelve null
+        }
+    }
 }
