@@ -1,5 +1,7 @@
 package com.example.cycles.ui.screens
 
+
+import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -14,9 +16,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+
 import coil.compose.AsyncImage
 import com.example.cycles.data.RecommendationItem
 import com.example.cycles.viewmodel.FinalRecommendationsViewModel
+import com.example.cycles.viewmodel.SessionCache
 import kotlinx.coroutines.launch
 
 @Composable
@@ -28,15 +32,10 @@ fun FinalRecommendationsScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
 
-    // 👉 Llamamos a la carga solo una vez al entrar en la pantalla
+    // 👉 Solo una vez al entrar en la pantalla
     LaunchedEffect(sessionId) {
         viewModel.loadFinalRecommendations(sessionId)
     }
-
-
-
-
-
 
     when (state) {
         is FinalRecommendationsViewModel.UiState.Loading -> {
@@ -47,25 +46,33 @@ fun FinalRecommendationsScreen(
 
         is FinalRecommendationsViewModel.UiState.Success -> {
             val recommendations = (state as FinalRecommendationsViewModel.UiState.Success).recommendations
+            val coroutineScope = rememberCoroutineScope()
 
-            Column(modifier = Modifier.fillMaxSize()) {
-                // 👉 aquí usas tu grid de recomendaciones
-                RecommendationsGrid(items = recommendations)
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(8.dp)
+            ) {
+                // 🔥 El grid ocupa todo el espacio disponible
+                RecommendationsGrid(
+                    items = recommendations,
+                    modifier = Modifier.weight(1f)
+                )
 
-                Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(12.dp))
 
-                val coroutineScope = rememberCoroutineScope()
-
+                // 🔥 El botón queda siempre visible abajo
                 Button(
                     onClick = {
                         coroutineScope.launch {
                             viewModel.restartSession(domain)
-                            onRestart(domain) // 🔥 dispara la navegación después de limpiar la sesión
+                            SessionCache.clearSession(domain)
+                            onRestart(domain)
                         }
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp)
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
                 ) {
                     Text("Reiniciar sesión")
                 }
@@ -80,12 +87,16 @@ fun FinalRecommendationsScreen(
         }
     }
 }
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun RecommendationsGrid(items: List<RecommendationItem>) {
+fun RecommendationsGrid(
+    items: List<RecommendationItem>,
+    modifier: Modifier = Modifier
+) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(8.dp)
     ) {
         items(items.size) { index ->
@@ -95,7 +106,7 @@ fun RecommendationsGrid(items: List<RecommendationItem>) {
                 modifier = Modifier
                     .padding(8.dp)
                     .fillMaxWidth()
-                    .height(240.dp), // un poco más alto para imagen + texto
+                    .height(240.dp),
                 elevation = CardDefaults.cardElevation()
             ) {
                 Column(
@@ -105,6 +116,7 @@ fun RecommendationsGrid(items: List<RecommendationItem>) {
                 ) {
                     // Imagen (si hay URL)
                     item.imageUrl?.let { url ->
+                        Log.d("IMAGE_DEBUG", "Llega al cliente: $url")
                         AsyncImage(
                             model = url,
                             contentDescription = item.title,

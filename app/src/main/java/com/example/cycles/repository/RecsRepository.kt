@@ -21,7 +21,7 @@ class RecsRepository @Inject constructor(
     private suspend fun bearer(): String =
         "Bearer ${userPrefs.token.first() ?: throw Exception("Token no disponible")}"
 
-    suspend fun getInitialSeed(domain: String): RecommendationItem {
+    suspend fun getInitialSeed(domain: String): RecommendationItem? {
         val token = userPrefs.token.first() ?: throw Exception("Token no disponible")
         return api.getInitialSeed(domain, "Bearer $token").seed_item
     }
@@ -51,4 +51,7 @@ class RecsRepository @Inject constructor(
             null // si no existe, devuelve null
         }
     }
+
+
 }
+

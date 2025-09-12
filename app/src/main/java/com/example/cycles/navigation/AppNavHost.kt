@@ -98,6 +98,18 @@ fun AppNavHost(
 //            FinalRecommendationsScreen(sessionId = sessionId)
 //        }
 
+        // Pantalla interactiva (dinámica)
+        composable(
+            route = "interactive/{domain}",
+            arguments = listOf(
+                navArgument("domain") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val domain = backStackEntry.arguments?.getString("domain") ?: "movie"
+            InteractiveRecScreen(navController = navController, domain = domain)
+        }
+
+// Pantalla final (dinámica)
         composable(
             route = "final/{domain}/{sessionId}",
             arguments = listOf(
@@ -118,6 +130,8 @@ fun AppNavHost(
                 }
             )
         }
+
+
 
 
 
