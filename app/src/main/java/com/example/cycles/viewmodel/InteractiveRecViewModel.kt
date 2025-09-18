@@ -5,7 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.cycles.data.RecommendationItem
 import com.example.cycles.repository.RecsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -21,6 +22,7 @@ class InteractiveRecViewModel @Inject constructor(
     sealed class UiState {
         object Loading : UiState()
         data class Seed(val seed: RecommendationItem, val iteration: Int) : UiState()
+        data class Final(val recommendations: List<RecommendationItem>) : UiState()
         data class Error(val message: String) : UiState()
     }
 
@@ -30,75 +32,50 @@ class InteractiveRecViewModel @Inject constructor(
     val sessionId: String?
         get() = currentSessionId
 
-    var navigatingToFinalGrid = false
-
-    /** Crea sesión y obtiene seed inicial */
-    fun loadInitialSeed(domain: String, onSessionFinalized: (List<RecommendationItem>) -> Unit) {
+    fun createSession(domain: String) {
         viewModelScope.launch {
             _uiState.value = UiState.Loading
             try {
-                val sessionResponse = repo.createSession(domain)
-                currentSessionId = sessionResponse.session_id
+                val resp = repo.createSession(domain) // SessionCreateResponse
                 currentDomain = domain
+                currentSessionId = resp.session_id
                 currentIteration = 1
-
-                val seed = repo.getInitialSeed(domain)
-                if (seed == null) {
-                    // No hay seed → finalizar inmediatamente
-                    finalizeSession(onSessionFinalized)
-                    return@launch
-                }
-
-                _uiState.value = UiState.Seed(seed, currentIteration)
+                _uiState.value = UiState.Seed(resp.seed, currentIteration)
             } catch (e: Exception) {
-                _uiState.value = UiState.Error(e.message ?: "Error al crear sesión")
+                _uiState.value = UiState.Error("Error creando sesión: ${e.message}")
             }
         }
     }
 
-    /** Envía feedback y avanza iteración; finaliza sesión si ya no hay más seeds */
-    fun sendFeedback(feedback: Int, onSuccess: (List<RecommendationItem>) -> Unit) {
-        val sessionId = currentSessionId ?: run {
-            _uiState.value = UiState.Error("Session no válida")
-            return
-        }
-        val currentSeed = (_uiState.value as? UiState.Seed)?.seed ?: run {
-            _uiState.value = UiState.Error("No hay seed activo")
-            return
-        }
+    fun sendFeedback(feedback: Int) {
+        val sid = currentSessionId ?: return
+        val currentSeed = (_uiState.value as? UiState.Seed)?.seed ?: return
 
         viewModelScope.launch {
             _uiState.value = UiState.Loading
             try {
-                val newSeed = repo.sendSessionFeedback(sessionId, currentSeed.itemId, feedback)
+                val nextSeed: RecommendationItem? =
+                    repo.sendFeedback(sid, currentSeed.itemId, feedback)
 
-                if (newSeed == null) {
-                    // No hay siguiente seed → finalizar sesión automáticamente
-                    finalizeSession(onSuccess)
-                    return@launch
+                if (nextSeed == null) {
+                    finalizeSession()
+                } else {
+                    currentIteration++
+                    _uiState.value = UiState.Seed(nextSeed, currentIteration)
                 }
-
-                // Avanzamos la iteración y actualizamos estado
-                currentIteration += 1
-                _uiState.value = UiState.Seed(newSeed, currentIteration)
-
             } catch (e: Exception) {
                 _uiState.value = UiState.Error("Error al enviar feedback: ${e.message}")
             }
         }
     }
 
-    /** Finaliza sesión y devuelve lista final de recomendaciones */
-    fun finalizeSession(onSuccess: (List<RecommendationItem>) -> Unit) {
-        val sessionId = currentSessionId ?: return
-        val domain = currentDomain ?: return
+    private fun finalizeSession() {
+        val sid = currentSessionId ?: return
 
         viewModelScope.launch {
             try {
-                val response = repo.finalizeSession(sessionId)
-                SessionCache.saveSession(domain, sessionId)
-                navigatingToFinalGrid = true
-                onSuccess(response.recommendations)
+                val resp = repo.finalizeSession(sid) // <- FinalListResponse
+                _uiState.value = UiState.Final(resp)
             } catch (e: Exception) {
                 _uiState.value = UiState.Error("Error al finalizar sesión: ${e.message}")
             }

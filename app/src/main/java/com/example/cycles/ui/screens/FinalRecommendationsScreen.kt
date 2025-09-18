@@ -16,21 +16,24 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.cycles.data.RecommendationItem
 import com.example.cycles.viewmodel.FinalRecommendationsViewModel
 import com.example.cycles.viewmodel.SessionCache
 import kotlinx.coroutines.launch
 
+
 @Composable
 fun FinalRecommendationsScreen(
     domain: String,
     sessionId: String,
+    navController: NavController,
     viewModel: FinalRecommendationsViewModel = hiltViewModel(),
-    onRestart: (String) -> Unit
+
 ) {
     val state by viewModel.uiState.collectAsState()
+    val coroutineScope = rememberCoroutineScope()
 
     // 👉 Solo una vez al entrar en la pantalla
     LaunchedEffect(sessionId) {
@@ -46,33 +49,28 @@ fun FinalRecommendationsScreen(
 
         is FinalRecommendationsViewModel.UiState.Success -> {
             val recommendations = (state as FinalRecommendationsViewModel.UiState.Success).recommendations
-            val coroutineScope = rememberCoroutineScope()
 
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(8.dp)
-            ) {
-                // 🔥 El grid ocupa todo el espacio disponible
-                RecommendationsGrid(
-                    items = recommendations,
-                    modifier = Modifier.weight(1f)
-                )
+            Column {
+                RecommendationsGrid(items = recommendations, modifier = Modifier.weight(1f))
 
-                Spacer(Modifier.height(12.dp))
-
-                // 🔥 El botón queda siempre visible abajo
                 Button(
                     onClick = {
                         coroutineScope.launch {
-                            viewModel.restartSession(domain)
-                            SessionCache.clearSession(domain)
-                            onRestart(domain)
+                            viewModel.restartSession(sessionId) { newSeed ->
+                                // Guardamos la nueva sesión correctamente
+                                SessionCache.saveSession(domain, newSeed.session_id)
+
+                                // Navegamos a InteractiveRecScreen con session_id correcto
+                                val restoredSessionId = SessionCache.getSession(domain)
+                                if (restoredSessionId != null) {
+                                    navController.navigate("final/$domain/$restoredSessionId") {
+                                        popUpTo("home") { inclusive = false }
+                                    }
+                                }
+                            }
                         }
                     },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     Text("Reiniciar sesión")
                 }
@@ -87,7 +85,6 @@ fun FinalRecommendationsScreen(
         }
     }
 }
-
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun RecommendationsGrid(

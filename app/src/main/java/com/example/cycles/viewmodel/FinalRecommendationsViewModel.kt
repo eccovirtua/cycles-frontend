@@ -3,14 +3,12 @@ package com.example.cycles.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.cycles.data.RecommendationItem
-//import com.example.cycles.data.RecommendResponse
+import com.example.cycles.data.SeedResponse
 import com.example.cycles.repository.RecsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import retrofit2.HttpException
-import java.io.IOException
 import javax.inject.Inject
 
 @HiltViewModel
@@ -21,6 +19,7 @@ class FinalRecommendationsViewModel @Inject constructor(
     sealed class UiState {
         object Loading : UiState()
         data class Success(val recommendations: List<RecommendationItem>) : UiState()
+
         data class Error(val message: String) : UiState()
     }
 
@@ -32,18 +31,24 @@ class FinalRecommendationsViewModel @Inject constructor(
             _uiState.value = UiState.Loading
             try {
                 val response = repository.finalizeSession(sessionId)
-                _uiState.value = UiState.Success(response.recommendations)
-            } catch (e: HttpException) {
-                _uiState.value = UiState.Error("Error del servidor: ${e.code()}")
-            } catch (e: IOException) {
-                _uiState.value = UiState.Error("Error de red: ${e.message}")
+                _uiState.value = UiState.Success(response) // response ya es lista
             } catch (e: Exception) {
-                _uiState.value = UiState.Error("Error desconocido: ${e.message}")
+                _uiState.value = UiState.Error("Error: ${e.message}")
             }
         }
     }
-    suspend fun restartSession(domain: String) {
-        SessionCache.clearSession(domain)
-        _uiState.value = UiState.Loading
+
+    fun restartSession(
+        sessionId: String,
+        onDone: suspend (SeedResponse) -> Unit
+    ) {
+        viewModelScope.launch {
+            try {
+                val seedResponse = repository.resetSession(sessionId) // ahora SeedResponse
+                onDone(seedResponse) // sin conversión, ya es SeedResponse
+            } catch (e: Exception) {
+                _uiState.value = UiState.Error(e.message ?: "Error reiniciando sesión")
+            }
+        }
     }
 }

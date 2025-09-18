@@ -123,11 +123,7 @@ fun AppNavHost(
             FinalRecommendationsScreen(
                 domain = domain,
                 sessionId = sessionId,
-                onRestart = { restartedDomain ->
-                    navController.navigate("interactive/$restartedDomain") {
-                        popUpTo("final/$domain/$sessionId") { inclusive = true }
-                    }
-                }
+                navController = navController // <--- PASAMOS navController
             )
         }
 
