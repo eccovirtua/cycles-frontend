@@ -1,9 +1,10 @@
 package com.example.cycles.repository
 
 import com.example.cycles.data.FeedbackRequest
+import com.example.cycles.data.FinalListResponse
 import com.example.cycles.data.RecommendationItem
-import com.example.cycles.data.SeedResponse
 import com.example.cycles.data.SessionCreateResponse
+import com.example.cycles.data.SessionStateResponse
 import com.example.cycles.data.UserPreferences
 import com.example.cycles.network.RecsApiService
 import kotlinx.coroutines.flow.first
@@ -30,13 +31,14 @@ class RecsRepository @Inject constructor(
         return api.sendSessionFeedback(sessionId, req, token).seed_item
     }
 
-    suspend fun finalizeSession(sessionId: String): List<RecommendationItem> {
+    suspend fun finalizeSession(sessionId: String): FinalListResponse {
         val token = bearer()
-        return api.finalizeSession(sessionId, token) // resp ya es List<RecommendationItem>
+        return api.finalizeSession(sessionId, token)
     }
 
-    suspend fun resetSession(sessionId: String): SeedResponse {
+    suspend fun getSessionState(sessionId: String): SessionStateResponse {
         val token = bearer()
-        return api.resetSession(sessionId, token) // ahora devuelve SeedResponse
+        return api.getSessionState(sessionId, token)
     }
+
 }

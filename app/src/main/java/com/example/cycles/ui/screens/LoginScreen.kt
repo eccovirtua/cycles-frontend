@@ -10,24 +10,20 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.cycles.navigation.Screen
 import com.example.cycles.viewmodel.LoginViewModel
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue //delegación de propiedades
-
-
+import com.example.cycles.ui.theme.AnimatedBackground // 🎯 IMPORTA TU COMPONENTE AQUÍ
 
 @Composable
 fun LoginScreen(
     navController: NavHostController,
-    viewModel: LoginViewModel = hiltViewModel() // Obtén una instancia del ViewModel
+    viewModel: LoginViewModel = hiltViewModel()
 ) {
-    //estados
+    // ... (Estados y LaunchedEffect permanecen igual) ...
+
     val email by viewModel.usernameOrEmail.collectAsState()
     val password by viewModel.password.collectAsState()
-    val isLoading by viewModel.isLoading.collectAsState() // Observa el estado isLoading del ViewModel
+    val isLoading by viewModel.isLoading.collectAsState()
     val errorMsg by viewModel.error.collectAsState()
-
-
-    val snackbarHostState = remember { SnackbarHostState() } //snackbar
+    val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(Unit) {
         viewModel.uiEvent.collect { message ->
@@ -42,13 +38,19 @@ fun LoginScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         modifier = Modifier.fillMaxSize()
     ) { paddingValues ->
-        Surface(
-            modifier = Modifier.fillMaxSize()
-                .padding(paddingValues)) {
-            Column(
+
+        // 🎯 REEMPLAZAMOS Surface y Column con AnimatedBackground
+        AnimatedBackground(
+            // Aplicamos el padding del Scaffold al fondo
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+
+            Column( // Usamos un Column interno para centrar el contenido
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(paddingValues),
+                    .padding(horizontal = 24.dp), // Añadimos padding horizontal para los campos
                 verticalArrangement = Arrangement.Center
             ) {
                 OutlinedTextField(
@@ -81,8 +83,8 @@ fun LoginScreen(
                 Spacer(Modifier.height(16.dp))
 
                 TextButton(onClick = { navController.navigate(Screen.ForgotPassword.route) }) {
-                Text("¿Olvidaste tu contraseña?")
-            }
+                    Text("¿Olvidaste tu contraseña?")
+                }
                 Spacer(Modifier.height(8.dp))
                 TextButton(onClick = { navController.navigate(Screen.Register.route) }) {
                     Text("¿No tienes cuenta? Regístrate")

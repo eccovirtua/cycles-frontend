@@ -12,6 +12,7 @@ import androidx.compose.material3.*
 import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import com.example.cycles.ui.theme.AnimatedBackground
 import com.example.cycles.viewmodel.VerifyCodeViewModel
 
 @Composable
@@ -27,12 +28,11 @@ fun VerifyCodeScreen(
     val error by viewModel.error.collectAsState()
 
     Surface(modifier = Modifier.fillMaxSize()) {
-        Column(
+        AnimatedBackground(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(32.dp),
-            verticalArrangement = Arrangement.Center // ← Debe nombrarse así
-        ) {
+                .padding(32.dp))
+        {
             Text("Ingresa el código de 6 dígitos")
             OutlinedTextField(
                 value = code,

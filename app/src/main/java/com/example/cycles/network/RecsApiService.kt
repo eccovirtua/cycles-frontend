@@ -1,10 +1,12 @@
 package com.example.cycles.network
 
 import com.example.cycles.data.FeedbackRequest
-import com.example.cycles.data.RecommendationItem
+import com.example.cycles.data.FinalListResponse
 import com.example.cycles.data.SeedResponse
 import com.example.cycles.data.SessionCreateResponse
+import com.example.cycles.data.SessionStateResponse
 import retrofit2.http.Body
+import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Header
 import retrofit2.http.Path
@@ -29,15 +31,13 @@ interface RecsApiService {
     suspend fun finalizeSession(
         @Path("session_id") sessionId: String,
         @Header("Authorization") token: String
-    ): List<RecommendationItem>
+    ): FinalListResponse
 
-    @POST("/session/{session_id}/reset")
-    suspend fun resetSession(
+    @GET("session/{session_id}")
+    suspend fun getSessionState(
         @Path("session_id") sessionId: String,
         @Header("Authorization") token: String
-    ): SeedResponse
-
-
+    ): SessionStateResponse
 }
 
 

@@ -1,11 +1,11 @@
 package com.example.cycles.ui.screens
 
-
 import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -23,22 +23,22 @@ import com.example.cycles.viewmodel.FinalRecommendationsViewModel
 import com.example.cycles.viewmodel.SessionCache
 import kotlinx.coroutines.launch
 
-
 @Composable
 fun FinalRecommendationsScreen(
     domain: String,
     sessionId: String,
     navController: NavController,
     viewModel: FinalRecommendationsViewModel = hiltViewModel(),
-
 ) {
     val state by viewModel.uiState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
 
-    // 👉 Solo una vez al entrar en la pantalla
     LaunchedEffect(sessionId) {
-        viewModel.loadFinalRecommendations(sessionId)
+        if (sessionId.isNotBlank()) {
+            viewModel.loadFinalRecommendations(sessionId)
+        }
     }
+
 
     when (state) {
         is FinalRecommendationsViewModel.UiState.Loading -> {
@@ -48,31 +48,35 @@ fun FinalRecommendationsScreen(
         }
 
         is FinalRecommendationsViewModel.UiState.Success -> {
-            val recommendations = (state as FinalRecommendationsViewModel.UiState.Success).recommendations
+            val recommendations =
+                (state as FinalRecommendationsViewModel.UiState.Success).recommendations
 
             Column {
-                RecommendationsGrid(items = recommendations, modifier = Modifier.weight(1f))
+                RecommendationsGrid(
+                    items = recommendations,
+                    modifier = Modifier.weight(1f)
+                )
 
                 Button(
                     onClick = {
                         coroutineScope.launch {
-                            viewModel.restartSession(sessionId) { newSeed ->
-                                // Guardamos la nueva sesión correctamente
-                                SessionCache.saveSession(domain, newSeed.session_id)
+                            try {
+                                // 🧩 Limpiar y marcar reinicio
+                                SessionCache.clearSession(domain)
+                                SessionCache.markSessionAsReset(domain)
 
-                                // Navegamos a InteractiveRecScreen con session_id correcto
-                                val restoredSessionId = SessionCache.getSession(domain)
-                                if (restoredSessionId != null) {
-                                    navController.navigate("final/$domain/$restoredSessionId") {
-                                        popUpTo("home") { inclusive = false }
-                                    }
+                                // 🧭 Volver a la pantalla de dominios
+                                navController.navigate("home") {
+                                    popUpTo("home") { inclusive = false }
                                 }
+                            } catch (e: Exception) {
+                                e.printStackTrace()
                             }
                         }
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Reiniciar sesión")
+                    Text("Reiniciar recomendaciones!")
                 }
             }
         }
@@ -85,6 +89,7 @@ fun FinalRecommendationsScreen(
         }
     }
 }
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun RecommendationsGrid(
@@ -96,12 +101,11 @@ fun RecommendationsGrid(
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(8.dp)
     ) {
-        items(items.size) { index ->
-            val item = items[index]
-
+        items(items) { item ->
             Card(
                 modifier = Modifier
                     .padding(8.dp)
+                    .fillMaxWidth()
                     .fillMaxWidth()
                     .height(240.dp),
                 elevation = CardDefaults.cardElevation()
@@ -111,7 +115,6 @@ fun RecommendationsGrid(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Top
                 ) {
-                    // Imagen (si hay URL)
                     item.imageUrl?.let { url ->
                         Log.d("IMAGE_DEBUG", "Llega al cliente: $url")
                         AsyncImage(
@@ -125,7 +128,6 @@ fun RecommendationsGrid(
 
                     Spacer(Modifier.height(8.dp))
 
-                    // Título
                     Text(
                         text = item.title,
                         style = MaterialTheme.typography.bodyLarge,

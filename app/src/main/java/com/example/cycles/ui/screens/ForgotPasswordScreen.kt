@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import com.example.cycles.ui.theme.AnimatedBackground
 import java.net.URLEncoder
 
 
@@ -45,11 +46,10 @@ fun ForgotPasswordScreen(
     Surface(
         modifier = Modifier.fillMaxSize()
             ) {
-        Column(
+        AnimatedBackground(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(32.dp),
-            verticalArrangement = Arrangement.Center
+                .padding(32.dp)
         ) {
             Text("Recuperar contraseña", fontSize = 24.sp)
             Spacer(modifier = Modifier.height(16.dp))

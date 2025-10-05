@@ -12,6 +12,7 @@ import androidx.navigation.NavHostController
 import com.example.cycles.navigation.Screen
 import com.example.cycles.viewmodel.RegisterViewModel
 import com.example.cycles.ui.components.DateOfBirthPicker
+import com.example.cycles.ui.theme.AnimatedBackground
 
 @Composable
 fun RegisterScreen(
@@ -42,10 +43,9 @@ fun RegisterScreen(
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) }, // El anclaje del Snackbar
         modifier = Modifier.fillMaxSize() // El Scaffold ocupa toda la pantalla
-    ) { paddingValues -> // paddingValues es crucial para que el contenido no se solape con el Snackbar
-        // El Surface ahora va dentro del contenido del Scaffold
+    ) { paddingValues ->
 
-        Surface(
+        AnimatedBackground(
             modifier = Modifier.fillMaxSize()
                 .padding(paddingValues)
         ) {

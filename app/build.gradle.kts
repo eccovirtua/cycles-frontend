@@ -72,6 +72,10 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.foundation)
+    implementation(libs.androidx.benchmark.common)
+    implementation(libs.androidx.datastore.core)
+    implementation(libs.androidx.ui.tooling.v192)
+    implementation(libs.androidx.ui.text.google.fonts)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -104,6 +108,7 @@ dependencies {
 
     // Hilt
     implementation(libs.hilt.android)
+    debugImplementation(libs.androidx.ui.tooling.v192)
     kapt(libs.hilt.compiler)
 
     // Hilt con Jetpack Compose
@@ -128,6 +133,9 @@ dependencies {
     implementation(libs.moshi.kotlin)
 
     implementation(libs.coil.compose) //coil: libreria para el proceso de carga de imagenes desde api
+    // 👇 ESTA ES LA DEPENDENCIA FALTANTE
+    debugImplementation(libs.androidx.ui.tooling)
 
-
+    // También es buena práctica añadir esto si quieres interactuar con la preview:
+    debugImplementation(libs.androidx.ui.tooling.preview)
 }

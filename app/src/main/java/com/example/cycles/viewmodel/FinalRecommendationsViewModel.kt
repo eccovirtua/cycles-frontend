@@ -3,7 +3,6 @@ package com.example.cycles.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.cycles.data.RecommendationItem
-import com.example.cycles.data.SeedResponse
 import com.example.cycles.repository.RecsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,35 +18,19 @@ class FinalRecommendationsViewModel @Inject constructor(
     sealed class UiState {
         object Loading : UiState()
         data class Success(val recommendations: List<RecommendationItem>) : UiState()
-
         data class Error(val message: String) : UiState()
     }
 
     private val _uiState = MutableStateFlow<UiState>(UiState.Loading)
     val uiState: StateFlow<UiState> = _uiState
-
     fun loadFinalRecommendations(sessionId: String) {
         viewModelScope.launch {
             _uiState.value = UiState.Loading
             try {
                 val response = repository.finalizeSession(sessionId)
-                _uiState.value = UiState.Success(response) // response ya es lista
+                _uiState.value = UiState.Success(response.recommendations)
             } catch (e: Exception) {
-                _uiState.value = UiState.Error("Error: ${e.message}")
-            }
-        }
-    }
-
-    fun restartSession(
-        sessionId: String,
-        onDone: suspend (SeedResponse) -> Unit
-    ) {
-        viewModelScope.launch {
-            try {
-                val seedResponse = repository.resetSession(sessionId) // ahora SeedResponse
-                onDone(seedResponse) // sin conversión, ya es SeedResponse
-            } catch (e: Exception) {
-                _uiState.value = UiState.Error(e.message ?: "Error reiniciando sesión")
+                _uiState.value = UiState.Error(e.message ?: "Error desconocido")
             }
         }
     }

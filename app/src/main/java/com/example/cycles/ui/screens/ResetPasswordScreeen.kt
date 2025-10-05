@@ -1,7 +1,6 @@
 package com.example.cycles.ui.screens
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
+
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -23,6 +22,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.cycles.viewmodel.ResetPasswordViewModel
 import androidx.compose.runtime.getValue
+import com.example.cycles.ui.theme.AnimatedBackground
 
 @Composable
 fun ResetPasswordScreen(navController: NavController,
@@ -39,9 +39,8 @@ fun ResetPasswordScreen(navController: NavController,
         modifier = Modifier.fillMaxSize()
     ) {
         //aqui arranca la ui COMO TAL
-        Column(Modifier.fillMaxSize()
-            .padding(32.dp),
-            verticalArrangement = Arrangement.Center) {
+        AnimatedBackground(Modifier.fillMaxSize().padding(32.dp)
+        ) {
             Text("Nueva contraseña")
             OutlinedTextField(
                 value = pwd1,

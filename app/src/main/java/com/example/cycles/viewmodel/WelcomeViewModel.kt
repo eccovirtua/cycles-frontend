@@ -10,9 +10,6 @@ import javax.inject.Inject
 @HiltViewModel
 class WelcomeViewModel @Inject constructor(): ViewModel() {
 
-    // Estado que indica si la pantalla está lista
-
-
     // Mensaje de bienvenida, por ejemplo
     private val _welcomeMessage = MutableStateFlow("Cycles")
     val welcomeMessage: StateFlow<String> = _welcomeMessage

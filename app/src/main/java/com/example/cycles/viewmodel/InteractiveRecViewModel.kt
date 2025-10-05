@@ -3,6 +3,7 @@ package com.example.cycles.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.cycles.data.RecommendationItem
+import com.example.cycles.data.SessionStateResponse
 import com.example.cycles.repository.RecsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,11 +37,14 @@ class InteractiveRecViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.value = UiState.Loading
             try {
-                val resp = repo.createSession(domain) // SessionCreateResponse
+                val resp = repo.createSession(domain)
                 currentDomain = domain
                 currentSessionId = resp.session_id
                 currentIteration = 1
+                SessionCache.saveSession(domain, resp.session_id)
+                SessionCache.saveLastDomain(domain)
                 _uiState.value = UiState.Seed(resp.seed, currentIteration)
+
             } catch (e: Exception) {
                 _uiState.value = UiState.Error("Error creando sesión: ${e.message}")
             }
@@ -74,11 +78,33 @@ class InteractiveRecViewModel @Inject constructor(
 
         viewModelScope.launch {
             try {
-                val resp = repo.finalizeSession(sid) // <- FinalListResponse
-                _uiState.value = UiState.Final(resp)
+                val resp = repo.finalizeSession(sid)
+                _uiState.value = UiState.Final(resp.recommendations)
             } catch (e: Exception) {
                 _uiState.value = UiState.Error("Error al finalizar sesión: ${e.message}")
             }
         }
+    }
+
+//    suspend fun isSessionFinal(sessionId: String): Boolean {
+//        return try {
+//            val response = repo.finalizeSession(sessionId)
+//            response.recommendations.isNotEmpty()
+//        } catch (_: Exception) {
+//            false
+//        }
+//    }
+
+    suspend fun getSessionState(sessionId: String): SessionStateResponse {
+        return repo.getSessionState(sessionId)
+    }
+
+    fun resumeSession(sessionId: String) {
+        currentSessionId = sessionId
+    }
+
+    fun loadExistingSeed(seed: RecommendationItem, iteration: Int) {
+        currentIteration = iteration
+        _uiState.value = UiState.Seed(seed, iteration)
     }
 }

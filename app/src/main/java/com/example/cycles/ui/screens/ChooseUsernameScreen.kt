@@ -9,6 +9,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
+import com.example.cycles.ui.theme.AnimatedBackground
 import com.example.cycles.viewmodel.ChooseUsernameViewModel
 
 
@@ -23,7 +24,7 @@ fun ChooseUsernameScreen(
     val error by viewModel.error.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
 
-    Column(Modifier.fillMaxSize().padding(32.dp), verticalArrangement = Arrangement.Center) {
+    AnimatedBackground(Modifier.fillMaxSize().padding(32.dp)) {
         OutlinedTextField(
             value = name,
             onValueChange = viewModel::onNameChange,

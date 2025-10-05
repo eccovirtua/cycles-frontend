@@ -23,7 +23,10 @@ import com.example.cycles.ui.screens.InteractiveRecScreen
 
 @Composable
 fun AppNavHost(
-    navController: NavHostController) {
+    navController: NavHostController,
+    // 🎯 CORRECCIÓN CLAVE: Agrega el parámetro onTitleClick
+    onTitleClick: () -> Unit // Una función que no recibe ni devuelve nada
+) {
 
     NavHost(
         navController,
@@ -31,7 +34,7 @@ fun AppNavHost(
     ) {
         //ruta de pantalla principal
         composable(Screen.Welcome.route) {
-            WelcomeScreen(navController)
+            WelcomeScreen(navController = navController, onTitleClick = onTitleClick)
         }
 
         //login
@@ -90,26 +93,18 @@ fun AppNavHost(
             InteractiveRecScreen(navController = navController, domain = "movie")
         }
 
-//        composable(
-//            "final_recs/{sessionId}",
-//            arguments = listOf(navArgument("sessionId") { type = NavType.StringType })
-//        ) { backStackEntry ->
-//            val sessionId = backStackEntry.arguments?.getString("sessionId")!!
-//            FinalRecommendationsScreen(sessionId = sessionId)
-//        }
+
 
         // Pantalla interactiva (dinámica)
-        composable(
-            route = "interactive/{domain}",
-            arguments = listOf(
-                navArgument("domain") { type = NavType.StringType }
+        composable("interactive/{domain}") { backStackEntry ->
+            val domain = backStackEntry.arguments?.getString("domain") ?: ""
+            InteractiveRecScreen(
+                domain = domain,
+                navController = navController
             )
-        ) { backStackEntry ->
-            val domain = backStackEntry.arguments?.getString("domain") ?: "movie"
-            InteractiveRecScreen(navController = navController, domain = domain)
         }
 
-// Pantalla final (dinámica)
+        // Pantalla final (dinámica)
         composable(
             route = "final/{domain}/{sessionId}",
             arguments = listOf(
