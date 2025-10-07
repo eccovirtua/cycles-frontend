@@ -131,11 +131,12 @@ dependencies {
 
     implementation(libs.converter.moshi)
     implementation(libs.moshi.kotlin)
-
+    implementation(libs.androidx.material.icons.extended)
     implementation(libs.coil.compose) //coil: libreria para el proceso de carga de imagenes desde api
     // 👇 ESTA ES LA DEPENDENCIA FALTANTE
     debugImplementation(libs.androidx.ui.tooling)
 
     // También es buena práctica añadir esto si quieres interactuar con la preview:
     debugImplementation(libs.androidx.ui.tooling.preview)
+
 }

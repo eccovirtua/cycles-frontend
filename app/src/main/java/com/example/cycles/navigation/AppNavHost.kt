@@ -3,6 +3,7 @@ package com.example.cycles.navigation
 //conveniente usar route = "nombre de las pantallas" y NombreDeLaPantalla(navController)
 
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -24,27 +25,27 @@ import com.example.cycles.ui.screens.InteractiveRecScreen
 @Composable
 fun AppNavHost(
     navController: NavHostController,
-    // 🎯 CORRECCIÓN CLAVE: Agrega el parámetro onTitleClick
-    onTitleClick: () -> Unit // Una función que no recibe ni devuelve nada
+    paddingValues: PaddingValues,
+    onTitleClick: () -> Unit
 ) {
 
     NavHost(
         navController,
-        startDestination = Screen.Home.route
+        startDestination = Screen.Home.route,
     ) {
         //ruta de pantalla principal
         composable(Screen.Welcome.route) {
-            WelcomeScreen(navController = navController, onTitleClick = onTitleClick)
+            WelcomeScreen(navController = navController, onTitleClick = onTitleClick, paddingValues = paddingValues)
         }
 
         //login
         composable(Screen.Login.route) {
-            LoginScreen(navController)
+            LoginScreen(navController, paddingValues)
         }
 
         //register
         composable(Screen.Register.route) {
-            RegisterScreen(navController)
+            RegisterScreen(navController, paddingValues)
         }
 
         //forgot password
@@ -63,7 +64,7 @@ fun AppNavHost(
             route = Screen.ResetPassword.route,
             arguments = listOf(
                 navArgument("email") { type = NavType.StringType },
-                navArgument("code")  { type = NavType.StringType }
+                navArgument("code")   { type = NavType.StringType }
             )
         ) { back ->
             val emailArg = back.arguments!!.getString("email")!!
@@ -76,7 +77,7 @@ fun AppNavHost(
             arguments = listOf(navArgument("token") { type = NavType.StringType })
         ) { back ->
             val token = back.arguments!!.getString("token")!!
-            ChooseUsernameScreen(navController, token)
+            ChooseUsernameScreen(navController, token, paddingValues)
         }
 
         composable(Screen.Home.route) {
