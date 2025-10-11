@@ -54,7 +54,7 @@ fun LoginScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(horizontal = 1.dp),
+                .padding(horizontal = 25.dp, vertical = 29.dp),
             verticalArrangement = Arrangement.Top
         ) {
             Spacer(Modifier.height(40.dp))

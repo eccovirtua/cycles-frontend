@@ -6,22 +6,31 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.Scaffold
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.padding
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.cycles.navigation.AppNavHost
+import com.example.cycles.navigation.Screen
+import com.example.cycles.ui.components.BottomNavBar
 import com.example.cycles.ui.theme.AnimatedBackground
 import com.example.cycles.ui.theme.CyclesTheme
 import com.example.cycles.ui.theme.ThemeColors
 import dagger.hilt.android.AndroidEntryPoint
 import androidx.compose.ui.graphics.Color
 
-
-
-
-// 1. ESTADO GLOBAL: El índice del tema actual (debe estar fuera de la clase)
 val currentThemeIndex = mutableIntStateOf(0)
 
 @AndroidEntryPoint
@@ -33,29 +42,61 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val activeColorScheme = ThemeColors[currentThemeIndex.intValue]
-
             val themeCycleAction = {
                 currentThemeIndex.intValue = (currentThemeIndex.intValue + 1) % ThemeColors.size
             }
 
-            // Aplica el tema global, pasando el esquema activo
             CyclesTheme(activeColorScheme) {
+
                 val navController = rememberNavController()
+
+                val navBackStackEntry by navController.currentBackStackEntryAsState()
+                val currentRoute = navBackStackEntry?.destination?.route
+
+                val screensWithBottomBar = listOf(
+                    Screen.Home.route,
+                    "profile_route",
+                    Screen.InteractiveMusic.route,
+                    Screen.InteractiveBooks.route,
+                    Screen.InteractiveMovies.route,
+                    "interactive/{domain}"
+                )
+
+                val shouldShowBottomBar = currentRoute in screensWithBottomBar
+
                 AnimatedBackground(
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = 0.dp
                 ) {
-                    Scaffold(
-                        containerColor = Color.Transparent,
-                        modifier = Modifier.fillMaxSize()
-                    ) { paddingValues ->
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .imePadding()
+                    ) {
+                        Scaffold(
+                            containerColor = Color.Transparent,
+                            modifier = Modifier.fillMaxSize(),
 
+                            contentWindowInsets = WindowInsets.navigationBars.only(WindowInsetsSides.Vertical),
 
-                        // Llama al host de navegación, pasando el controlador y la acción de clic
-                        AppNavHost(
-                            navController = navController,
-                            onTitleClick = themeCycleAction,
-                            paddingValues = paddingValues
-                        )
+                            bottomBar = {
+                                if (shouldShowBottomBar) {
+                                    BottomNavBar(
+                                        navController = navController,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+//                                            .padding(horizontal = 25.dp, vertical = 45.dp)
+                                    )
+                                }
+                            }
+                        ) { paddingValues ->
+                            // Pasamos el padding completo
+                            AppNavHost(
+                                navController = navController,
+                                onTitleClick = themeCycleAction,
+                                paddingValues = paddingValues,
+                            )
+                        }
                     }
                 }
             }

@@ -27,6 +27,9 @@ val Context.dataStore by preferencesDataStore(name = "user_prefs")
 @Singleton
 class UserPreferences @Inject constructor(@ApplicationContext context: Context) {
     private val dataStore = context.dataStore
+    private object PreferencesKeys {
+        val PROFILE_PHOTO_URI = stringPreferencesKey("profile_photo_uri")
+    }
 
     companion object {
         val TOKEN_KEY = stringPreferencesKey("auth_token")
@@ -34,10 +37,20 @@ class UserPreferences @Inject constructor(@ApplicationContext context: Context) 
 
     }
 
+
     //leer el token
     //Este Flow<String?> emite cada vez que cambie el contenido de prefs[TOKEN_KEY].
     val token: Flow<String?> = dataStore.data.map { prefs ->
         prefs[TOKEN_KEY]
+    }
+    val profilePhotoUri: Flow<String?> = dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.PROFILE_PHOTO_URI]
+        }
+    suspend fun saveProfilePhotoUri(uri: String) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.PROFILE_PHOTO_URI] = uri
+        }
     }
 
 

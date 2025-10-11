@@ -2,6 +2,7 @@ package com.example.cycles.di
 
 import com.example.cycles.BuildConfig
 import com.example.cycles.network.AuthApiService
+import com.example.cycles.network.ProfileApiService
 import com.example.cycles.network.RecsApiService
 import dagger.Module
 import dagger.Provides
@@ -72,4 +73,14 @@ object NetworkModule {
     fun provideRecsApiService(
         @Named("recs") retrofit: Retrofit
     ): RecsApiService = retrofit.create(RecsApiService::class.java)
+
+
+    // 🎯 NUEVO: Proveedor para el servicio de Perfil de Usuario
+    @Provides
+    @Singleton
+    fun provideProfileApiService(
+        @Named("auth") retrofit: Retrofit //
+    ): ProfileApiService = retrofit.create(ProfileApiService::class.java)
+
+
 }

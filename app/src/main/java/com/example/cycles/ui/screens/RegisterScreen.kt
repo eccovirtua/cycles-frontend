@@ -57,7 +57,7 @@ fun RegisterScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(horizontal = 1.dp), // Ajustado a 24.dp para consistencia con LoginScreen
+                .padding(horizontal = 25.dp, vertical = 29.dp),
             verticalArrangement = Arrangement.Top
         ) {
 

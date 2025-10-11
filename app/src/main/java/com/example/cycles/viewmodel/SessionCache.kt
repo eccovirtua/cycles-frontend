@@ -8,8 +8,12 @@ import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
+// 🎯 NUEVAS CLAVES PARA EL PERFIL LOCAL
+private val USER_NAME_KEY = stringPreferencesKey("user_profile_name")
+private val USER_BIO_KEY = stringPreferencesKey("user_profile_bio")
 
 private val LAST_DOMAIN_KEY = stringPreferencesKey("last_domain")
 private val Context.dataStore by preferencesDataStore(name = "session_cache")
@@ -41,6 +45,38 @@ object SessionCache {
         return prefs[LAST_DOMAIN_KEY]
     }
 
+    // --- MÉTODOS DE PERFIL (NOMBRE Y BIO) ---
+
+    // 🎯 Guardar nombre y biografía localmente
+    suspend fun saveProfileMetadata(name: String, bio: String) {
+        appContext.dataStore.edit { prefs ->
+            prefs[USER_NAME_KEY] = name
+            prefs[USER_BIO_KEY] = bio
+        }
+    }
+
+    // 🎯 Obtener nombre guardado
+    suspend fun getLocalName(): String? {
+        return appContext.dataStore.data
+            .map { prefs -> prefs[USER_NAME_KEY] }
+            .first()
+    }
+
+    // 🎯 Obtener biografía guardada
+    suspend fun getLocalBio(): String? {
+        return appContext.dataStore.data
+            .map { prefs -> prefs[USER_BIO_KEY] }
+            .first()
+    }
+
+    // 🎯 Limpiar Nombre y Bio (Al cerrar sesión, por ejemplo)
+    suspend fun clearProfileMetadata() {
+        appContext.dataStore.edit { prefs ->
+            prefs.remove(USER_NAME_KEY)
+            prefs.remove(USER_BIO_KEY)
+        }
+    }
+
 
     // ✅ Guardar sesión (suspend para evitar race conditions)
     suspend fun saveSession(domain: String, sessionId: String) {
@@ -57,6 +93,8 @@ object SessionCache {
 
     // ✅ Eliminar sesión
     suspend fun clearSession(domain: String) {
+        // También limpiamos los metadatos de perfil al limpiar la sesión
+        clearProfileMetadata()
         appContext.dataStore.edit { prefs ->
             prefs.remove(sessionKey(domain))
         }
@@ -79,5 +117,4 @@ object SessionCache {
             prefs.remove(resetKey(domain))
         }
     }
-
 }

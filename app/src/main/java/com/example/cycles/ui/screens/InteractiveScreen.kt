@@ -4,6 +4,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -81,18 +82,21 @@ fun InteractiveRecScreen(
                 AsyncImage(
                     model = state.seed.imageUrl,
                     contentDescription = state.seed.title,
-                    modifier = Modifier.size(240.dp)
+                    modifier = Modifier.size(470.dp)
                 )
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(state.seed.title, style = MaterialTheme.typography.titleMedium)
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(30.dp))
+                Text(state.seed.title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.height(45.dp))
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(32.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Button(onClick = { viewModel.sendFeedback(1) }) { Text("👍") }
-                    Button(onClick = { viewModel.sendFeedback(0) }) { Text("👎") }
+                    Button(onClick = { viewModel.sendFeedback(1) }) { Text("Me interesa") }
+                    Button(onClick = { viewModel.sendFeedback(0) }) { Text("No me interesa") }
+
+
                 }
+                Spacer(modifier = Modifier.height(125.dp))
             }
         }
         is InteractiveRecViewModel.UiState.Final -> {

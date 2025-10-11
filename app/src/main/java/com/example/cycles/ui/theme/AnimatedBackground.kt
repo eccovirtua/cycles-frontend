@@ -10,11 +10,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.TileMode
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 @Composable
 fun AnimatedBackground(
     modifier: Modifier = Modifier,
+    contentPadding: Dp = 25.dp,
     content: @Composable ColumnScope.() -> Unit // Recibe el contenido de la pantalla
 ) {
     // 1. Lógica de la Animación (Igual que en WelcomeScreen)
@@ -54,8 +56,7 @@ fun AnimatedBackground(
         modifier = modifier
             .fillMaxSize()
             // Aplica el Brush DIFUMINADO al fondo
-            .background(animatedBrush)
-            .padding(24.dp),
-        content = content // Coloca el contenido de la pantalla aquí
+            .background(animatedBrush).padding(contentPadding),
+        content = content
     )
 }

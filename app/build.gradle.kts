@@ -61,6 +61,14 @@ android {
         android.buildFeatures.buildConfig = true
         compose = true
     }
+    kotlinOptions {
+        freeCompilerArgs = listOf("-XXLanguage:+PropertyParamAnnotationDefaultTargetMode")
+    }
+
+}
+configurations.all {
+    // Excluye la dependencia duplicada de todas las configuraciones
+    exclude(group = "com.google.guava", module = "listenablefuture")
 }
 dependencies {
     implementation(libs.androidx.core.ktx)
@@ -76,6 +84,8 @@ dependencies {
     implementation(libs.androidx.datastore.core)
     implementation(libs.androidx.ui.tooling.v192)
     implementation(libs.androidx.ui.text.google.fonts)
+    implementation(libs.androidx.foundation.layout)
+    implementation(libs.androidx.compiler)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -94,6 +104,9 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.navigation.fragment)
     implementation(libs.androidx.navigation.ui)
+    implementation(libs.accompanist.navigation.animation.v0340)
+
+    // Asegúrate de tener también la dependencia de Compose Navigation
 
 
     // ViewModel + Compose integration

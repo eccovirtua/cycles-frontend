@@ -35,7 +35,7 @@ fun ChooseUsernameScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(horizontal = 1.dp),
+                .padding(horizontal = 25.dp, vertical = 29.dp),
             verticalArrangement = Arrangement.Top
         ) {
 
@@ -80,7 +80,7 @@ fun ChooseUsernameScreen(
                 onClick =
                     { viewModel.checkAvailability() },
                 enabled = name.isNotBlank() && !isLoading,
-                shape = RoundedCornerShape(25.dp),
+                shape = RoundedCornerShape(10.dp),
                 modifier = Modifier.fillMaxWidth()
             )
             {
@@ -92,8 +92,8 @@ fun ChooseUsernameScreen(
                 Spacer(Modifier.height(16.dp))
                 Button(
                     onClick = { viewModel.saveUsername(navController) },
-                    modifier = Modifier.fillMaxWidth().size(20.dp),
-                    shape = RoundedCornerShape(25.dp)
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(10.dp)
                 ) {
                     Text("Continuar")
                 }
