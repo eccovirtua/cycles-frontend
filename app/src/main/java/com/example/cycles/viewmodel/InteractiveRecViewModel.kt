@@ -86,15 +86,6 @@ class InteractiveRecViewModel @Inject constructor(
         }
     }
 
-//    suspend fun isSessionFinal(sessionId: String): Boolean {
-//        return try {
-//            val response = repo.finalizeSession(sessionId)
-//            response.recommendations.isNotEmpty()
-//        } catch (_: Exception) {
-//            false
-//        }
-//    }
-
     suspend fun getSessionState(sessionId: String): SessionStateResponse {
         return repo.getSessionState(sessionId)
     }
