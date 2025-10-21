@@ -5,6 +5,7 @@ import com.example.cycles.data.FinalListResponse
 import com.example.cycles.data.RecommendationItem
 import com.example.cycles.data.SessionCreateResponse
 import com.example.cycles.data.SessionStateResponse
+import com.example.cycles.data.UserDashboardStats
 import com.example.cycles.data.UserPreferences
 import com.example.cycles.network.RecsApiService
 import kotlinx.coroutines.flow.first
@@ -22,7 +23,7 @@ class RecsRepository @Inject constructor(
 
     suspend fun createSession(domain: String): SessionCreateResponse {
         val token = bearer()
-        return api.createSession(domain, token) // usa el endpoint nuevo
+        return api.createSession(domain, token)
     }
 
     suspend fun sendFeedback(sessionId: String, itemId: String, feedback: Int): RecommendationItem? {
@@ -39,6 +40,11 @@ class RecsRepository @Inject constructor(
     suspend fun getSessionState(sessionId: String): SessionStateResponse {
         val token = bearer()
         return api.getSessionState(sessionId, token)
+    }
+
+    suspend fun getDashboardStats(): UserDashboardStats {
+        val token = bearer()
+        return api.getUserDashboardStats(token)
     }
 
 }

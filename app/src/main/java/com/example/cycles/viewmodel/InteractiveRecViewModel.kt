@@ -37,6 +37,10 @@ class InteractiveRecViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.value = UiState.Loading
             try {
+                val statsBefore = repo.getDashboardStats()
+                StatsCache.statsBeforeSession = statsBefore
+
+
                 val resp = repo.createSession(domain)
                 currentDomain = domain
                 currentSessionId = resp.session_id

@@ -13,16 +13,16 @@ sealed class BottomNavItem(
     val icon: ImageVector
 ) {
     // 🎯 HOME: La pantalla de selección de dominio (Películas, Libros, Música)
-    object Home : BottomNavItem("home", "Inicio", Icons.Filled.Tv)
+    object Home : BottomNavItem(Screen.Home.route, "Inicio", Icons.Filled.Tv)
 
     // 🎯 LISTAS
     object Lists : BottomNavItem("lists_route", "Listas", Icons.Filled.Bookmarks)
 
     // 🎯 PERFIL
-    object Profile : BottomNavItem("profile_route", "Perfil", Icons.Filled.AccountBox)
+    object Profile : BottomNavItem(Screen.Profile.route, "Perfil", Icons.Filled.AccountBox)
 
     // 🎯 BÚSQUEDA
-    object Search : BottomNavItem("search_route", "Buscar", Icons.Filled.Search)
+    object Search : BottomNavItem(Screen.Search.route, "Buscar", Icons.Filled.Search)
 }
 
 // Lista de ítems a mostrar en la NavigationBar

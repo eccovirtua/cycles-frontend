@@ -15,6 +15,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Book
+import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.LocalMovies
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material3.Text
@@ -74,7 +75,6 @@ fun HomeScreen (
             colors = listOf(Color.Red, Color.Magenta, Color.Red)
         )
 
-        // ✅ CORRECCIÓN 1: Necesitamos un CoroutineScope para envolver la acción pesada
         val scope = rememberCoroutineScope()
 
         val interactionSource = remember { MutableInteractionSource() }
@@ -85,7 +85,6 @@ fun HomeScreen (
         val scaleFactor by animateFloatAsState(
             // La animación de escala usa isPressed para el rebote visual
             targetValue = if (isPressed || isTapping) 0.85f else 1.0f,
-            // ✅ CAMBIO CLAVE: Reducimos la duración a 50ms para un toque instantáneo
             animationSpec = tween(durationMillis = 150),
             label = "scale_animation"
         )
@@ -133,7 +132,6 @@ fun HomeScreen (
 
             .verticalScroll(scrollState)
 
-            // ✅ CORRECCIÓN CLAVE: Separar el padding horizontal del vertical/específico.
             .padding(horizontal = 26.dp) // Aplica 25dp a start y end
             .padding(top = 75.dp),      // Aplica 40dp solo a top (y 0 a bottom, ya cubierto por paddingValues)
 
@@ -191,6 +189,17 @@ fun HomeScreen (
                 onClick = { navController.navigate("interactive_music") },
                 modifier = Modifier.fillMaxWidth()
             )
+
+            // ✅ 2. Tarjeta 4: Dashboard (NUEVA)
+            SectionCard(
+                title = "Dashboard",
+                icon = Icons.Filled.Dashboard,
+                color1 = Color(0xFFFFC107), // Color ámbar
+                color2 = Color(0xFFFF6F00), // Color ámbar oscuro
+                onClick = { navController.navigate("dashboard") }, // Navega a la nueva pantalla
+                modifier = Modifier.fillMaxWidth()
+            )
+
 
             Spacer(modifier = Modifier.height(80.dp))
         }

@@ -92,7 +92,7 @@ fun InteractiveRecScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Button(onClick = { viewModel.sendFeedback(1) }) { Text("Me interesa") }
-                    Button(onClick = { viewModel.sendFeedback(0) }) { Text("No me interesa") }
+                    Button(onClick = { viewModel.sendFeedback(-1) }) { Text("No me interesa") }
 
 
                 }

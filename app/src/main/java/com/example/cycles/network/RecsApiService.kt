@@ -5,6 +5,7 @@ import com.example.cycles.data.FinalListResponse
 import com.example.cycles.data.SeedResponse
 import com.example.cycles.data.SessionCreateResponse
 import com.example.cycles.data.SessionStateResponse
+import com.example.cycles.data.UserDashboardStats
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
@@ -38,6 +39,12 @@ interface RecsApiService {
         @Path("session_id") sessionId: String,
         @Header("Authorization") token: String
     ): SessionStateResponse
+
+
+    @GET("stats/dashboard")
+    suspend fun getUserDashboardStats(
+        @Header("Authorization") token: String
+    ): UserDashboardStats
 }
 
 

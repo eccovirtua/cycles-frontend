@@ -21,12 +21,15 @@ sealed class Screen(val route: String) {
 
     }
     data object Home           : Screen("home")
+    data object Search         : Screen("search")
     data object InteractiveMusic   : Screen("interactive_music")
     data object InteractiveBooks   : Screen("interactive_books")
     data object InteractiveMovies  : Screen("interactive_movies")
     data object Profile : Screen("profile_route")
 
     data object EditProfile : Screen("edit_profile_route")
+
+    data object Dashboard : Screen("dashboard")
 
     // añadir profile, home, en el futuro.
 }

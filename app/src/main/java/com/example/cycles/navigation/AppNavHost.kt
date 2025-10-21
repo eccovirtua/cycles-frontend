@@ -10,12 +10,12 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
@@ -24,18 +24,20 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.cycles.ui.screens.ChooseUsernameScreen
+import com.example.cycles.ui.screens.DashboardScreen
 import com.example.cycles.ui.screens.EditProfileScreen
 import com.example.cycles.ui.screens.FinalRecommendationsScreen
-import com.example.cycles.ui.screens.LoginScreen
-import com.example.cycles.viewmodel.AuthViewModel
-import com.example.cycles.ui.screens.RegisterScreen
-import com.example.cycles.ui.screens.WelcomeScreen
 import com.example.cycles.ui.screens.ForgotPasswordScreen
 import com.example.cycles.ui.screens.HomeScreen
-import com.example.cycles.ui.screens.ResetPasswordScreen
-import com.example.cycles.ui.screens.VerifyCodeScreen
 import com.example.cycles.ui.screens.InteractiveRecScreen
+import com.example.cycles.ui.screens.LoginScreen
+import com.example.cycles.ui.screens.RegisterScreen
+import com.example.cycles.ui.screens.ResetPasswordScreen
+import com.example.cycles.ui.screens.SearchScreen
 import com.example.cycles.ui.screens.UserProfileScreen
+import com.example.cycles.ui.screens.VerifyCodeScreen
+import com.example.cycles.ui.screens.WelcomeScreen
+import com.example.cycles.viewmodel.AuthViewModel
 import kotlinx.coroutines.launch
 
 private const val TRANSITION_DURATION = 220
@@ -112,6 +114,16 @@ fun AppNavHost(
             HomeScreen(navController, paddingValues, onTitleClick = onTitleClick)
         }
 
+        composable(
+            route = Screen.Search.route,
+            enterTransition = { slideInFromRight },
+            exitTransition = { slideOutToLeft },
+            popEnterTransition = { slideInFromLeft },
+            popExitTransition = { slideOutToRight }
+        ) {
+            SearchScreen()
+        }
+
         // --- RUTAS MODALES (Aparecen desde Abajo, más apropiado para Auth) ---
 
         // login
@@ -123,6 +135,29 @@ fun AppNavHost(
         ) {
             LoginScreen(navController, paddingValues)
         }
+
+        //dashboard
+        composable(
+            route = Screen.Dashboard.route,
+            enterTransition = { slideInFromBottom},
+            exitTransition = { fadeOut(tween(TRANSITION_DURATION))},
+            popExitTransition = { slideOutToBottom }
+
+        ) {
+            DashboardScreen()
+        }
+
+
+        composable(
+            route = "dashboard?animate={animate}",
+            arguments = listOf(navArgument("animate") {
+                type = NavType.BoolType
+                defaultValue = false
+            })
+        ) { backStackEntry -> // 'backStackEntry' might still be needed for other things
+            DashboardScreen() // Just call the screen, ViewModel gets the arg
+        }
+
 
         // register
         composable(

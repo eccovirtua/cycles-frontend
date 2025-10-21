@@ -14,12 +14,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.cycles.data.RecommendationItem
+import com.example.cycles.ui.components.StatsPopupDialog
 import com.example.cycles.viewmodel.FinalRecommendationsViewModel
 import com.example.cycles.viewmodel.SessionCache
 import kotlinx.coroutines.launch
@@ -40,64 +40,50 @@ fun FinalRecommendationsScreen(
         }
     }
 
-
-    when (state) {
-        is FinalRecommendationsViewModel.UiState.Loading -> {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
-            }
-        }
-
-        is FinalRecommendationsViewModel.UiState.Success -> {
-            val recommendations =
-                (state as FinalRecommendationsViewModel.UiState.Success).recommendations
-
-            Column(modifier = Modifier.fillMaxSize()) {
-
-
-
-                // La cuadrícula toma el espacio restante
-                RecommendationsGrid(
-                    items = recommendations,
-                    modifier = Modifier.weight(2f)
-                )
-
-                // El botón está ahora más arriba debido al título
-                Button(
-                    onClick = {
-                        coroutineScope.launch {
-                            try {
-                                // 🧩 Limpiar y marcar reinicio
-                                SessionCache.clearSession(domain)
-                                SessionCache.markSessionAsReset(domain)
-
-                                // 🧭 Volver a la pantalla de dominios
-                                navController.navigate("home") {
-                                    popUpTo("home") { inclusive = false }
-                                }
-                            } catch (e: Exception) {
-                                Log.e("FinalRecScreen", "Error al reiniciar sesión", e)
-                            }
-                        }
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        // 🎯 Padding que separa el botón de los bordes.
-                        .padding(horizontal = 25.dp, vertical = 15.dp)
-
-                ) {
-                    Text(
-                        text="Reiniciar recomendaciones!",
-                        style = MaterialTheme.typography.bodyLarge
-                    )
+    if (state.shouldShowStatsPopup && state.statsBeforeSession != null && state.statsAfterSession != null) {
+        StatsPopupDialog(
+            statsBefore = state.statsBeforeSession!!,
+            statsAfter = state.statsAfterSession!!,
+            onDismiss = {
+                viewModel.dismissStatsPopup()
+                coroutineScope.launch {
+                    SessionCache.clearSession(domain)
+                    SessionCache.markSessionAsReset(domain)
+                    navController.navigate("dashboard?animate=true") {
+                        popUpTo("home") { inclusive = false }
+                    }
                 }
             }
+        )
+    }
+    // El contenido principal de la pantalla
+    if (state.isLoading) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
         }
+    } else if (state.error != null) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text("Error: ${state.error}")
+        }
+    } else {
+        Column(modifier = Modifier.fillMaxSize()) {
+            RecommendationsGrid(
+                items = state.recommendations,
+                modifier = Modifier.weight(1f) // Ajustado para que ocupe el espacio disponible
+            )
 
-        is FinalRecommendationsViewModel.UiState.Error -> {
-            val message = (state as FinalRecommendationsViewModel.UiState.Error).message
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("Error: $message")
+            Button(
+                // 👈 3. El botón ahora llama a la nueva función del ViewModel
+                onClick = { viewModel.onRestartClicked() },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 25.dp, vertical = 15.dp)
+
+            ) {
+                Text(
+                    text = "Ver resumen!",
+                    style = MaterialTheme.typography.bodyLarge
+                )
             }
         }
     }
