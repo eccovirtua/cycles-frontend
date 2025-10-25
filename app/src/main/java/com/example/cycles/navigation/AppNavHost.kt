@@ -30,6 +30,9 @@ import com.example.cycles.ui.screens.FinalRecommendationsScreen
 import com.example.cycles.ui.screens.ForgotPasswordScreen
 import com.example.cycles.ui.screens.HomeScreen
 import com.example.cycles.ui.screens.InteractiveRecScreen
+import com.example.cycles.ui.screens.ItemDetailScreen
+import com.example.cycles.ui.screens.ListDetailScreen
+import com.example.cycles.ui.screens.ListsScreen
 import com.example.cycles.ui.screens.LoginScreen
 import com.example.cycles.ui.screens.RegisterScreen
 import com.example.cycles.ui.screens.ResetPasswordScreen
@@ -121,7 +124,41 @@ fun AppNavHost(
             popEnterTransition = { slideInFromLeft },
             popExitTransition = { slideOutToRight }
         ) {
-            SearchScreen()
+            SearchScreen(
+                onItemClick = { itemId, itemType ->
+                    // Navega a la pantalla de detalle, pasando el ID y Tipo
+                    navController.navigate(Screen.ItemDetail.createRoute(itemId, itemType))
+                }
+            )
+        }
+        // 2. Pantalla Dinámica de Detalle de Ítem (Asegúrate que esta exista como en el paso anterior)
+        composable(
+            route = Screen.ItemDetail.route, // "item_detail/{itemId}/{itemType}"
+            arguments = listOf(
+                navArgument("itemId") { type = NavType.StringType },
+                navArgument("itemType") { type = NavType.StringType }
+            ),
+            enterTransition = { slideInFromRight },
+            exitTransition = { slideOutToLeft },
+            popEnterTransition = { slideInFromLeft },
+            popExitTransition = { slideOutToRight }
+        ) { backStackEntry ->
+            val itemId = backStackEntry.arguments?.getString("itemId") ?: ""
+            val itemTypeString = backStackEntry.arguments?.getString("itemType") ?: ""
+
+            // Importa tu enum ItemType
+            val itemType = try {
+                com.example.cycles.data.ItemType.valueOf(itemTypeString)
+            } catch (_: IllegalArgumentException) {
+                com.example.cycles.data.ItemType.BOOK // Fallback
+            }
+
+            // Asegúrate de que ItemDetailScreen exista
+            ItemDetailScreen(
+                itemId = itemId,
+                itemType = itemType,
+                onBack = { navController.popBackStack() }
+            )
         }
 
         // --- RUTAS MODALES (Aparecen desde Abajo, más apropiado para Auth) ---
@@ -156,6 +193,28 @@ fun AppNavHost(
             })
         ) { backStackEntry -> // 'backStackEntry' might still be needed for other things
             DashboardScreen() // Just call the screen, ViewModel gets the arg
+        }
+        // RUTA PARA LA PANTALLA DE "LISTAS" (de la fase anterior)
+        composable(
+            route = "lists_route", // Esta es la ruta de BottomNavItem.Lists
+            enterTransition = { slideInFromRight },
+            exitTransition = { slideOutToLeft },
+            popEnterTransition = { slideInFromLeft },
+            popExitTransition = { slideOutToRight }
+        ) {
+            ListsScreen(navController = navController) // Pasamos el navController
+        }
+
+        // 🎯 NUEVA RUTA: DETALLE DE LISTA
+        composable(
+            route = "list_detail/{listId}",
+            arguments = listOf(navArgument("listId") { type = NavType.StringType }),
+            enterTransition = { slideInFromRight },
+            exitTransition = { slideOutToLeft },
+            popEnterTransition = { slideInFromLeft },
+            popExitTransition = { slideOutToRight }
+        ) {
+            ListDetailScreen(navController = navController)
         }
 
 

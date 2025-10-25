@@ -45,11 +45,34 @@ fun InteractiveRecScreen(
                         viewModel.loadExistingSeed(it, state.iterations)
                     }
                 }
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 // Si falla la consulta, crear nueva sesión
                 viewModel.createSession(domain)
             }
         }
+    }
+    // Variable para controlar la alerta
+    var showLimitAlert by remember { mutableStateOf(false) }
+    var limitAlertMessage by remember { mutableStateOf("") }
+
+    if (showLimitAlert) {
+        AlertDialog(
+            onDismissRequest = {
+                showLimitAlert = false
+                // Volver a la pantalla anterior al cerrar la alerta
+                navController.popBackStack()
+            },
+            title = { Text("Límite Alcanzado") },
+            text = { Text(limitAlertMessage) },
+            confirmButton = {
+                Button(onClick = {
+                    showLimitAlert = false
+                    navController.popBackStack()
+                }) {
+                    Text("Entendido")
+                }
+            }
+        )
     }
 
     when (val state = uiState) {
@@ -57,6 +80,16 @@ fun InteractiveRecScreen(
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
             }
+        }
+        // 🎯 MANEJAR EL NUEVO ESTADO DE ERROR
+        is InteractiveRecViewModel.UiState.ErrorLimitReached -> {
+            // Mostramos la alerta en lugar del error genérico
+            LaunchedEffect(state.message) {
+                limitAlertMessage = state.message
+                showLimitAlert = true
+            }
+            // Muestra un Box vacío o un indicador mientras la alerta está visible
+            Box(Modifier.fillMaxSize()) { /* Puedes poner un CircularProgressIndicator si quieres */ }
         }
         is InteractiveRecViewModel.UiState.Error -> {
             Column(

@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import retrofit2.HttpException
 
 @HiltViewModel
 class InteractiveRecViewModel @Inject constructor(
@@ -25,6 +26,8 @@ class InteractiveRecViewModel @Inject constructor(
         data class Seed(val seed: RecommendationItem, val iteration: Int) : UiState()
         data class Final(val recommendations: List<RecommendationItem>) : UiState()
         data class Error(val message: String) : UiState()
+        data class ErrorLimitReached(val message: String) : UiState()
+
     }
 
     private val _uiState = MutableStateFlow<UiState>(UiState.Loading)
@@ -32,6 +35,7 @@ class InteractiveRecViewModel @Inject constructor(
 
     val sessionId: String?
         get() = currentSessionId
+
 
     fun createSession(domain: String) {
         viewModelScope.launch {
@@ -50,7 +54,12 @@ class InteractiveRecViewModel @Inject constructor(
                 _uiState.value = UiState.Seed(resp.seed, currentIteration)
 
             } catch (e: Exception) {
-                _uiState.value = UiState.Error("Error creando sesión: ${e.message}")
+                if (e is HttpException && e.code() == 429) {
+
+                    _uiState.value = UiState.ErrorLimitReached(e.message ?: "Límite diario de sesiones alcanzado.")
+                } else {
+                    _uiState.value = UiState.Error("Error creando sesión: ${e.message}")
+                }
             }
         }
     }

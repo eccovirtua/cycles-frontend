@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.LocalMovies
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,8 +37,12 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
 import com.example.cycles.ui.components.SectionCard
 import com.example.cycles.viewmodel.AuthViewModel
+import com.example.cycles.viewmodel.HomeViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -122,6 +127,18 @@ fun HomeScreen (
         }
     }
 
+    val homeViewModel: HomeViewModel = hiltViewModel()
+    val homeState by homeViewModel.uiState.collectAsState()
+    val isLimitReached by homeViewModel.isLimitReached.collectAsState()
+
+    // Recargar el estado de uso cuando la pantalla se vuelve visible
+    val lifecycleOwner = LocalLifecycleOwner.current
+    LaunchedEffect(lifecycleOwner.lifecycle) {
+        lifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            homeViewModel.loadUsageStatus()
+        }
+    }
+
 
 
     Column(
@@ -167,7 +184,8 @@ fun HomeScreen (
                 onClick = { navController.navigate("interactive_movies") },
                 color1 = Color(0xFF6A1B9A),
                 color2 = Color(0xFFFF5252),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !isLimitReached
             )
 
             // Tarjeta 2: Libros
@@ -177,7 +195,8 @@ fun HomeScreen (
                 color1 = Color(0xFF43A047),
                 color2 = Color(0xFFDCE775),
                 onClick = { navController.navigate("interactive_books") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !isLimitReached
             )
 
             // Tarjeta 3: Música
@@ -187,7 +206,8 @@ fun HomeScreen (
                 color1 = Color(0xFF1976D2),
                 color2 = Color(0xFF00E5FF),
                 onClick = { navController.navigate("interactive_music") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !isLimitReached
             )
 
             // ✅ 2. Tarjeta 4: Dashboard (NUEVA)
@@ -197,7 +217,8 @@ fun HomeScreen (
                 color1 = Color(0xFFFFC107), // Color ámbar
                 color2 = Color(0xFFFF6F00), // Color ámbar oscuro
                 onClick = { navController.navigate("dashboard") }, // Navega a la nueva pantalla
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                enabled = true
             )
 
 

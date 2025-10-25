@@ -33,10 +33,16 @@ fun SectionCard(
     color1: Color,
     color2: Color,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true
 ) {
 
 
+    // 🎯 Ajustar colores si está deshabilitado
+    val finalColor1 = if (enabled) color1 else Color.Gray.copy(alpha = 0.5f)
+    val finalColor2 = if (enabled) color2 else Color.DarkGray.copy(alpha = 0.5f)
+    val finalIconTint = if (enabled) Color.White else Color.White.copy(alpha = 0.6f)
+    val finalTextColor = if (enabled) Color.White else Color.White.copy(alpha = 0.6f)
 
     // 1. Lógica de animación del degradado
     val infiniteTransition = rememberInfiniteTransition(label = "gradient_animation_$title")
@@ -77,7 +83,8 @@ fun SectionCard(
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
-                onClick = onClick
+                onClick = onClick,
+                enabled = enabled
             )
 
         ) {

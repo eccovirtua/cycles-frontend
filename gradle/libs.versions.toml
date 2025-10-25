@@ -41,6 +41,7 @@ uiTextGoogleFonts = "1.9.2"
 composeUi = "1.7.8"
 foundationLayout = "1.9.2"
 compiler = "3.2.0-alpha11"
+lifecycleRuntimeKtxVersion = "2.9.4"
 
 [libraries]
 accompanist-navigation-animation = { module = "com.google.accompanist:accompanist-navigation-animation", version.ref = "accompanistNavigationAnimation" }
@@ -95,6 +96,7 @@ androidx-datastore-core = { group = "androidx.datastore", name = "datastore-core
 androidx-ui-text-google-fonts = { group = "androidx.compose.ui", name = "ui-text-google-fonts", version.ref = "uiTextGoogleFonts" }
 androidx-foundation-layout = { group = "androidx.compose.foundation", name = "foundation-layout", version.ref = "foundationLayout" }
 androidx-compiler = { group = "androidx.databinding", name = "compiler", version.ref = "compiler" }
+lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtxVersion" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
