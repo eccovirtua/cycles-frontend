@@ -1,8 +1,10 @@
 package com.example.cycles.viewmodel
 
 import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.cycles.data.SearchResultItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -16,6 +18,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import com.example.cycles.data.SessionCacheContract
+import com.example.cycles.data.UserListBasic
+import com.example.cycles.data.UserPreferences
+import com.example.cycles.repository.RecsRepository
 
 // Definición de eventos de única vez (Side Effects)
 sealed class UserProfileEvent {
@@ -23,95 +28,147 @@ sealed class UserProfileEvent {
 }
 
 // 🎯 Modelo de Datos para la UI (UserProfileState)
+// 🎯 Modelo de Datos para la UI (UserProfileState) - ACTUALIZADO
 data class UserProfileState(
     val isLoading: Boolean = false,
-    val username: String = "",
-    val name: String = "",
-    val bio: String = "",
-    val followersCount: Int = 0,
-    val followingCount: Int = 0,
-    val profileImageUrl: String = "",
-    val coverImageUrl: String = "",
-    val sectionIndex: Int = 0,
+    val username: String = "", // Ahora viene de UserPreferences
+    val name: String = "", // Nombre (de SessionCache)
+    val bio: String = "", // Bio (de SessionCache)
+    val followersCount: Int = 0, // Placeholder
+    val followingCount: Int = 0, // Placeholder
+    val profileImageUrl: String = "", // De ProfileRepository
+    val coverImageUrl: String = "https://picsum.photos/800/200?random=2", // Placeholder
+
+    // Pestañas
+    val sectionIndex: Int = 0, // 0: Listas, 1: Archivadas, 2: Favoritos
+    val activeLists: List<UserListBasic> = emptyList(),
+    val archivedLists: List<UserListBasic> = emptyList(),
+    val favoriteItems: List<SearchResultItem> = emptyList(),
+    val isLoadingSection: Boolean = false, // Para carga específica de pestañas
 
     val error: String? = null,
 
-    // Campos para la edición y previsualización
+    // Campos para la edición (sin cambios)
     val newName: String = "",
     val newBio: String = "",
-    val newProfileUri: Uri? = null // URI local de la imagen seleccionada
+    val newProfileUri: Uri? = null
 )
 
 
 @HiltViewModel
 class UserProfileViewModel @Inject constructor(
     private val profileRepository: ProfileRepositoryContract,
-    // CLAVE: Inyección de SessionCacheContract
-    private val sessionCache: SessionCacheContract
+    private val sessionCache: SessionCacheContract,
+    private val userPreferences: UserPreferences, // <-- Inyectar UserPreferences
+    private val recsRepository: RecsRepository   // <-- Inyectar RecsRepository
 ) : ViewModel() {
 
-    // Se inicializa el StateFlow ANTES del bloque init
     private val _state = MutableStateFlow(UserProfileState(isLoading = true))
     val state: StateFlow<UserProfileState> = _state.asStateFlow()
 
     private val _events = MutableSharedFlow<UserProfileEvent>()
     val events: SharedFlow<UserProfileEvent> = _events.asSharedFlow()
 
-    private val currentUserId: String = "current_user_id"
+    private val currentUserId: String = "current_user_id" // Placeholder
 
     init {
-        loadUserProfile()
+        // Observe username changes continuously
+        observeUsername() // Call the new function
+
+        loadUserProfileData() // Load photo, name, bio
+        loadSectionData(0)
     }
 
-
-    // 🛑 CORRECCIÓN: Se añade el parámetro shouldNavigateBack a la firma de la función.
-    fun loadUserProfile(shouldNavigateBack: Boolean = false) {
-        // La recarga debe ejecutarse en el hilo principal del ViewModel, pero las llamadas al repositorio no.
+    private fun observeUsername() {
         viewModelScope.launch {
+            userPreferences.username
+                .collect { fetchedUsername ->
+                    Log.d("UserProfileVM", "Collected username from Prefs: $fetchedUsername") // <-- ADD LOG
+                    _state.update {
+                        it.copy(username = fetchedUsername?.let { "@$it" } ?: "@usuario")
+                    }
+                }
+        }
+    }
+
+    // Renamed from loadUserProfile to avoid confusion
+    fun loadUserProfileData(shouldNavigateBack: Boolean = false) {
+        // 🎯 REMOVE USERNAME FETCHING FROM HERE
+        viewModelScope.launch {
+            // Only set loading for photo/name/bio part
             _state.update { it.copy(isLoading = true, error = null) }
 
-            var remotePhotoUrl = "https://picsum.photos/200/200?random=1"
+            var remotePhotoUrl = "..."
             var loadError: String? = null
+            // var fetchedUsername: String? = null // <-- REMOVE
 
             try {
-                // 🛑 Se mueve la llamada de I/O al Dispatchers.IO
                 val photoData = withContext(Dispatchers.IO) {
                     profileRepository.fetchProfilePhoto(currentUserId)
                 }
                 remotePhotoUrl = photoData.profileImageUrl
+                // fetchedUsername = userPreferences.username.first() // <-- REMOVE
+
             } catch (e: Exception) {
-                // Manejo de error (por ejemplo, el 403)
-                loadError = "Error al cargar foto: ${e.message}"
+                loadError = "Error al cargar foto: ${e.message}" // Error only for photo now
             }
 
-            // Usamos la instancia inyectada para el caché
-            // sessionCache (DataStore) es suspend y ya usa Dispatchers.IO internamente
-            val localName = sessionCache.getLocalName() ?: "Nombre de Usuario"
-            val localBio = sessionCache.getLocalBio() ?: "Biografía local"
+            val localName = sessionCache.getLocalName() ?: "Nombre"
+            val localBio = sessionCache.getLocalBio() ?: "Biografía"
 
-            // Actualización del estado (que dispara la actualización de la UI)
             _state.update {
                 it.copy(
-                    isLoading = false,
+                    isLoading = false, // Set loading false here
                     profileImageUrl = remotePhotoUrl,
-                    name = localName, // Nuevo nombre actualizado
-                    bio = localBio, // Nueva bio actualizada
+                    name = localName,
+                    bio = localBio,
+                    // username is now handled by observeUsername() // <-- REMOVE USERNAME UPDATE
                     newName = localName,
                     newBio = localBio,
-                    username = "@CyclesCEO",
-                    coverImageUrl = "https://picsum.photos/800/200?random=2",
-                    error = loadError
+                    error = loadError // Error might still occur for photo
                 )
             }
 
-            // 🛑 Se dispara la navegación SOLO después de que el estado se actualizó.
             if (shouldNavigateBack) {
                 _events.emit(UserProfileEvent.NavigateBack)
             }
         }
     }
 
+    // --- Lógica de Pestañas ---
 
+    fun onSectionSelected(index: Int) {
+        if (_state.value.sectionIndex == index) return // No recargar si ya está seleccionada
+        _state.update { it.copy(sectionIndex = index) }
+        loadSectionData(index) // Cargar datos para la nueva pestaña
+    }
+
+    private fun loadSectionData(index: Int) {
+        viewModelScope.launch {
+            _state.update { it.copy(isLoadingSection = true, error = null) } // Indicador de carga para la sección
+            try {
+                when (index) {
+                    0 -> { // Listas Activas
+                        val lists = recsRepository.getMyLists(archived = false)
+                        _state.update { it.copy(isLoadingSection = false, activeLists = lists) }
+                    }
+                    1 -> { // Listas Archivadas
+                        val lists = recsRepository.getMyLists(archived = true)
+                        _state.update { it.copy(isLoadingSection = false, archivedLists = lists) }
+                    }
+                    2 -> { // Favoritos
+                        val favs = recsRepository.getFavorites()
+                        _state.update { it.copy(isLoadingSection = false, favoriteItems = favs) }
+                    }
+                }
+            } catch (e: Exception) {
+                _state.update { it.copy(isLoadingSection = false, error = "Error al cargar sección: ${e.message}") }
+            }
+        }
+    }
+
+
+    // --- Funciones de Edición (sin cambios) ---
     fun onNameChange(name: String) {
         _state.update { it.copy(newName = name) }
     }
@@ -124,46 +181,83 @@ class UserProfileViewModel @Inject constructor(
         _state.update { it.copy(newProfileUri = uri) }
     }
 
-    /**
-     * Guarda los cambios del perfil.
-     */
     fun saveProfileChanges() {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
-
             val currentState = _state.value
             val photoUri = currentState.newProfileUri
-
             try {
-                // 🛑 Se mueve la llamada de I/O al Dispatchers.IO
                 if (photoUri != null) {
                     withContext(Dispatchers.IO) {
                         profileRepository.uploadImageAndGetUrl(currentUserId, photoUri)
                     }
                 }
-
-                // sessionCache.saveProfileMetadata es suspend y lo hace en segundo plano
+                // Guardar Nombre y Bio
                 sessionCache.saveProfileMetadata(
                     name = currentState.newName,
                     bio = currentState.newBio
                 )
+                // NO guardamos username aquí, se guarda en su propio flujo
 
-                // Después de guardar, recargamos (lo que actualizará la UI) y navegamos.
-                loadUserProfile(shouldNavigateBack = true)
+                // Recargar perfil (sin navegación) y luego navegar
+                loadUserProfileData(shouldNavigateBack = true)
 
             } catch (e: Exception) {
                 _state.update {
-                    it.copy(
-                        isLoading = false,
-                        error = "Error al guardar el perfil: ${e.message}"
-                    )
+                    it.copy(isLoading = false, error = "Error al guardar: ${e.message}")
                 }
             }
         }
     }
 
 
-    fun onSectionSelected(index: Int) {
-        _state.update { it.copy(sectionIndex = index) }
+    fun archiveList(listId: String) {
+        viewModelScope.launch {
+            val currentLists = _state.value.activeLists
+            // Actualización optimista: Mover la lista localmente
+            _state.update {
+                it.copy(
+                    activeLists = currentLists.filterNot { l -> l.listId == listId },
+                    // Podríamos añadirla a archivedLists aquí, pero es más simple recargar
+                )
+            }
+            try {
+                recsRepository.archiveList(listId)
+                // Recargar la sección actual (que debería ser 'Listas Activas')
+                loadSectionData(0) // O _state.value.sectionIndex si quieres ser más genérico
+            } catch (e: Exception) {
+                // Revertir si hay error
+                _state.update {
+                    it.copy(
+                        activeLists = currentLists, // Restaurar
+                        error = "Error al archivar: ${e.message}"
+                    )
+                }
+            }
+        }
+    }
+
+    fun unarchiveList(listId: String) {
+        viewModelScope.launch {
+            val currentArchived = _state.value.archivedLists
+            // Actualización optimista
+            _state.update {
+                it.copy(
+                    archivedLists = currentArchived.filterNot { l -> l.listId == listId }
+                )
+            }
+            try {
+                recsRepository.unarchiveList(listId)
+                // Recargar la sección actual (que debería ser 'Archivadas')
+                loadSectionData(1) // O _state.value.sectionIndex
+            } catch (e: Exception) {
+                _state.update {
+                    it.copy(
+                        archivedLists = currentArchived, // Restaurar
+                        error = "Error al desarchivar: ${e.message}"
+                    )
+                }
+            }
+        }
     }
 }

@@ -361,12 +361,12 @@ fun AppNavHost(
 
 
             UserProfileScreen(
+                navController = navController,
                 onBackClick = { navController.popBackStack() },
                 screenPadding = profilePadding,
                 onLogoutClick = {
                     scope.launch {
                         authViewModel.logout()
-
                         navController.navigate(Screen.Welcome.route) {
                             popUpTo(Screen.Home.route) { inclusive = true }
                         }

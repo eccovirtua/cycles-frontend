@@ -1,5 +1,6 @@
 package com.example.cycles.repository
 
+import android.util.Log
 import com.example.cycles.data.FeedbackRequest
 import com.example.cycles.data.FinalListResponse
 import com.example.cycles.data.ItemAddRequest
@@ -8,6 +9,7 @@ import com.example.cycles.data.ListCreateRequest
 import com.example.cycles.data.ListUpdateRequest
 import com.example.cycles.data.RecommendationItem
 import com.example.cycles.data.SearchResponse
+import com.example.cycles.data.SearchResultItem
 import com.example.cycles.data.SessionCreateResponse
 import com.example.cycles.data.SessionStateResponse
 import com.example.cycles.data.UserDashboardStats
@@ -69,9 +71,10 @@ class RecsRepository @Inject constructor(
 
     // --- Funciones de Listas ---
 
-    suspend fun getMyLists(): List<UserListBasic> {
+    suspend fun getMyLists(archived: Boolean? = null): List<UserListBasic> {
         val token = bearer()
-        return api.getMyLists(token = token)
+
+        return api.getMyLists(archived = archived, token = token)
     }
 
     suspend fun createList(name: String, icon: String, color: String): UserListBasic {
@@ -113,6 +116,48 @@ class RecsRepository @Inject constructor(
     suspend fun getUserUsage(): UserUsageStatus {
         val token = bearer()
         return api.getUserUsage(token = token)
+    }
+    suspend fun archiveList(listId: String): UserListBasic {
+        val token = bearer()
+        return api.archiveList(listId = listId, token = token)
+    }
+
+    suspend fun unarchiveList(listId: String): UserListBasic {
+        val token = bearer()
+        return api.unarchiveList(listId = listId, token = token)
+    }
+
+    // --- Favoritos (Nuevas) ---
+    suspend fun addFavorite(itemId: String) {
+        val token = bearer()
+        val response = api.addFavorite(itemId = itemId, token = token)
+        if (!response.isSuccessful && response.code() != 201) { // 201 es éxito
+            throw Exception("Error al añadir favorito: ${response.code()}")
+        }
+    }
+
+    suspend fun removeFavorite(itemId: String) {
+        val token = bearer()
+        val response = api.removeFavorite(itemId = itemId, token = token)
+        if (!response.isSuccessful && response.code() != 204) { // 204 es éxito
+            throw Exception("Error al quitar favorito: ${response.code()}")
+        }
+    }
+
+    suspend fun getFavorites(): List<SearchResultItem> {
+        val token = bearer()
+        return api.getFavorites(token = token)
+    }
+
+    suspend fun getFavoriteStatus(itemId: String): Boolean {
+        val token = bearer()
+        return try {
+            api.getFavoriteStatus(itemId = itemId, token = token).isFavorite
+        } catch (e: Exception) {
+            // Si hay error (ej 404), asumimos que no es favorito
+            Log.e("RecsRepository", "Error fetching favorite status for $itemId: ${e.message}")
+            false
+        }
     }
 
 }

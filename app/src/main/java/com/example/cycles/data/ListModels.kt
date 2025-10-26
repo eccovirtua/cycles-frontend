@@ -32,7 +32,8 @@ data class UserListBasic(
     val name: String,
     @SerializedName("icon_name") val iconName: String,
     @SerializedName("color_hex") val colorHex: String,
-    @SerializedName("item_count") val itemCount: Int
+    @SerializedName("item_count") val itemCount: Int,
+    @SerializedName("is_archived") val isArchived: Boolean
 )
 
 // La respuesta para el detalle de la lista
@@ -42,5 +43,6 @@ data class UserListDetail(
     @SerializedName("icon_name") val iconName: String,
     @SerializedName("color_hex") val colorHex: String,
     @SerializedName("item_count") val itemCount: Int,
+    @SerializedName("is_archived") val isArchived: Boolean,
     val items: List<SearchResultItem> // Reutilizamos el modelo de búsqueda
 )

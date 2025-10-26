@@ -6,10 +6,13 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.PlaylistAdd
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -29,9 +32,10 @@ fun ItemDetailScreen(
     onBack: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val item = uiState.currentItemDetail
-    val isLoading = uiState.isDetailLoading
-    val error = uiState.detailError
+    val item = uiState.itemDetails // Renombrado para claridad
+    val isLoading = uiState.isLoading
+    val error = uiState.error
+    val isFavorite = uiState.isFavorite // <-- Nuevo estado
 
 
     var showAddToListDialog by remember { mutableStateOf(false) }
@@ -42,17 +46,6 @@ fun ItemDetailScreen(
         )
     }
 
-    // Cargar detalles al componer la pantalla por primera vez
-    LaunchedEffect(itemId) {
-        viewModel.loadItemDetails(itemId)
-    }
-
-    // Limpiar detalles al salir de la pantalla
-    DisposableEffect(Unit) {
-        onDispose {
-            viewModel.clearItemDetails()
-        }
-    }
 
     Scaffold(
         topBar = {
@@ -64,8 +57,23 @@ fun ItemDetailScreen(
                     }
                 },
                 actions = {
+                    // --- Botón Añadir a Lista (EXISTENTE) ---
+                    var showAddToListDialog by remember { mutableStateOf(false) }
+                    if (showAddToListDialog) {
+                        AddToListDialog(
+                            itemIdToAdd = itemId,
+                            onDismiss = { showAddToListDialog = false }
+                        )
+                    }
                     IconButton(onClick = { showAddToListDialog = true }) {
                         Icon(Icons.AutoMirrored.Filled.PlaylistAdd, contentDescription = "Añadir a lista")
+                    }
+                    IconButton(onClick = { viewModel.toggleFavorite() }) {
+                        Icon(
+                            imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                            contentDescription = if (isFavorite) "Quitar de favoritos" else "Añadir a favoritos",
+                            tint = if (isFavorite) Color.Red else LocalContentColor.current // Color rojo si es fav
+                        )
                     }
                 }
             )

@@ -33,8 +33,8 @@ class UserPreferences @Inject constructor(@ApplicationContext context: Context) 
 
     companion object {
         val TOKEN_KEY = stringPreferencesKey("auth_token")
-
-
+        // 🎯 NUEVA CLAVE PARA USERNAME
+        val USERNAME_KEY = stringPreferencesKey("user_profile_username")
     }
 
 
@@ -52,7 +52,16 @@ class UserPreferences @Inject constructor(@ApplicationContext context: Context) 
             preferences[PreferencesKeys.PROFILE_PHOTO_URI] = uri
         }
     }
+    val username: Flow<String?> = dataStore.data.map { prefs ->
+        prefs[USERNAME_KEY]
+    }
 
+    // 🎯 NUEVA FUNCIÓN PARA GUARDAR USERNAME
+    suspend fun saveUsername(username: String) {
+        dataStore.edit { prefs ->
+            prefs[USERNAME_KEY] = username
+        }
+    }
 
     // aquí es donde realmente se pasa el token JWT como un string (token: String y desde del LoginViewModel o  AuthViewModel creo) y ese string
     //entra en el dataStore como un valor PERSISTENTE
@@ -69,6 +78,7 @@ class UserPreferences @Inject constructor(@ApplicationContext context: Context) 
     suspend fun clearToken() {
         dataStore.edit { prefs ->
             prefs.remove(TOKEN_KEY)
+            prefs.remove(USERNAME_KEY)
         }
     }
 
