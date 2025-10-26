@@ -11,20 +11,40 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.cycles.ui.screens.ListCreateDialog
 import com.example.cycles.ui.screens.ListRowItem
 import com.example.cycles.viewmodel.AddToListViewModel
+import androidx.compose.runtime.*
+import com.example.cycles.viewmodel.ListsViewModel
 
 @Composable
 fun AddToListDialog(
     itemIdToAdd: String,
     onDismiss: () -> Unit,
-    viewModel: AddToListViewModel = hiltViewModel()
+    // Inject both ViewModels
+    addToListViewModel: AddToListViewModel = hiltViewModel(),
+    listsViewModel: ListsViewModel = hiltViewModel() // <-- Inject ListsViewModel
 ) {
-    val state by viewModel.uiState.collectAsState()
+    val state by addToListViewModel.uiState.collectAsState()
+    // State to control the create list dialog
+    var showCreateListDialog by remember { mutableStateOf(false) }
 
+    // --- Show Create List Dialog if needed ---
+    if (showCreateListDialog) {
+        ListCreateDialog(
+            viewModel = listsViewModel, // Pass the injected ListsViewModel
+            onDismiss = {
+                showCreateListDialog = false
+                // After creating, reload lists in the AddToListDialog
+                addToListViewModel.loadLists()
+            }
+        )
+    }
+
+    // --- Main Add To List Dialog ---
     AlertDialog(
         onDismissRequest = {
-            viewModel.clearError() // Limpia el error al cerrar
+            addToListViewModel.clearError()
             onDismiss()
         },
         title = { Text("Añadir a una lista") },
@@ -32,40 +52,45 @@ fun AddToListDialog(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(min = 100.dp, max = 300.dp) // Damos altura al diálogo
+                    .heightIn(min = 100.dp, max = 300.dp)
             ) {
+                // 🎯 Get local copies *after* null checks
+                val currentSuccessMessage = state.successMessage
+                val currentError = state.error
+
                 when {
                     state.isLoading -> {
                         CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                     }
-                    state.successMessage != null -> {
+                    // 🎯 Use the local variable
+                    currentSuccessMessage != null -> {
                         Text(
-                            state.successMessage!!,
+                            currentSuccessMessage, // Use local variable
                             modifier = Modifier.align(Alignment.Center),
                             color = MaterialTheme.colorScheme.primary
                         )
                     }
-                    state.error != null -> {
+                    // 🎯 Use the local variable
+                    currentError != null -> {
                         Text(
-                            state.error!!,
+                            currentError, // Use local variable
                             modifier = Modifier.align(Alignment.Center),
                             color = MaterialTheme.colorScheme.error
                         )
                     }
-                    state.lists.isEmpty() -> {
+                    state.lists.isEmpty() && !state.isLoading -> {
                         Text(
-                            "No tienes listas. Ve a la pestaña 'Listas' para crear una.",
+                            "No tienes listas. Puedes crear una ahora.",
                             modifier = Modifier.align(Alignment.Center)
                         )
                     }
                     else -> {
                         LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                             items(state.lists, key = { it.listId }) { list ->
-                                // Reutilizamos el Composable de ListsScreen
                                 ListRowItem(
                                     list = list,
                                     onClick = {
-                                        viewModel.addItemToList(list, itemIdToAdd, onComplete = onDismiss)
+                                        addToListViewModel.addItemToList(list, itemIdToAdd, onComplete = onDismiss)
                                     }
                                 )
                             }
@@ -75,7 +100,17 @@ fun AddToListDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = onDismiss) {
+            if (state.lists.isEmpty() && !state.isLoading && state.successMessage == null && state.error == null) {
+                Button(onClick = { showCreateListDialog = true }) {
+                    Text("Crear")
+                }
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = {
+                addToListViewModel.clearError()
+                onDismiss()
+            }) {
                 Text("Cerrar")
             }
         }

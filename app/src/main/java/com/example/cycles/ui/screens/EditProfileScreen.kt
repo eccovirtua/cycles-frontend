@@ -76,7 +76,7 @@ fun EditProfileScreen(
         // snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = { Text("Editar Perfil", fontWeight = FontWeight.Bold) },
+                title = { Text("  Editar Perfil", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick, enabled = !state.isLoading) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Cancelar")
@@ -102,7 +102,7 @@ fun EditProfileScreen(
                             Text("Guardar")
                         }
                     }
-                    Spacer(Modifier.width(8.dp))
+                    Spacer(Modifier.width(18.dp))
                 }
             )
         }
@@ -115,6 +115,8 @@ fun EditProfileScreen(
                 .padding(top = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+
+            Spacer(Modifier.width(18.dp))
 
             // 1. Selector de Foto de Perfil
             ProfilePhotoSelector(
@@ -131,7 +133,7 @@ fun EditProfileScreen(
             OutlinedTextField(
                 value = state.newName,
                 onValueChange = viewModel::onNameChange,
-                label = { Text("Nombre") },
+                label = { Text("") },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !state.isLoading
             )
@@ -142,7 +144,7 @@ fun EditProfileScreen(
             OutlinedTextField(
                 value = state.newBio,
                 onValueChange = viewModel::onBioChange,
-                label = { Text("Biografía") },
+                label = { Text("") },
                 minLines = 3,
                 maxLines = 5,
                 modifier = Modifier.fillMaxWidth(),
@@ -165,8 +167,8 @@ fun ProfilePhotoSelector(currentUrl: String, newUri: Uri?, onClick: () -> Unit) 
             contentDescription = "Foto de perfil",
             contentScale = ContentScale.Crop,
             modifier = Modifier
-                .size(120.dp)
-                .clip(CircleShape)
+                .size(150.dp)
+
                 .background(Color.Gray)
                 .clickable(onClick = onClick) // Hacer toda la imagen clickeable
         )

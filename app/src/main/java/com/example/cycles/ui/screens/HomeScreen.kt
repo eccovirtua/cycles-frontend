@@ -1,6 +1,12 @@
 package com.example.cycles.ui.screens
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -12,12 +18,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.LocalMovies
 import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -34,6 +43,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.cycles.navigation.Screen
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
@@ -150,7 +160,7 @@ fun HomeScreen (
             .verticalScroll(scrollState)
 
             .padding(horizontal = 26.dp) // Aplica 25dp a start y end
-            .padding(top = 75.dp),      // Aplica 40dp solo a top (y 0 a bottom, ya cubierto por paddingValues)
+            .padding(top = 55.dp),      // Aplica 40dp solo a top (y 0 a bottom, ya cubierto por paddingValues)
 
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start
@@ -159,23 +169,23 @@ fun HomeScreen (
         // 1. TÍTULO
         CyclesTitleComposable(themeCycleAction = themeCycleAction)
 
-        Spacer(Modifier.height(20.dp))
+        Spacer(Modifier.height(19.dp))
 
         // 2. SUBTÍTULO
         Text(
-            text = "¿Qué quieres planear para hoy?",
-            style = MaterialTheme.typography.bodySmall,
+            text = "Mejora tu bienestar planificando rutinas de entretenimiento",
+            style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
-        Spacer(Modifier.height(15.dp))
-
+        Spacer(Modifier.height(22.dp))
+        RemainingSessionsCard(remaining = homeState.remainingSessions)
         Column(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(Modifier.height(32.dp)) // Espacio entre el subtítulo y las tarjetas
+            Spacer(Modifier.height(2.dp)) // Espacio entre el subtítulo y las tarjetas
 
             // Tarjeta 1: Películas/TV
             SectionCard(
@@ -234,6 +244,58 @@ fun HomeScreen (
         if (token.isNullOrEmpty()) {
             navController.navigate(Screen.Welcome.route) {
                 popUpTo(Screen.Home.route) { inclusive = true }
+            }
+        }
+    }
+}
+@Composable
+fun RemainingSessionsCard(remaining: Int?) {
+    // 1. Animación de "flote" vertical
+    val infiniteTransition = rememberInfiniteTransition(label = "floating_anim")
+    val offsetY by infiniteTransition.animateFloat(
+        initialValue = -6f, // Sube 4dp
+        targetValue = 6f,  // Baja 4dp
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 1300, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "offset_y"
+    )
+
+    // 2. Animación de color del texto (Blanco a Rojo)
+    val textColor by animateColorAsState(
+        targetValue = if (remaining == 0) Color.Red else Color.White,
+        animationSpec = tween(durationMillis = 500),
+        label = "text_color_anim"
+    )
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(70.dp) // Altura de la tarjeta
+            .graphicsLayer { translationY = offsetY }, // Aplica el desplazamiento vertical
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            // Fondo semitransparente
+            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = "Sesiones disponibles para hoy: ",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = Color.White.copy(alpha = 0.8f) // Texto descriptivo más tenue
+                )
+                // Muestra el número o "--" si aún no se ha cargado
+                Text(
+                    text = remaining?.toString() ?: "--",
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = textColor, // Color animado
+                    fontSize = 30.sp // Tamaño grande para el número
+                )
             }
         }
     }

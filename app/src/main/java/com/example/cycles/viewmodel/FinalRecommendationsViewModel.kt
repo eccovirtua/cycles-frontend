@@ -34,6 +34,35 @@ class FinalRecommendationsViewModel @Inject constructor(
     private var sessionQualityScore: Float = 0.0f
 
 
+//    fun loadFinalRecommendations(sessionId: String) {
+//        // Avoid reloading if we already have data and statsBefore for this specific session ID
+//        if (sessionId == currentSessionId && _uiState.value.statsBeforeSession != null) {
+//            _uiState.update { it.copy(isLoading = false) } // Ensure loading indicator is off
+//            return
+//        }
+//        currentSessionId = sessionId
+//
+//        viewModelScope.launch {
+//            _uiState.update { it.copy(isLoading = true) }
+//            try {
+//                val statsBefore = repository.getDashboardStats()
+//
+//                val response = repository.finalizeSession(sessionId)
+//                sessionQualityScore = response.sessionAvgQuality // Store session-specific quality
+//
+//                _uiState.update {
+//                    it.copy(
+//                        isLoading = false,
+//                        recommendations = response.recommendations,
+//                        statsBeforeSession = statsBefore // Store the correct 'before' stats.
+//                    )
+//                }
+//            } catch (e: Exception) {
+//                _uiState.update{ it.copy( isLoading = false, error = e.message ?: "Error desconocido")}
+//            }
+//        }
+//    }
+
     fun loadFinalRecommendations(sessionId: String) {
         if (sessionId == currentSessionId) return
         currentSessionId = sessionId
@@ -62,7 +91,6 @@ class FinalRecommendationsViewModel @Inject constructor(
     fun onRestartClicked() {
         viewModelScope.launch {
             try {
-                // Obtenemos las stats DESPUÉS de haber finalizado (los números habrán subido)
                 val statsAfter = repository.getDashboardStats()
                 val modifiedStatsAfter = statsAfter.copy(
                     totalAvgQualityScore = sessionQualityScore
@@ -78,6 +106,8 @@ class FinalRecommendationsViewModel @Inject constructor(
             }
         }
     }
+
+
 
     fun dismissStatsPopup() {
         _uiState.update { it.copy(shouldShowStatsPopup = false) }
