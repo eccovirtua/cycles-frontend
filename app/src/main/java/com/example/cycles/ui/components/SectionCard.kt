@@ -190,8 +190,11 @@ fun SectionCard(
     // 2. Lógica de animación de ESCALA (sin cambios)
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
+    // --- CHANGE ANIMATION SPEC ---
     val scaleFactor by animateFloatAsState(
-        targetValue = if (isPressed && enabled) 0.85f else 1.0f, // Solo escala si está habilitado
+        targetValue = if (isPressed && enabled) 0.85f else 1.0f,
+        // Option 1: Very short tween (almost instant)
+         animationSpec = tween(durationMillis = 50), // 50ms duration
         label = "scale_animation_$title"
     )
 

@@ -3,6 +3,7 @@ package com.example.cycles.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.cycles.data.SessionCacheContract
 import com.example.cycles.data.UserPreferences
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
@@ -14,7 +15,8 @@ import kotlinx.coroutines.flow.stateIn
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-    private val userPreferences: UserPreferences
+    private val userPreferences: UserPreferences,
+    private val sessionCache: SessionCacheContract
 ) : ViewModel() {
 
     // El Flow directo de DataStore, sin stateIn ni valor inicial fake
@@ -34,7 +36,8 @@ class AuthViewModel @Inject constructor(
     //para cerrar sesión(limpiar el token)
     suspend fun logout(){
         Log.d("AuthVM", "Calling clearToken()")
-        userPreferences.clearToken() // borra prefs[TOKEN_KEY]
+        userPreferences.clearToken()
+        sessionCache.clearProfileMetadata() // Borra nombre y bio de SharedPreferences
     }
 }
 

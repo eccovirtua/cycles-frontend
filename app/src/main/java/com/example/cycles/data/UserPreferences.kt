@@ -79,6 +79,7 @@ class UserPreferences @Inject constructor(@ApplicationContext context: Context) 
         dataStore.edit { prefs ->
             prefs.remove(TOKEN_KEY)
             prefs.remove(USERNAME_KEY)
+            prefs.remove(PreferencesKeys.PROFILE_PHOTO_URI)
         }
     }
 

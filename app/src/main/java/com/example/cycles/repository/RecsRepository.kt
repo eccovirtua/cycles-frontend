@@ -160,4 +160,10 @@ class RecsRepository @Inject constructor(
         }
     }
 
+    suspend fun randomizeSeed(sessionId: String): RecommendationItem? {
+        val token = bearer()
+        // La API devuelve SeedResponse, extraemos el item o null
+        return api.randomizeSeed(sessionId = sessionId, token = token).seed_item
+    }
+
 }

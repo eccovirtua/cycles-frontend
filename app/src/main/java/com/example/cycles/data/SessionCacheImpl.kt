@@ -35,4 +35,10 @@ class SessionCacheImpl @Inject constructor(
     override fun getLocalBio(): String? {
         return sharedPrefs.getString(KEY_BIO, null)
     }
+    override fun clearProfileMetadata() {
+        sharedPrefs.edit(commit = true) { // commit=true para asegurar escritura síncrona
+            remove(KEY_NAME)
+            remove(KEY_BIO)
+        }
+    }
 }

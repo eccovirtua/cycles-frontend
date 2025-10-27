@@ -175,6 +175,7 @@ fun HomeScreen (
         Text(
             text = "Mejora tu bienestar planificando rutinas de entretenimiento",
             style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 

@@ -27,8 +27,7 @@ sealed class UserProfileEvent {
     object NavigateBack : UserProfileEvent()
 }
 
-// 🎯 Modelo de Datos para la UI (UserProfileState)
-// 🎯 Modelo de Datos para la UI (UserProfileState) - ACTUALIZADO
+
 data class UserProfileState(
     val isLoading: Boolean = false,
     val username: String = "", // Ahora viene de UserPreferences
@@ -36,7 +35,7 @@ data class UserProfileState(
     val bio: String = "", // Bio (de SessionCache)
     val followersCount: Int = 0, // Placeholder
     val followingCount: Int = 0, // Placeholder
-    val profileImageUrl: String = "", // De ProfileRepository
+    val profileImageUrl: String = "https://picsum.photos/800/200?random=2", // De ProfileRepository
     val coverImageUrl: String = "https://picsum.photos/800/200?random=2", // Placeholder
 
     // Pestañas
@@ -93,21 +92,17 @@ class UserProfileViewModel @Inject constructor(
 
     // Renamed from loadUserProfile to avoid confusion
     fun loadUserProfileData(shouldNavigateBack: Boolean = false) {
-        // 🎯 REMOVE USERNAME FETCHING FROM HERE
         viewModelScope.launch {
-            // Only set loading for photo/name/bio part
             _state.update { it.copy(isLoading = true, error = null) }
 
             var remotePhotoUrl = "..."
             var loadError: String? = null
-            // var fetchedUsername: String? = null // <-- REMOVE
 
             try {
                 val photoData = withContext(Dispatchers.IO) {
                     profileRepository.fetchProfilePhoto(currentUserId)
                 }
                 remotePhotoUrl = photoData.profileImageUrl
-                // fetchedUsername = userPreferences.username.first() // <-- REMOVE
 
             } catch (e: Exception) {
                 loadError = "Error al cargar foto: ${e.message}" // Error only for photo now

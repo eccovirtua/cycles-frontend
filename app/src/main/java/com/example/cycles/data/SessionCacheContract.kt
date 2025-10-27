@@ -4,5 +4,6 @@ interface SessionCacheContract {
     fun saveProfileMetadata(name: String, bio: String)
     fun getLocalName(): String?
     fun getLocalBio(): String?
+    fun clearProfileMetadata()
 
 }

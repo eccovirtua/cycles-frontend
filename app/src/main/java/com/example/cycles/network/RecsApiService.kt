@@ -157,6 +157,12 @@ interface RecsApiService {
     ): FavoriteStatusResponse
     @GET("user/usage")
     suspend fun getUserUsage(@Header("Authorization") token: String): UserUsageStatus
+
+    @POST("session/{session_id}/randomize")
+    suspend fun randomizeSeed(
+        @Path("session_id") sessionId: String,
+        @Header("Authorization") token: String
+    ): SeedResponse // Devuelve el nuevo seed
 }
 
 

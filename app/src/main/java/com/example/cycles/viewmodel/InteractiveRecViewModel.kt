@@ -37,6 +37,30 @@ class InteractiveRecViewModel @Inject constructor(
         get() = currentSessionId
 
 
+    fun randomizeSeed() {
+        val sid = currentSessionId ?: return // Necesitamos el ID de sesión
+
+        viewModelScope.launch {
+            _uiState.value = UiState.Loading // Mostrar carga mientras busca
+            try {
+                // Llamar al nuevo metodo del repositorio
+                val nextSeed: RecommendationItem? = repo.randomizeSeed(sid)
+
+                if (nextSeed == null) {
+                    // Si devuelve null, significa que no hay más items y la sesión terminó
+                    finalizeSession() // Llama a la función existente para finalizar
+                } else {
+                    // Si hay un nuevo seed, actualiza la UI
+                    // Mantenemos la iteración actual, ya que no fue una interacción real
+                    _uiState.value = UiState.Seed(nextSeed, currentIteration)
+                }
+            } catch (e: Exception) {
+                // Manejar errores (ej: red, 404 si la sesión no existe)
+                _uiState.value = UiState.Error("Error al obtener nuevo item: ${e.message}")
+            }
+        }
+    }
+
     fun createSession(domain: String) {
         viewModelScope.launch {
             _uiState.value = UiState.Loading

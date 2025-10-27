@@ -98,7 +98,9 @@ fun UserProfileScreen(
                 ),
             contentPadding = PaddingValues( // Padding interior (respeta top/bottom del Scaffold)
                 top = innerPadding.calculateTopPadding(),
-                bottom = innerPadding.calculateBottomPadding() + 16.dp // Padding extra abajo
+                bottom = innerPadding.calculateBottomPadding() + 150.dp,
+                start = 0.dp,
+                end = 0.dp
             )
         ) {
             // --- Header Item ---
@@ -116,7 +118,7 @@ fun UserProfileScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .heightIn(min = 300.dp) // Altura mínima para contenido
+//                        .heightIn(min = 300.dp) // Altura mínima para contenido
                         .padding(top = 8.dp) // Espacio después de las pestañas
                 ) {
                     // Contenido de la sección seleccionada
@@ -176,16 +178,15 @@ fun ProfileHeaderContent(state: UserProfileState, onEditClick: () -> Unit) {
                     painter = rememberAsyncImagePainter(model = state.profileImageUrl),
                     contentDescription = "Foto de perfil",
                     modifier = Modifier
-                        .size(100.dp) // Reducir tamaño
-                        .clip(CircleShape) // Hacerla circular
+                        .size(150.dp) // Reducir tamaño
                         .background(MaterialTheme.colorScheme.surface) // Fondo para borde
-                        .border(2.dp, MaterialTheme.colorScheme.surface, CircleShape), // Borde
+                        .border(2.dp, MaterialTheme.colorScheme.surface), // Borde
                     contentScale = ContentScale.Crop
                 )
                 // Botón Editar Perfil
                 OutlinedButton(
                     onClick = onEditClick,
-                    modifier = Modifier.padding(bottom = 8.dp) // Ajustar padding
+                    modifier = Modifier.padding(bottom = 38.dp) // Ajustar altura de boton editar perfil
                 ) {
                     Text("Editar Perfil")
                 }
@@ -211,13 +212,7 @@ fun ProfileHeaderContent(state: UserProfileState, onEditClick: () -> Unit) {
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 // Fila Seguidores/Seguidos (Placeholders)
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = "${state.followersCount}", fontWeight = FontWeight.Bold)
-                    Text(" Seguidores", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Spacer(Modifier.width(16.dp)) // Espacio
-                    Text(text = "${state.followingCount}", fontWeight = FontWeight.Bold)
-                    Text(" Seguidos", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
+
             }
         }
     }

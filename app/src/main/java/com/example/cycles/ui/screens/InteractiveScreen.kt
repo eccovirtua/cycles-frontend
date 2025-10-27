@@ -1,9 +1,17 @@
 package com.example.cycles.ui.screens
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Casino
+import androidx.compose.material.icons.filled.ThumbDown
+import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -120,14 +128,68 @@ fun InteractiveRecScreen(
                 Spacer(modifier = Modifier.height(30.dp))
                 Text(state.seed.title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.height(45.dp))
+                // --- Updated Button Row ---
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(32.dp),
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly, // Keeps spacing
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Button(onClick = { viewModel.sendFeedback(1) }) { Text("Me interesa") }
-                    Button(onClick = { viewModel.sendFeedback(-1) }) { Text("No me interesa") }
+                    // --- Dislike Button ---
+                    val dislikeInteractionSource = remember { MutableInteractionSource() }
+                    val isDislikePressed by dislikeInteractionSource.collectIsPressedAsState()
+                    val dislikeScale by animateFloatAsState(
+                        targetValue = if (isDislikePressed) 0.8f else 1.0f, // Shrink when pressed
+                        label = "dislikeScaleAnim"
+                    )
 
+                    IconButton(
+                        onClick = { viewModel.sendFeedback(-1) },
+                        modifier = Modifier.graphicsLayer { // Apply scale animation
+                            scaleX = dislikeScale
+                            scaleY = dislikeScale
+                        },
+                        interactionSource = dislikeInteractionSource // Link interaction source
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.ThumbDown,
+                            contentDescription = "No me interesa",
+                            modifier = Modifier.size(48.dp), // Larger icon size
+                            tint = MaterialTheme.colorScheme.error // Optional: Color tint
+                        )
+                    }
 
+                    // --- Randomize Button (Existing) ---
+                    IconButton(onClick = { viewModel.randomizeSeed() }) {
+                        Icon(
+                            imageVector = Icons.Default.Casino,
+                            contentDescription = "Siguiente item aleatorio",
+                            modifier = Modifier.size(36.dp)
+                        )
+                    }
+
+                    // --- Like Button ---
+                    val likeInteractionSource = remember { MutableInteractionSource() }
+                    val isLikePressed by likeInteractionSource.collectIsPressedAsState()
+                    val likeScale by animateFloatAsState(
+                        targetValue = if (isLikePressed) 0.8f else 1.0f, // Shrink when pressed
+                        label = "likeScaleAnim"
+                    )
+
+                    IconButton(
+                        onClick = { viewModel.sendFeedback(1) },
+                        modifier = Modifier.graphicsLayer { // Apply scale animation
+                            scaleX = likeScale
+                            scaleY = likeScale
+                        },
+                        interactionSource = likeInteractionSource // Link interaction source
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.ThumbUp,
+                            contentDescription = "Me interesa",
+                            modifier = Modifier.size(48.dp), // Larger icon size
+                            tint = MaterialTheme.colorScheme.primary // Optional: Color tint
+                        )
+                    }
                 }
                 Spacer(modifier = Modifier.height(125.dp))
             }
