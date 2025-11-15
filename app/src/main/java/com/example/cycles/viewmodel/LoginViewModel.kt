@@ -62,16 +62,12 @@ class LoginViewModel @Inject constructor(
                 )
                 // si el login es correcto:
                 val token = response.jwtToken
-//                _uiEvent.emit("Login exitoso, token: ${response.jwtToken}") esto emite un evento de ui que literalmente muestra el token en pantalla XD (para testeo)
                 userPreferences.saveToken(token) //aqui se guarda el token
                 nav.navigate(route = "home")
 
                 // limpiar valores de los campos despues de un login exitoso(visual)
                 _usernameOrEmail.value = ""
                 _password.value = ""
-
-
-
             } catch (e: Exception) {
                 Log.d("BaseURL", "Base URL usada: ${BuildConfig.AUTH_BASE_URL}")
 
