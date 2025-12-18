@@ -89,7 +89,6 @@ fun InteractiveRecScreen(
                 CircularProgressIndicator()
             }
         }
-        // 🎯 MANEJAR EL NUEVO ESTADO DE ERROR
         is InteractiveRecViewModel.UiState.ErrorLimitReached -> {
             // Mostramos la alerta en lugar del error genérico
             LaunchedEffect(state.message) {
@@ -154,7 +153,7 @@ fun InteractiveRecScreen(
                             imageVector = Icons.Filled.ThumbDown,
                             contentDescription = "No me interesa",
                             modifier = Modifier.size(48.dp), // Larger icon size
-                            tint = MaterialTheme.colorScheme.error // Optional: Color tint
+                            tint = MaterialTheme.colorScheme.error //
                         )
                     }
 

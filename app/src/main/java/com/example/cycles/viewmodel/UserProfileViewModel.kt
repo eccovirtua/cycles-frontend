@@ -209,17 +209,17 @@ class UserProfileViewModel @Inject constructor(
     fun archiveList(listId: String) {
         viewModelScope.launch {
             val currentLists = _state.value.activeLists
-            // Actualización optimista: Mover la lista localmente
+            
             _state.update {
                 it.copy(
                     activeLists = currentLists.filterNot { l -> l.listId == listId },
-                    // Podríamos añadirla a archivedLists aquí, pero es más simple recargar
+                    
                 )
             }
             try {
                 recsRepository.archiveList(listId)
-                // Recargar la sección actual (que debería ser 'Listas Activas')
-                loadSectionData(0) // O _state.value.sectionIndex si quieres ser más genérico
+               
+                loadSectionData(0)
             } catch (e: Exception) {
                 // Revertir si hay error
                 _state.update {

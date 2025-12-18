@@ -68,7 +68,7 @@ fun HomeScreen (
 
     val authViewModel: AuthViewModel = hiltViewModel()
 
-    // 🎯 1. Define la acción de click para el cambio de tema (como en tu WelcomeScreen)
+    
     val themeCycleAction: () -> Unit = {
         onTitleClick()
 
@@ -127,7 +127,7 @@ fun HomeScreen (
                     indication = null, // Y ahora sí permitimos indication = null
                         onClick = {
                             scope.launch {
-                                // 🎯 RETRASO CLAVE: Permite que la animación de isPressed=false se complete
+                                
                                 delay(150)
                                 themeCycleAction()
                             }

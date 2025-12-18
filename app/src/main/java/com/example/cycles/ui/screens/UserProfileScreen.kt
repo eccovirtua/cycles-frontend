@@ -390,7 +390,6 @@ fun FavoriteItemRow(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            // Podrías añadir un IconButton aquí si necesitas quitar favoritos desde el perfil
         }
     }
 }

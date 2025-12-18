@@ -35,11 +35,11 @@ android {
     buildTypes {
         debug {
             buildConfigField("String", "AUTH_BASE_URL", "\"https://cycles-backend.onrender.com\"")
-            buildConfigField("String", "RECS_BASE_URL", "\"https://knn-ann-algorithm.onrender.com\"")
+            buildConfigField("String", "RECS_BASE_URL", "\"https://knn-ann-algorithm-377792293762.southamerica-west1.run.app/\"")
         }
         release {
             buildConfigField( "String", "AUTH_BASE_URL", "\"https://cycles-backend.onrender.com\"")
-            buildConfigField( "String", "RECS_BASE_URL", "\"https://knn-ann-algorithm.onrender.com\"")
+            buildConfigField( "String", "RECS_BASE_URL", "\"https://knn-ann-algorithm-377792293762.southamerica-west1.run.app/\"")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
