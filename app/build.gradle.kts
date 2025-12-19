@@ -8,6 +8,7 @@ plugins {
     kotlin("plugin.serialization") version "2.0.21"
     id("kotlin-kapt")
     id("com.google.dagger.hilt.android") version "2.57.2"
+    id("com.google.gms.google-services")
 }
 hilt {
     enableAggregatingTask = false
@@ -87,6 +88,7 @@ dependencies {
     implementation(libs.androidx.foundation.layout)
     implementation(libs.androidx.compiler)
     implementation(libs.lifecycle.runtime.ktx)
+    implementation(libs.firebase.crashlytics.buildtools)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -152,5 +154,14 @@ dependencies {
 
     // También es buena práctica añadir esto si quieres interactuar con la preview:
     debugImplementation(libs.androidx.ui.tooling.preview)
+
+    // Import the Firebase BoM
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.analytics)
+    implementation(libs.firebase.auth)
+    implementation(libs.androidx.credentials)
+    implementation(libs.play.services.auth)
+    implementation(libs.glide)
+    // Para Google Sign-In
 
 }

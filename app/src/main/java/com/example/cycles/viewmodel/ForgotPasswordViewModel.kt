@@ -1,12 +1,10 @@
 package com.example.cycles.viewmodel
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.example.cycles.repository.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
@@ -33,16 +31,21 @@ class ForgotPasswordViewModel @Inject constructor(
     }
 
     fun sendRecoveryEmail() {
-        viewModelScope.launch {
-            _isLoading.value = true
-            try {
-                val result = authRepository.sendPasswordRecoveryEmail(email.value)
-                _message.value = result
-            } catch (e: Exception) {
-                _message.value = "Error: ${e.message}"
-            } finally {
+        if (email.value.isBlank()) {
+            _message.value = "Ingresa tu correo"
+            return
+        }
+
+        _isLoading.value = true
+        authRepository.sendPasswordResetEmail(email.value)
+            .addOnSuccessListener {
+                _message.value = "Correo de recuperación enviado. Revisa tu bandeja."
+            }
+            .addOnFailureListener { e ->
+                _message.value = "Error: ${e.localizedMessage}"
+            }
+            .addOnCompleteListener {
                 _isLoading.value = false
             }
-        }
     }
 }

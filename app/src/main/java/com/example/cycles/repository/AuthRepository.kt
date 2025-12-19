@@ -1,77 +1,40 @@
 package com.example.cycles.repository
 
-
-import android.util.Log
-import com.example.cycles.data.AuthenticationRequest
-import com.example.cycles.data.AuthenticationResponse
-import com.example.cycles.data.ForgotPasswordRequest
-import com.example.cycles.data.RegisterRequest
-import com.example.cycles.data.ResetPasswordRequest
-import com.example.cycles.data.VerifyCodeRequest
-import com.example.cycles.network.AuthApiService
-import retrofit2.Retrofit
-import javax.inject.Inject
-import javax.inject.Named
-import javax.inject.Singleton
+import com.google.android.gms.tasks.Task
+import com.google.firebase.auth.AuthCredential
+import com.google.firebase.auth.AuthResult
+import com.google.firebase.auth.FirebaseAuth
+import jakarta.inject.Inject
 
 
-@Singleton
+
 class AuthRepository @Inject constructor(
-    @Named("auth") retrofit: Retrofit,
+    private val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
 ) {
-    private val api = retrofit.create(AuthApiService::class.java)
-
-
-
-    suspend fun register(request: RegisterRequest): AuthenticationResponse {
-        return api.register(request)
+    // Login con Email
+    fun loginWithEmail(email: String, pass: String): Task<AuthResult> {
+        return firebaseAuth.signInWithEmailAndPassword(email, pass)
     }
 
-    suspend fun login(request: AuthenticationRequest): AuthenticationResponse {
-        return api.login(request)
+    // Registro con Email
+    fun registerWithEmail(email: String, pass: String): Task<AuthResult> {
+        return firebaseAuth.createUserWithEmailAndPassword(email, pass)
     }
 
-    suspend fun sendPasswordRecoveryEmail(email: String): String {
-        val request = ForgotPasswordRequest(email)
-        val response = api.forgotPassword(request)
-        return if (response.isSuccessful) {
-            response.body()?.message ?: "Código enviado"
-        } else {
-            "No se pudo enviar el correo"
-        }
+    // Login con Google (Credencial ya obtenida en la UI)
+    fun signInWithGoogle(credential: AuthCredential): Task<AuthResult> {
+        return firebaseAuth.signInWithCredential(credential)
     }
 
-    suspend fun verifyCode(email: String, code: String): Boolean {
-        val response = api.verifyCode(VerifyCodeRequest(email, code))
-        return response.isSuccessful && response.body()?.message == "Código válido"
+    // Cerrar sesión
+    fun logout() {
+        firebaseAuth.signOut()
     }
 
-    suspend fun resetPassword(email: String, code: String, newPassword: String): Boolean {
-        val request = ResetPasswordRequest(email, code, newPassword)
-        val response = api.resetPassword(request)
-        if (!response.isSuccessful) {
-            Log.e("API_ERROR", "Error: ${response.code()} - ${response.errorBody()?.string()}")
-        }
-            return response.isSuccessful
+    // Verificar si hay usuario logueado
+    fun isUserLoggedIn(): Boolean = firebaseAuth.currentUser != null
+
+    fun sendPasswordResetEmail(email: String): Task<Void> {
+        return firebaseAuth.sendPasswordResetEmail(email)
     }
-
-    suspend fun checkUsername(name: String): Boolean {
-
-        val response = api.checkUsername(
-            mapOf("name" to name))
-        Log.d("CheckUsername", "HTTP ${response.code()} • body = ${response.body()} • error = ${response.errorBody()?.string()}")
-
-        val msg = response.body()?.message
-        Log.d("CheckUsername", "message raw = \"$msg\"")
-
-        return response.isSuccessful && msg.equals("available", ignoreCase = true)
-    }
-
-    suspend fun updateUsername(name: String, token: String): Boolean {
-        val response = api.updateUsername(mapOf("name" to name), "Bearer $token")
-        return response.isSuccessful
-    }
-
-
-
 }

@@ -40,7 +40,6 @@ import com.example.cycles.ui.screens.SearchScreen
 import com.example.cycles.ui.screens.UserProfileScreen
 import com.example.cycles.ui.screens.VerifyCodeScreen
 import com.example.cycles.ui.screens.WelcomeScreen
-import com.example.cycles.viewmodel.AuthViewModel
 import kotlinx.coroutines.launch
 
 private const val TRANSITION_DURATION = 220

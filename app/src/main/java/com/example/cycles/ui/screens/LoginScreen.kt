@@ -2,6 +2,9 @@ package com.example.cycles.ui.screens
 
 
 
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -17,30 +20,45 @@ import androidx.navigation.NavHostController
 import com.example.cycles.navigation.Screen
 import com.example.cycles.viewmodel.LoginViewModel
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.NavController
 import com.example.cycles.ui.components.CyclesPrimaryButton
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.common.api.ApiException
 
 @Composable
 fun LoginScreen(
-    navController: NavHostController,
-    paddingValues: PaddingValues,
+    navController: NavController,
     viewModel: LoginViewModel = hiltViewModel()
 ) {
-    val email by viewModel.usernameOrEmail.collectAsState()
-    val password by viewModel.password.collectAsState()
-    val isLoading by viewModel.isLoading.collectAsState()
-    val errorMsg by viewModel.error.collectAsState()
-    val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
+    val isLoading by viewModel.isLoading
+    val loginError by viewModel.loginError
+    val isSuccess by viewModel.isLoginSuccess
 
-    val isFormValid = email.isNotEmpty() && password.isNotEmpty()
+    // 1. Lanzador para el resultado de Google
+    val googleLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+        try {
+            val account = task.getResult(ApiException::class.java)
+            account?.idToken?.let { token ->
+                // Pasamos el token al ViewModel
+                viewModel.firebaseAuthWithGoogle(token)
+            }
+        } catch (e: ApiException) {
+            Log.e("LoginScreen", "Google Sign In falló: ${e.statusCode}")
+        }
+    }
 
-
-
-    LaunchedEffect(Unit) {
-        viewModel.uiEvent.collect { message ->
-            snackbarHostState.showSnackbar(
-                message = message,
-                duration = SnackbarDuration.Short
-            )
+    // 2. Efecto de navegación al éxito
+    LaunchedEffect(isSuccess) {
+        if (isSuccess) {
+            // Navegar al Dashboard y borrar el historial de login
+            navController.navigate(Screen.Dashboard.route) {
+                popUpTo(Screen.Login.route) { inclusive = true }
+            }
         }
     }
 
@@ -127,7 +145,7 @@ fun LoginScreen(
                 CyclesPrimaryButton(
                     text = "Iniciar sesión",
                     enabled = isFormValid,
-                    onClick = { viewModel.onLoginClick(navController) },
+                    onClick = { viewModel.login(email, password) },
                 )
             }
             Spacer(Modifier.height(16.dp))

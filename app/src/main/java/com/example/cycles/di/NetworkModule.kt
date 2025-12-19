@@ -1,86 +1,68 @@
 package com.example.cycles.di
 
-import com.example.cycles.BuildConfig
-import com.example.cycles.network.AuthApiService
-import com.example.cycles.network.ProfileApiService
+
+import android.util.Log
 import com.example.cycles.network.RecsApiService
+import com.google.android.gms.tasks.Tasks
+import com.google.firebase.auth.FirebaseAuth
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import okhttp3.Interceptor
 import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
-import javax.inject.Named
 import javax.inject.Singleton
+
 
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
 
-    @Provides
+    // Interceptor para Firebase
     @Singleton
-    fun provideLoggingInterceptor(): HttpLoggingInterceptor =
-        HttpLoggingInterceptor().apply {
-            level = HttpLoggingInterceptor.Level.BODY
+    @Provides
+    fun provideAuthInterceptor(): Interceptor = Interceptor { chain ->
+        val user = FirebaseAuth.getInstance().currentUser
+        val requestBuilder = chain.request().newBuilder()
+
+        if (user != null) {
+
+            try {
+                val tokenResult = Tasks.await(user.getIdToken(true))
+                val token = tokenResult.token
+                if (token != null) {
+                    requestBuilder.addHeader("Authorization", "Bearer $token")
+                }
+            } catch (e: Exception) {
+                Log.e("AuthInterceptor", "Error obteniendo token", e)
+            }
         }
+        chain.proceed(requestBuilder.build())
+    }
 
-    @Provides
+    // 3. Inyectar interceptor en OkHttpClient
     @Singleton
-    fun provideOkHttpClient(
-        logging: HttpLoggingInterceptor
-    ): OkHttpClient =
-        OkHttpClient.Builder()
-            .connectTimeout(15, TimeUnit.SECONDS)
-            .readTimeout(15, TimeUnit.SECONDS)
-            .addInterceptor(logging)
+    @Provides
+    fun provideOkHttpClient(authInterceptor: Interceptor): OkHttpClient {
+        return OkHttpClient.Builder()
+            .addInterceptor(authInterceptor)
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
             .build()
+    }
 
-    // ------------------ Retrofit para AUTENTICACIÓN ------------------
-    @Provides
+
     @Singleton
-    @Named("auth")
-    fun provideAuthRetrofit(client: OkHttpClient): Retrofit =
-        Retrofit.Builder()
-            .baseUrl(BuildConfig.AUTH_BASE_URL)
-            .client(client)
+    @Provides
+    fun provideRecsApiService(okHttpClient: OkHttpClient): RecsApiService {
+        return Retrofit.Builder()
+            .baseUrl("https://knn-ann-algorithm-377792293762.southamerica-west1.run.app") // <--- Tu URL de Cloud Run
+            .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-
-    // ------------------ Retrofit para RECOMENDACIONES ------------------
-    @Provides
-    @Singleton
-    @Named("recs")
-    fun provideRecsRetrofit(client: OkHttpClient): Retrofit =
-        Retrofit.Builder()
-            .baseUrl(BuildConfig.RECS_BASE_URL)
-            .client(client)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-
-    // ------------------ Servicios API ------------------
-
-    @Provides
-    @Singleton
-    fun provideAuthApiService(
-        @Named("auth") retrofit: Retrofit
-    ): AuthApiService = retrofit.create(AuthApiService::class.java)
-
-    @Provides
-    @Singleton
-    fun provideRecsApiService(
-        @Named("recs") retrofit: Retrofit
-    ): RecsApiService = retrofit.create(RecsApiService::class.java)
-
-
-    // 🎯 NUEVO: Proveedor para el servicio de Perfil de Usuario
-    @Provides
-    @Singleton
-    fun provideProfileApiService(
-        @Named("auth") retrofit: Retrofit //
-    ): ProfileApiService = retrofit.create(ProfileApiService::class.java)
-
-
+            .create(RecsApiService::class.java)
+    }
 }
