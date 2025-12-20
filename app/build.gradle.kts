@@ -89,6 +89,7 @@ dependencies {
     implementation(libs.androidx.compiler)
     implementation(libs.lifecycle.runtime.ktx)
     implementation(libs.firebase.crashlytics.buildtools)
+    implementation(libs.androidx.compose.ui.text)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

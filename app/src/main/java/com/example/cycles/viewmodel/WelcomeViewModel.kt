@@ -11,6 +11,6 @@ import javax.inject.Inject
 class WelcomeViewModel @Inject constructor(): ViewModel() {
 
     // Mensaje de bienvenida, por ejemplo
-    private val _welcomeMessage = MutableStateFlow("Cycles")
+    private val _welcomeMessage = MutableStateFlow("Recommender™")
     val welcomeMessage: StateFlow<String> = _welcomeMessage
 }

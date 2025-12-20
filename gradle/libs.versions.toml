@@ -48,6 +48,7 @@ foundationLayout = "1.9.2"
 compiler = "3.2.0-alpha11"
 lifecycleRuntimeKtxVersion = "2.9.4"
 firebaseCrashlyticsBuildtools = "3.0.6"
+uiText = "1.10.0"
 
 [libraries]
 accompanist-navigation-animation = { module = "com.google.accompanist:accompanist-navigation-animation", version.ref = "accompanistNavigationAnimation" }
@@ -110,6 +111,7 @@ androidx-foundation-layout = { group = "androidx.compose.foundation", name = "fo
 androidx-compiler = { group = "androidx.databinding", name = "compiler", version.ref = "compiler" }
 lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtxVersion" }
 firebase-crashlytics-buildtools = { group = "com.google.firebase", name = "firebase-crashlytics-buildtools", version.ref = "firebaseCrashlyticsBuildtools" }
+androidx-compose-ui-text = { group = "androidx.compose.ui", name = "ui-text", version.ref = "uiText" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

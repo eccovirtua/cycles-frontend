@@ -151,7 +151,7 @@ fun LoginScreen(
 
                 Spacer(Modifier.height(16.dp))
 
-                Text(text = "— O —", style = MaterialTheme.typography.bodyMedium)
+                Text(text = "————————————————", style = MaterialTheme.typography.bodyMedium)
 
                 Spacer(Modifier.height(16.dp))
 
@@ -164,7 +164,7 @@ fun LoginScreen(
                     shape = RoundedCornerShape(6.dp)
                 ) {
                     // Puedes poner un Icono de Google aquí si tienes el recurso
-                    Text("Iniciar sesión con Google")
+                    Text("Continuar con Google")
                 }
 
                 Spacer(Modifier.height(24.dp))

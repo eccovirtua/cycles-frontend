@@ -2,31 +2,42 @@ package com.example.cycles.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.font.FontFamily
-
-
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.googlefonts.GoogleFont
-import androidx.compose.ui.text.googlefonts.Font
 
+//"GoogleFontRes" es para la nube, "LocalFont" para fuentes locales
+import androidx.compose.ui.text.googlefonts.Font as GoogleFontRes
+import androidx.compose.ui.text.font.Font as LocalFont
+import com.example.cycles.R
+
+// --- 1. Configuración existente (Google Fonts) ---
 val provider = GoogleFont.Provider(
     providerAuthority = "com.google.android.gms.fonts",
     providerPackage = "com.google.android.gms",
-    certificates = com.example.cycles.R.array.com_google_android_gms_fonts_certs )
+    certificates = R.array.com_google_android_gms_fonts_certs
+)
 
 val bodyFontFamily = FontFamily(
-    Font(
+    GoogleFontRes(
         googleFont = GoogleFont("Inter"),
         fontProvider = provider,
     )
 )
 
 val displayFontFamily = FontFamily(
-    Font(
+    GoogleFontRes(
         googleFont = GoogleFont("Molengo"),
         fontProvider = provider,
     )
 )
 
-// Default Material 3 typography values
+// --- 2. Fuentes locales ---
+val HelveticaFamily = FontFamily(
+    LocalFont(R.font.helvetica_bold, FontWeight.Bold),
+    LocalFont(R.font.helvetica, FontWeight.Normal)
+)
+
+// --- 3. Tipografía General de la App ---
 val baseline = Typography()
 
 val AppTypography = Typography(
