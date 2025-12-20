@@ -17,13 +17,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.example.cycles.ui.screens.ChooseUsernameScreen
+//import com.example.cycles.ui.screens.ChooseUsernameScreen
 import com.example.cycles.ui.screens.DashboardScreen
 import com.example.cycles.ui.screens.EditProfileScreen
 import com.example.cycles.ui.screens.FinalRecommendationsScreen
@@ -35,11 +35,11 @@ import com.example.cycles.ui.screens.ListDetailScreen
 import com.example.cycles.ui.screens.ListsScreen
 import com.example.cycles.ui.screens.LoginScreen
 import com.example.cycles.ui.screens.RegisterScreen
-import com.example.cycles.ui.screens.ResetPasswordScreen
+//import com.example.cycles.ui.screens.ResetPasswordScreen
 import com.example.cycles.ui.screens.SearchScreen
 import com.example.cycles.ui.screens.UserProfileScreen
-import com.example.cycles.ui.screens.VerifyCodeScreen
 import com.example.cycles.ui.screens.WelcomeScreen
+import com.example.cycles.viewmodel.LoginViewModel
 import kotlinx.coroutines.launch
 
 private const val TRANSITION_DURATION = 220
@@ -84,7 +84,6 @@ fun AppNavHost(
     onTitleClick: () -> Unit
 ) {
     val layoutDirection = LocalLayoutDirection.current
-    val authViewModel: AuthViewModel = hiltViewModel()
     val scope = rememberCoroutineScope()
 
 
@@ -169,7 +168,7 @@ fun AppNavHost(
             exitTransition = { fadeOut(tween(TRANSITION_DURATION)) }, // FadeOut para que la pantalla de fondo no se mueva
             popExitTransition = { slideOutToBottom }
         ) {
-            LoginScreen(navController, paddingValues)
+            LoginScreen(navController)
         }
 
         //dashboard
@@ -245,7 +244,7 @@ fun AppNavHost(
             popExitTransition = { slideOutToBottom }
         ) { back ->
             val email = back.arguments!!.getString("email")!!
-            VerifyCodeScreen(navController, email)
+//            VerifyCodeScreen(navController, email)
         }
 
         composable(
@@ -260,7 +259,7 @@ fun AppNavHost(
         ) { back ->
             val emailArg = back.arguments!!.getString("email")!!
             val codeArg  = back.arguments!!.getString("code")!!
-            ResetPasswordScreen(navController, emailArg, codeArg)
+//            ResetPasswordScreen(navController, emailArg, codeArg)
         }
 
         composable(
@@ -271,7 +270,7 @@ fun AppNavHost(
             popExitTransition = { slideOutToBottom }
         ) { back ->
             val token = back.arguments!!.getString("token")!!
-            ChooseUsernameScreen(navController, token, paddingValues)
+//            ChooseUsernameScreen(navController, token, paddingValues)
         }
 
         // --- RUTAS INTERACTIVAS Y PERFIL (Deslizamiento Lateral) ---
@@ -365,7 +364,7 @@ fun AppNavHost(
                 screenPadding = profilePadding,
                 onLogoutClick = {
                     scope.launch {
-                        authViewModel.logout()
+//                        LoginViewModel.logout()
                         navController.navigate(Screen.Welcome.route) {
                             popUpTo(Screen.Home.route) { inclusive = true }
                         }

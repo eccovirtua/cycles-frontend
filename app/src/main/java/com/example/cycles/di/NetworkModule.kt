@@ -59,10 +59,14 @@ object NetworkModule {
     @Provides
     fun provideRecsApiService(okHttpClient: OkHttpClient): RecsApiService {
         return Retrofit.Builder()
-            .baseUrl("https://knn-ann-algorithm-377792293762.southamerica-west1.run.app") // <--- Tu URL de Cloud Run
+            .baseUrl("https://knn-ann-algorithm-377792293762.southamerica-west1.run.app")
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(RecsApiService::class.java)
     }
+    // Dentro de tu NetworkModule u otro módulo:
+    @Provides
+    @Singleton
+    fun provideFirebaseAuth(): FirebaseAuth = FirebaseAuth.getInstance()
 }

@@ -9,7 +9,7 @@ import jakarta.inject.Inject
 
 
 class AuthRepository @Inject constructor(
-    private val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
+    private val firebaseAuth: FirebaseAuth
 ) {
     // Login con Email
     fun loginWithEmail(email: String, pass: String): Task<AuthResult> {

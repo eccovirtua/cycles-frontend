@@ -132,7 +132,6 @@ interface RecsApiService {
         @Header("Authorization") token: String
     ): UserListBasic // Devuelve la lista actualizada
 
-    // --- FAVORITES (Nuevos) ---
     @POST("favorites/{item_id}")
     suspend fun addFavorite(
         @Path("item_id") itemId: String,
@@ -148,7 +147,7 @@ interface RecsApiService {
     @GET("favorites")
     suspend fun getFavorites(
         @Header("Authorization") token: String
-    ): List<SearchResultItem> // Reutilizamos SearchResultItem
+    ): List<SearchResultItem>
 
     @GET("favorites/status/{item_id}")
     suspend fun getFavoriteStatus(
