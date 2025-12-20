@@ -165,4 +165,7 @@ dependencies {
     implementation(libs.glide)
     // Para Google Sign-In
 
+
+    implementation(libs.androidx.appcompat)
+
 }

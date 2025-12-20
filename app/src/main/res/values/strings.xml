@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">Cycles</string>
+    <string name="field_email">Correo o nombre de usuario</string>
+    <string name="field_password">Contraseña</string>
+    <string name="home.login">Iniciar sesión</string>
+    <string name="home.google">Continuar con Google</string>
+    <string name="home.register">¿No tienes cuenta? Regístrate</string>
+    <string name="home.forgotpassword">¿Olvidaste tu contraseña?</string>
+    <string name="home.slogan">"Descubre y expande tus gustos musicales, de música o libros para tener una mejor organización personal y poder compartir tus experiencias en Recommender!          "</string>
 </resources>
