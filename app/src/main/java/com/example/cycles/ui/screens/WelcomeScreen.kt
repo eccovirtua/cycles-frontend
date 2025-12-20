@@ -146,7 +146,7 @@ fun WelcomeScreen(
                 value = email,
                 onValueChange = { welcomeViewModel.onEmailChange(it) },
                 shape = RoundedCornerShape(35),
-                placeholder = { Text(stringResource(R.string.field_email)) },
+                placeholder = { Text(stringResource(R.string.field_email), fontFamily = HelveticaFamily) },
                 leadingIcon = { Icon(Icons.Filled.AlternateEmail, contentDescription = null) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
@@ -159,7 +159,7 @@ fun WelcomeScreen(
                 value = password,
                 onValueChange = { welcomeViewModel.onPasswordChange(it) },
                 shape = RoundedCornerShape(35),
-                placeholder = { Text(stringResource(R.string.field_password)) },
+                placeholder = { Text(stringResource(R.string.field_password), fontFamily = HelveticaFamily) },
                 leadingIcon = { Icon(Icons.Filled.Lock, contentDescription = null) },
                 modifier = Modifier.fillMaxWidth(),
                 visualTransformation = PasswordVisualTransformation(),
@@ -182,17 +182,17 @@ fun WelcomeScreen(
                 } else {
                     Text(
                         text = stringResource(R.string.home_login),
+                        fontFamily = HelveticaFamily,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold
                     )
                 }
             } // <--- CIERRA EL BOTÓN AQUÍ
 
-            // AHORA LO SIGUIENTE ESTÁ FUERA DEL BOTÓN Y SE VERÁ EN LA COLUMNA PRINCIPAL
+
 
             Spacer(Modifier.height(10.dp))
 
-            // Separador visual
             Text(
                 text = "————————————————",
                 style = MaterialTheme.typography.bodyMedium
@@ -218,8 +218,9 @@ fun WelcomeScreen(
                 Spacer(modifier = Modifier.width(12.dp))
 
                 Text(
-                    text = stringResource(R.string.home_google),
+                    text = stringResource(R.string.home_google, ),
                     fontSize = 18.sp,
+                    fontFamily = HelveticaFamily,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
                 )
@@ -229,7 +230,7 @@ fun WelcomeScreen(
 
             // 7. TextButtons (Registro)
             TextButton(onClick = { navController.navigate(Screen.Register.route) }) {
-                Text(stringResource(R.string.home_register))
+                Text(stringResource(R.string.home_register), fontFamily = HelveticaFamily)
             }
 
             Text(
@@ -240,7 +241,7 @@ fun WelcomeScreen(
             Spacer(Modifier.height(2.dp))
 
             TextButton(onClick = { navController.navigate(Screen.ForgotPassword.route) }) {
-                Text(stringResource(R.string.home_forgotpassword))
+                Text(stringResource(R.string.home_forgotpassword), fontFamily = HelveticaFamily)
             }
 
             Spacer(Modifier.height(30.dp))

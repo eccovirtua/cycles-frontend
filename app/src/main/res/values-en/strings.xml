@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="field_email">Email or username</string>
+    <string name="field_password">Password</string>
+    <string name="home.login">Login</string>
+    <string name="home.google">Sign in with Google</string>
+    <string name="home.register">Don\'t have an account? Register here</string>
+    <string name="home.forgotpassword">Forgot Password?</string>
+    <string name="home.slogan">"Discover and expand your musical, music, or book preferences to better organize your personal life and share your experiences using Recommender!          "</string>
+</resources>
