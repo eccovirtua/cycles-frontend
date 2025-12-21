@@ -2,12 +2,14 @@ package com.example.cycles.viewmodel
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.cycles.repository.AuthRepository
 import com.google.firebase.auth.GoogleAuthProvider
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -42,11 +44,11 @@ class WelcomeViewModel @Inject constructor(
 
     // Login Clásico
     fun login() {
-        val currentEmail = _email.value
-        val currentPass = _password.value
+        val rawInput = _email.value
+        val passwordInput = _password.value
 
         // Validación básica antes de llamar a Firebase
-        if (currentEmail.isBlank() || currentPass.isBlank()) {
+        if (rawInput.isBlank() || passwordInput.isBlank()) {
             loginError.value = "Por favor completa todos los campos"
             return
         }
@@ -54,7 +56,31 @@ class WelcomeViewModel @Inject constructor(
         isLoading.value = true
         loginError.value = null
 
-        authRepository.loginWithEmail(currentEmail, currentPass)
+        // Caso 1: la input de email contiene un @ por lo que es mail, no se debe consultar con nada adicionalmente
+        if (rawInput.contains("@")) {
+            performFirebaseLogin(rawInput, passwordInput)
+            return
+        }
+
+        // Caso 2: la input del email no contiene un @ por lo que es un nombre de usuario, consultar con la API
+        viewModelScope.launch {
+            try {
+                // buscar email en base de datos (atlas)
+                val realEmail = authRepository.getEmailFromUsername(rawInput)
+                if (realEmail != null) {
+                    // se encontró el email correctamente, se procede a usar ese email para consultar con firebase
+                    performFirebaseLogin(realEmail, passwordInput)
+                } else {
+                    isLoading.value = false
+                    loginError.value = "Usuario no encontrado"
+                }
+            } catch (e: Exception) {
+                isLoading.value = false
+                loginError.value = e.localizedMessage ?: "Error de conexion con el servidor"
+            }
+        }
+
+        authRepository.loginWithEmail(rawInput, passwordInput)
             .addOnSuccessListener {
                 isLoading.value = false
                 isLoginSuccess.value = true
@@ -63,6 +89,20 @@ class WelcomeViewModel @Inject constructor(
                 isLoading.value = false
                 loginError.value = e.localizedMessage ?: "Error al iniciar sesión"
             }
+    }
+    private fun performFirebaseLogin(email: String, pass: String) {
+        authRepository.loginWithEmail(email, pass)
+            .addOnSuccessListener {
+                isLoading.value = false
+                isLoginSuccess.value = true
+            }
+            .addOnFailureListener { _ ->
+                isLoading.value = false
+                loginError.value = "Usuario o contraseña incorrectos."
+            }
+
+
+
     }
 
     // Login con Google

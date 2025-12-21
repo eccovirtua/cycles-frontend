@@ -15,9 +15,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
-import com.example.cycles.data.SessionCacheContract
 import com.example.cycles.data.UserListBasic
 import com.example.cycles.data.UserPreferences
 import com.example.cycles.repository.RecsRepository
@@ -56,8 +54,7 @@ data class UserProfileState(
 
 @HiltViewModel
 class UserProfileViewModel @Inject constructor(
-    private val profileRepository: ProfileRepositoryContract,
-    private val sessionCache: SessionCacheContract,
+//    private val sessionCache: SessionCacheContract,
     private val userPreferences: UserPreferences, // <-- Inyectar UserPreferences
     private val recsRepository: RecsRepository   // <-- Inyectar RecsRepository
 ) : ViewModel() {
@@ -98,31 +95,31 @@ class UserProfileViewModel @Inject constructor(
             var remotePhotoUrl = "..."
             var loadError: String? = null
 
-            try {
-                val photoData = withContext(Dispatchers.IO) {
-                    profileRepository.fetchProfilePhoto(currentUserId)
-                }
-                remotePhotoUrl = photoData.profileImageUrl
+//            try {
+//                val photoData = withContext(Dispatchers.IO) {
+//                    profileRepository.fetchProfilePhoto(currentUserId)
+//                }
+//                remotePhotoUrl = photoData.profileImageUrl
+//
+//            } catch (e: Exception) {
+//                loadError = "Error al cargar foto: ${e.message}" // Error only for photo now
+//            }
+//
+//            val localName = sessionCache.getLocalName() ?: "Nombre"
+//            val localBio = sessionCache.getLocalBio() ?: "Biografía"
 
-            } catch (e: Exception) {
-                loadError = "Error al cargar foto: ${e.message}" // Error only for photo now
-            }
-
-            val localName = sessionCache.getLocalName() ?: "Nombre"
-            val localBio = sessionCache.getLocalBio() ?: "Biografía"
-
-            _state.update {
-                it.copy(
-                    isLoading = false, // Set loading false here
-                    profileImageUrl = remotePhotoUrl,
-                    name = localName,
-                    bio = localBio,
-                    // username is now handled by observeUsername() // <-- REMOVE USERNAME UPDATE
-                    newName = localName,
-                    newBio = localBio,
-                    error = loadError // Error might still occur for photo
-                )
-            }
+//            _state.update {
+//                it.copy(
+//                    isLoading = false, // Set loading false here
+//                    profileImageUrl = remotePhotoUrl,
+//                    name = localName,
+//                    bio = localBio,
+//                    // username is now handled by observeUsername() // <-- REMOVE USERNAME UPDATE
+//                    newName = localName,
+//                    newBio = localBio,
+//                    error = loadError // Error might still occur for photo
+//                )
+//            }
 
             if (shouldNavigateBack) {
                 _events.emit(UserProfileEvent.NavigateBack)
@@ -176,34 +173,34 @@ class UserProfileViewModel @Inject constructor(
         _state.update { it.copy(newProfileUri = uri) }
     }
 
-    fun saveProfileChanges() {
-        viewModelScope.launch {
-            _state.update { it.copy(isLoading = true, error = null) }
-            val currentState = _state.value
-            val photoUri = currentState.newProfileUri
-            try {
-                if (photoUri != null) {
-                    withContext(Dispatchers.IO) {
-                        profileRepository.uploadImageAndGetUrl(currentUserId, photoUri)
-                    }
-                }
-                // Guardar Nombre y Bio
-                sessionCache.saveProfileMetadata(
-                    name = currentState.newName,
-                    bio = currentState.newBio
-                )
-                // NO guardamos username aquí, se guarda en su propio flujo
-
-                // Recargar perfil (sin navegación) y luego navegar
-                loadUserProfileData(shouldNavigateBack = true)
-
-            } catch (e: Exception) {
-                _state.update {
-                    it.copy(isLoading = false, error = "Error al guardar: ${e.message}")
-                }
-            }
-        }
-    }
+//    fun saveProfileChanges() {
+//        viewModelScope.launch {
+//            _state.update { it.copy(isLoading = true, error = null) }
+//            val currentState = _state.value
+//            val photoUri = currentState.newProfileUri
+//            try {
+//                if (photoUri != null) {
+//                    withContext(Dispatchers.IO) {
+//                        profileRepository.uploadImageAndGetUrl(currentUserId, photoUri)
+//                    }
+//                }
+//                // Guardar Nombre y Bio
+//                sessionCache.saveProfileMetadata(
+//                    name = currentState.newName,
+//                    bio = currentState.newBio
+//                )
+//                // NO guardamos username aquí, se guarda en su propio flujo
+//
+//                // Recargar perfil (sin navegación) y luego navegar
+//                loadUserProfileData(shouldNavigateBack = true)
+//
+//            } catch (e: Exception) {
+//                _state.update {
+//                    it.copy(isLoading = false, error = "Error al guardar: ${e.message}")
+//                }
+//            }
+//        }
+//    }
 
 
     fun archiveList(listId: String) {

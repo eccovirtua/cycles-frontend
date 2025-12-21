@@ -65,7 +65,6 @@ object NetworkModule {
             .build()
             .create(RecsApiService::class.java)
     }
-    // Dentro de tu NetworkModule u otro módulo:
     @Provides
     @Singleton
     fun provideFirebaseAuth(): FirebaseAuth = FirebaseAuth.getInstance()

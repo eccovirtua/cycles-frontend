@@ -15,6 +15,7 @@ import com.example.cycles.data.SessionStateResponse
 import com.example.cycles.data.UserDashboardStats
 import com.example.cycles.data.UserListBasic
 import com.example.cycles.data.UserListDetail
+import com.example.cycles.data.UserLookupResponse
 import com.example.cycles.data.UserUsageStatus
 import retrofit2.Response
 import retrofit2.http.Body
@@ -162,6 +163,12 @@ interface RecsApiService {
         @Path("session_id") sessionId: String,
         @Header("Authorization") token: String
     ): SeedResponse // Devuelve el nuevo seed
+
+
+    @GET("users/get-email/{username}")
+    suspend fun getEmailByUsername(
+        @Path("username") username: String
+    ): Response<UserLookupResponse>
 }
 
 
