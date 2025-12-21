@@ -2,9 +2,7 @@ package com.example.cycles.data
 
 import com.google.gson.annotations.SerializedName
 
-// --- Modelos para Peticiones (Requests) ---
 
-// Lo que enviamos para crear una lista
 data class ListCreateRequest(
     val name: String,
     @SerializedName("icon_name") val iconName: String,

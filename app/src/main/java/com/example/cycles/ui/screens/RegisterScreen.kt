@@ -1,5 +1,6 @@
 package com.example.cycles.ui.screens
 
+
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
@@ -18,6 +19,11 @@ import com.example.cycles.navigation.Screen
 import com.example.cycles.viewmodel.RegisterViewModel
 import com.example.cycles.ui.components.DateOfBirthPicker
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import com.example.cycles.R
+import com.example.cycles.ui.theme.HelveticaFamily
+
 
 @Composable
 fun RegisterScreen(
@@ -57,23 +63,27 @@ fun RegisterScreen(
         ) {
             Spacer(Modifier.height(40.dp))
             Text(
-                text = "Crea tu cuenta",
+                text = stringResource(R.string.register_title),
                 style = MaterialTheme.typography.headlineLarge.copy(
-                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = HelveticaFamily
                 ),
                 color = MaterialTheme.colorScheme.onBackground
             )
             Spacer(Modifier.height(20.dp)) //separacion de titulo y subtitulo
             Text(
-                text = "Ingresa tus datos para crear tu cuenta en Cycles",
+                text = stringResource(R.string.register_subtitle),
+                fontFamily = HelveticaFamily,
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 1.dp),
             )
             Spacer(Modifier.height(10.dp))
             // TEXTO DE EMAIL ETIQUETA ARRIBA DEL CAMPO
             Text(
-                text = "Correo",
-                style = MaterialTheme.typography.labelLarge, // Estilo apropiado para etiquetas de formulario
+                text = stringResource(R.string.register_topfield),
+                fontFamily = HelveticaFamily,
+                style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onBackground
             )
             Spacer(Modifier.height(4.dp))
@@ -84,7 +94,7 @@ fun RegisterScreen(
                 onValueChange = viewModel::onEmailChange,
 
                 shape = RoundedCornerShape(6.dp),
-                placeholder = { Text("Ingresa tu correo",style = MaterialTheme.typography.bodySmall) },
+                placeholder = { Text(stringResource(R.string.register_emailfield),style = MaterialTheme.typography.bodySmall, fontFamily = HelveticaFamily,) },
                 leadingIcon = {
                     Icon(Icons.Filled.Email, contentDescription = "Icono de correo")
                 },
@@ -99,7 +109,8 @@ fun RegisterScreen(
 
             // Etiqueta "Contraseña"
             Text(
-                text = "Contraseña",
+                text = stringResource(R.string.register_topfieldpw),
+                fontFamily = HelveticaFamily,
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onBackground
             )
@@ -110,7 +121,7 @@ fun RegisterScreen(
                 onValueChange = viewModel::onPasswordChange,
 
                 shape = RoundedCornerShape(6.dp),
-                placeholder = { Text("Ingresa tu contraseña",style = MaterialTheme.typography.bodySmall) },
+                placeholder = { Text(stringResource(R.string.register_pwfield),style = MaterialTheme.typography.bodySmall, fontFamily = HelveticaFamily,) },
 
                 leadingIcon = {
                     Icon(Icons.Filled.Lock, contentDescription = "Icono de contraseña")
@@ -128,7 +139,8 @@ fun RegisterScreen(
             Spacer(Modifier.height(12.dp))
 
             Text(
-                text = "Fecha de nacimiento",
+                text = stringResource(R.string.register_dobtop),
+                fontFamily = HelveticaFamily,
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onBackground
             )
@@ -146,7 +158,8 @@ fun RegisterScreen(
                 )
             Spacer(Modifier.height(12.dp))
             Text(
-                text = "Al crear tu cuenta admites ser mayor de edad y estar de acuerdo con los términos y condiciones.",
+                text = stringResource(R.string.register_tos),
+                fontFamily = HelveticaFamily,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -167,17 +180,16 @@ fun RegisterScreen(
                 enabled = !isLoading && email.isNotEmpty() && password.isNotEmpty() && dob.isNotEmpty()
             ) {
                 if (isLoading) CircularProgressIndicator(modifier = Modifier.size(20.dp))
-                else Text("Siguiente")
+                else Text(stringResource(R.string.register_next), fontFamily = HelveticaFamily)
             }
             Spacer(Modifier.height(16.dp))
 
             // Botón Iniciar Sesión
             TextButton(onClick = { navController.navigate(Screen.Login.route) }) {
-                Text("¿Ya tienes cuenta? Inicia sesión")
+                Text(stringResource(R.string.register_txtbtn), fontFamily = HelveticaFamily)
             }
         }
 
-        // 🎯 CLAVE 4: SnackbarHost alineado al fondo y respetando el padding.
         SnackbarHost(
             hostState = snackbarHostState,
             modifier = Modifier

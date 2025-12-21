@@ -11,9 +11,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import java.util.Calendar
 import java.util.Locale
+import com.example.cycles.R
+import com.example.cycles.ui.theme.HelveticaFamily
 
 @Composable
 fun DateOfBirthPicker(
@@ -76,7 +79,7 @@ fun DateOfBirthPicker(
             onValueChange = {},
             readOnly = true,
             enabled = false,
-            placeholder = { Text("31/12/2004", style = MaterialTheme.typography.bodySmall) },
+            placeholder = { Text(stringResource(R.string.register_dobfield), style = MaterialTheme.typography.bodySmall, fontFamily = HelveticaFamily,) },
 
             // 🎯 ICONO DE CALENDARIO
             leadingIcon = {

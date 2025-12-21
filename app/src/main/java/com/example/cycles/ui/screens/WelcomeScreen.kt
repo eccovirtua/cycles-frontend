@@ -218,7 +218,7 @@ fun WelcomeScreen(
                 Spacer(modifier = Modifier.width(12.dp))
 
                 Text(
-                    text = stringResource(R.string.home_google, ),
+                    text = stringResource(R.string.home_google),
                     fontSize = 18.sp,
                     fontFamily = HelveticaFamily,
                     fontWeight = FontWeight.Bold,

@@ -7,4 +7,15 @@
     <string name="home.register">¿No tienes cuenta? Regístrate</string>
     <string name="home.forgotpassword">¿Olvidaste tu contraseña?</string>
     <string name="home.slogan">"Descubre y expande tus gustos musicales, de música o libros para tener una mejor organización personal y poder compartir tus experiencias en Recommender!          "</string>
+    <string name="register.title">Crea tu cuenta</string>
+    <string name="register.subtitle">Ingresa tus datos para crear tu cuenta en Recommender.</string>
+    <string name="register.topfield">Correo</string>
+    <string name="register.emailfield">Ingresa tu correo...</string>
+    <string name="register.topfieldpw">Contraseña</string>
+    <string name="register.pwfield">Ingresa una contraseña...</string>
+    <string name="register.dobtop">Fecha de nacimiento</string>
+    <string name="register.dobfield">Ingresa tu fecha de nacimiento...</string>
+    <string name="register.tos">Al momento de crear tu cuenta en Recommender admites que leíste los términos y condiciones y te adhieres a estos mismos.</string>
+    <string name="register.next">Siguiente</string>
+    <string name="register.txtbtn">¿Ya tienes cuenta? Inicia sesión</string>
 </resources>
