@@ -89,7 +89,7 @@ fun WelcomeScreen(
     // Navegación al éxito
     LaunchedEffect(isSuccess) {
         if (isSuccess) {
-            navController.navigate(Screen.Home.route) { // Asumo que Dashboard es Screen.Dashboard, ajusta si es Home
+            navController.navigate(Screen.Home.route) {
                 popUpTo(Screen.Welcome.route) { inclusive = true }
             }
         }

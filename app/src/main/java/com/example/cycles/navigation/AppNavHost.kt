@@ -23,7 +23,6 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-//import com.example.cycles.ui.screens.ChooseUsernameScreen
 import com.example.cycles.ui.screens.DashboardScreen
 import com.example.cycles.ui.screens.EditProfileScreen
 import com.example.cycles.ui.screens.FinalRecommendationsScreen
@@ -33,13 +32,10 @@ import com.example.cycles.ui.screens.InteractiveRecScreen
 import com.example.cycles.ui.screens.ItemDetailScreen
 import com.example.cycles.ui.screens.ListDetailScreen
 import com.example.cycles.ui.screens.ListsScreen
-import com.example.cycles.ui.screens.LoginScreen
 import com.example.cycles.ui.screens.RegisterScreen
-//import com.example.cycles.ui.screens.ResetPasswordScreen
 import com.example.cycles.ui.screens.SearchScreen
 import com.example.cycles.ui.screens.UserProfileScreen
 import com.example.cycles.ui.screens.WelcomeScreen
-import com.example.cycles.viewmodel.LoginViewModel
 import kotlinx.coroutines.launch
 
 private const val TRANSITION_DURATION = 220
@@ -159,18 +155,7 @@ fun AppNavHost(
             )
         }
 
-        // --- RUTAS MODALES (Aparecen desde Abajo, más apropiado para Auth) ---
-
-        // login
-        composable(
-            route = Screen.Login.route,
-            enterTransition = { slideInFromBottom },
-            exitTransition = { fadeOut(tween(TRANSITION_DURATION)) }, // FadeOut para que la pantalla de fondo no se mueva
-            popExitTransition = { slideOutToBottom }
-        ) {
-            LoginScreen(navController)
-        }
-
+        // --- RUTAS MODALES
         //dashboard
         composable(
             route = Screen.Dashboard.route,

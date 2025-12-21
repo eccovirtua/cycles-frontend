@@ -1,5 +1,6 @@
 package com.example.cycles.viewmodel
 
+import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -64,19 +65,21 @@ class WelcomeViewModel @Inject constructor(
 
         // Caso 2: la input del email no contiene un @ por lo que es un nombre de usuario, consultar con la API
         viewModelScope.launch {
-            try {
-                // buscar email en base de datos (atlas)
-                val realEmail = authRepository.getEmailFromUsername(rawInput)
-                if (realEmail != null) {
-                    // se encontró el email correctamente, se procede a usar ese email para consultar con firebase
-                    performFirebaseLogin(realEmail, passwordInput)
-                } else {
-                    isLoading.value = false
-                    loginError.value = "Usuario no encontrado"
-                }
-            } catch (e: Exception) {
+            Log.d("DEBUG_LOGIN", "Buscando usuario: $rawInput en el servidor...")
+
+            // Llamamos a la función
+            val realEmail = authRepository.getEmailFromUsername(rawInput)
+
+            Log.d("DEBUG_LOGIN", "El servidor respondió con el email: $realEmail") // <--- ¡MIRA ESTO EN EL LOGCAT!
+
+            if (realEmail != null) {
+                Log.d("DEBUG_LOGIN", "Intentando login en Firebase con: $realEmail y password: $passwordInput")
+                // ¡Éxito! Tenemos el email real, iniciamos sesión en Firebase
+                performFirebaseLogin(realEmail, passwordInput)
+            } else {
+                Log.e("DEBUG_LOGIN", "Falló: El email llegó nulo o el usuario no existe")
                 isLoading.value = false
-                loginError.value = e.localizedMessage ?: "Error de conexion con el servidor"
+                loginError.value = "El usuario no existe"
             }
         }
 
@@ -93,16 +96,15 @@ class WelcomeViewModel @Inject constructor(
     private fun performFirebaseLogin(email: String, pass: String) {
         authRepository.loginWithEmail(email, pass)
             .addOnSuccessListener {
+                Log.d("DEBUG_LOGIN", "¡FIREBASE LOGIN EXITOSO!")
                 isLoading.value = false
                 isLoginSuccess.value = true
             }
-            .addOnFailureListener { _ ->
+            .addOnFailureListener { e ->
+                Log.e("DEBUG_LOGIN", "ERROR FIREBASE: ${e.message}") // <--- ESTO TE DIRÁ LA VERDAD
                 isLoading.value = false
-                loginError.value = "Usuario o contraseña incorrectos."
+                loginError.value = "Error: ${e.message}"
             }
-
-
-
     }
 
     // Login con Google
