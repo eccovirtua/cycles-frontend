@@ -80,14 +80,10 @@ fun DateOfBirthPicker(
             readOnly = true,
             enabled = false,
             placeholder = { Text(stringResource(R.string.register_dobfield), style = MaterialTheme.typography.bodySmall, fontFamily = HelveticaFamily,) },
-
-            // 🎯 ICONO DE CALENDARIO
             leadingIcon = {
                 Icon(Icons.Filled.CalendarToday, contentDescription = "Icono de calendario")
             },
-
-            // 🎯 DISEÑO DE CAJA
-            shape = RoundedCornerShape(5.dp),
+            shape = RoundedCornerShape(35),
             colors = OutlinedTextFieldDefaults.colors(
                 // --- Colores de estado Normal (Unfocused) ---
                 focusedBorderColor = MaterialTheme.colorScheme.primary, // El que se ve al tocar
@@ -102,8 +98,7 @@ fun DateOfBirthPicker(
                 disabledLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant, // Icono en color normal
                 disabledContainerColor = MaterialTheme.colorScheme.surface           // Color de fondo normal
             ),
-
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxWidth(),
         )
     }
 }

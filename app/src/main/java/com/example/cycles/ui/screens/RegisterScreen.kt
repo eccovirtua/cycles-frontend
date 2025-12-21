@@ -86,14 +86,14 @@ fun RegisterScreen(
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onBackground
             )
-            Spacer(Modifier.height(4.dp))
+            Spacer(Modifier.height(2.dp))
 
             // Campo de Correo
             OutlinedTextField(
                 value = email,
                 onValueChange = viewModel::onEmailChange,
 
-                shape = RoundedCornerShape(6.dp),
+                shape = RoundedCornerShape(35),
                 placeholder = { Text(stringResource(R.string.register_emailfield),style = MaterialTheme.typography.bodySmall, fontFamily = HelveticaFamily,) },
                 leadingIcon = {
                     Icon(Icons.Filled.Email, contentDescription = "Icono de correo")
@@ -103,7 +103,7 @@ fun RegisterScreen(
                     unfocusedBorderColor = MaterialTheme.colorScheme.surfaceVariant,
                     unfocusedContainerColor = MaterialTheme.colorScheme.surface
                 ),
-                modifier = Modifier.height(53.dp).fillMaxWidth() //altura del boton
+                modifier = Modifier.fillMaxWidth(), //altura del boton
             )
             Spacer(Modifier.height(12.dp)) //espacio entre correo y password
 
@@ -114,13 +114,13 @@ fun RegisterScreen(
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onBackground
             )
-            Spacer(Modifier.height(4.dp))
+            Spacer(Modifier.height(2.dp))
 
             OutlinedTextField(
                 value = password,
                 onValueChange = viewModel::onPasswordChange,
 
-                shape = RoundedCornerShape(6.dp),
+                shape = RoundedCornerShape(35),
                 placeholder = { Text(stringResource(R.string.register_pwfield),style = MaterialTheme.typography.bodySmall, fontFamily = HelveticaFamily,) },
 
                 leadingIcon = {
@@ -133,7 +133,7 @@ fun RegisterScreen(
                     unfocusedContainerColor = MaterialTheme.colorScheme.surface
                 ),
 
-                modifier = Modifier.height(53.dp).fillMaxWidth(), //altura del boton
+                modifier = Modifier.fillMaxWidth(), //altura del boton
                 visualTransformation = PasswordVisualTransformation()
             )
             Spacer(Modifier.height(12.dp))
@@ -144,7 +144,7 @@ fun RegisterScreen(
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onBackground
             )
-            Spacer(Modifier.height(4.dp))
+            Spacer(Modifier.height(2.dp))
 
             // DateOfBirthPicker
             DateOfBirthPicker(
@@ -175,8 +175,10 @@ fun RegisterScreen(
             // Botón Registrarse
             Button(
                 onClick = viewModel::onRegisterClick,
-                shape = RoundedCornerShape(25),
-                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(35),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp),
                 enabled = !isLoading && email.isNotEmpty() && password.isNotEmpty() && dob.isNotEmpty()
             ) {
                 if (isLoading) CircularProgressIndicator(modifier = Modifier.size(20.dp))

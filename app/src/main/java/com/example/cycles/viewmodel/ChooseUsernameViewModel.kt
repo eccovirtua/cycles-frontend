@@ -14,38 +14,38 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
-//@HiltViewModel
-//class ChooseUsernameViewModel @Inject constructor(
-//    private val repo: AuthRepository,
-//    savedStateHandle: SavedStateHandle,
-//    private val userPreferences: UserPreferences
-//): ViewModel() {
-//    val name = MutableStateFlow("")
-//    val isAvailable = MutableStateFlow<Boolean?>(null)
-//    val isLoading = MutableStateFlow(false)
-//    val error = MutableStateFlow<String?>(null)
-//
-//    private val token: String = savedStateHandle["token"]
-//        ?: throw IllegalStateException("token missing")
-//
-//    fun onNameChange(v: String) {
-//        name.value = v
-//        error.value = null
-//        isAvailable.value = null
-//    }
-//
+@HiltViewModel
+class ChooseUsernameViewModel @Inject constructor(
+    private val repo: AuthRepository,
+    savedStateHandle: SavedStateHandle,
+    private val userPreferences: UserPreferences
+): ViewModel() {
+    val name = MutableStateFlow("")
+    val isAvailable = MutableStateFlow<Boolean?>(null)
+    val isLoading = MutableStateFlow(false)
+    val error = MutableStateFlow<String?>(null)
+
+    private val token: String = savedStateHandle["token"]
+        ?: throw IllegalStateException("token missing")
+
+    fun onNameChange(v: String) {
+        name.value = v
+        error.value = null
+        isAvailable.value = null
+    }
+
 //    fun checkAvailability() = viewModelScope.launch {
 //        isLoading.value = true
-////        val available = repo.checkUsername(name.value)
+//        val available = repo.checkUsername(name.value)
 //        isLoading.value = false
 //        if (available) isAvailable.value = true
 //        else error.value = "Nombre de usuario no disponible"
 //    }
-//
+
 //    fun saveUsername(nav: NavController) = viewModelScope.launch {
 //        isLoading.value = true
 //        val usernameToSave = name.value // Get current username
-//        val ok = repo.updateUsername(usernameToSave, token)
+////        val ok = repo.updateUsername(usernameToSave, token)
 //        isLoading.value = false
 //        if (ok) {
 //            try {
@@ -62,4 +62,4 @@ import javax.inject.Inject
 //            error.value = "Error guardando nombre de usuario"
 //        }
 //    }
-//}
+}
