@@ -21,6 +21,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.platform.LocalConfiguration
+import com.example.cycles.ui.theme.HelveticaFamily
+import com.example.cycles.ui.theme.bodyFontFamily
+import com.example.cycles.ui.theme.displayFontFamily
 
 @Composable
 fun LanguageSelector(modifier: Modifier = Modifier) {
@@ -72,7 +75,8 @@ fun LanguageOption(text: String, code: String, isSelected: Boolean) {
         style = TextStyle(
             fontSize = 16.sp,
             fontWeight = weight,
-            color = color
+            color = color,
+            fontFamily = HelveticaFamily
         ),
         modifier = Modifier
             .scale(scale)
