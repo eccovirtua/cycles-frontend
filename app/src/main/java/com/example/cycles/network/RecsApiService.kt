@@ -12,6 +12,7 @@ import com.example.cycles.data.SearchResultItem
 import com.example.cycles.data.SeedResponse
 import com.example.cycles.data.SessionCreateResponse
 import com.example.cycles.data.SessionStateResponse
+import com.example.cycles.data.UserCreateRequest
 import com.example.cycles.data.UserDashboardStats
 import com.example.cycles.data.UserListBasic
 import com.example.cycles.data.UserListDetail
@@ -169,6 +170,11 @@ interface RecsApiService {
     suspend fun getEmailByUsername(
         @Path("username") username: String
     ): Response<UserLookupResponse>
+
+    @POST("users/create")
+    suspend fun createUser(
+        @Body user: UserCreateRequest
+    ): Response<Unit>
 }
 
 

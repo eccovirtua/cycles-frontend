@@ -1,6 +1,5 @@
 package com.example.cycles.ui.screens
 
-import android.util.Log
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
@@ -18,15 +17,15 @@ import androidx.navigation.NavHostController
 import com.example.cycles.navigation.Screen
 import com.example.cycles.viewmodel.RegisterViewModel
 import com.example.cycles.ui.components.DateOfBirthPicker
-import androidx.compose.ui.Alignment // Necesario para el Box/Snackbar si lo usas, pero no aquí.
+import androidx.compose.ui.Alignment
 
-// 🎯 CLAVE 1: Debe recibir paddingValues
 @Composable
 fun RegisterScreen(
     navController: NavHostController,
     paddingValues: PaddingValues,
     viewModel: RegisterViewModel = hiltViewModel()
 ) {
+    val isSuccess by viewModel.isRegisterSuccess.collectAsState()
     // Estados
     val email by viewModel.email.collectAsState()
     val password by viewModel.password.collectAsState()
@@ -37,33 +36,26 @@ fun RegisterScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val focusManager = LocalFocusManager.current
 
-    LaunchedEffect(Unit) {
-        viewModel.uiEvent.collect {
-            val token = viewModel.jwtToken.value
-                ?: return@collect
-
-            Log.d("NAV_DEBUG", "Navegando a: choose_username/$token")
-            navController.navigate(Screen.ChooseUsername.createRoute(token))
-
+    LaunchedEffect(isSuccess) {
+        if (isSuccess) {
+            // Si el registro fue exitoso, navegamos al Home
+            navController.navigate("home_screen") {
+                // Borramos la pantalla de registro del historial para que no pueda volver atrás
+                popUpTo("register_screen") { inclusive = true }
+            }
         }
     }
 
 
     Box(modifier = Modifier.fillMaxSize()) {
-
-        // Contenedor principal: Column
         Column(
-            // 🎯 CLAVE 3: Aplicar el paddingValues y el padding de diseño.
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
                 .padding(horizontal = 25.dp, vertical = 29.dp),
             verticalArrangement = Arrangement.Top
         ) {
-
             Spacer(Modifier.height(40.dp))
-
-
             Text(
                 text = "Crea tu cuenta",
                 style = MaterialTheme.typography.headlineLarge.copy(
@@ -71,16 +63,12 @@ fun RegisterScreen(
                 ),
                 color = MaterialTheme.colorScheme.onBackground
             )
-
             Spacer(Modifier.height(20.dp)) //separacion de titulo y subtitulo
-
             Text(
                 text = "Ingresa tus datos para crear tu cuenta en Cycles",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-
-
             Spacer(Modifier.height(10.dp))
             // TEXTO DE EMAIL ETIQUETA ARRIBA DEL CAMPO
             Text(
@@ -88,7 +76,7 @@ fun RegisterScreen(
                 style = MaterialTheme.typography.labelLarge, // Estilo apropiado para etiquetas de formulario
                 color = MaterialTheme.colorScheme.onBackground
             )
-            Spacer(Modifier.height(4.dp)) // Espacio mínimo entre la etiqueta y el campo
+            Spacer(Modifier.height(4.dp))
 
             // Campo de Correo
             OutlinedTextField(
@@ -100,29 +88,23 @@ fun RegisterScreen(
                 leadingIcon = {
                     Icon(Icons.Filled.Email, contentDescription = "Icono de correo")
                 },
-
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = MaterialTheme.colorScheme.primary,
                     unfocusedBorderColor = MaterialTheme.colorScheme.surfaceVariant,
                     unfocusedContainerColor = MaterialTheme.colorScheme.surface
                 ),
-
                 modifier = Modifier.height(53.dp).fillMaxWidth() //altura del boton
             )
-
-
             Spacer(Modifier.height(12.dp)) //espacio entre correo y password
 
-            // OutlinedTextField Password
             // Etiqueta "Contraseña"
             Text(
                 text = "Contraseña",
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onBackground
             )
-            Spacer(Modifier.height(4.dp)) // Espacio mínimo entre la etiqueta y el campo
+            Spacer(Modifier.height(4.dp))
 
-            // Campo de Contraseña (OutlinedTextField Personalizado)
             OutlinedTextField(
                 value = password,
                 onValueChange = viewModel::onPasswordChange,
@@ -155,9 +137,9 @@ fun RegisterScreen(
             // DateOfBirthPicker
             DateOfBirthPicker(
                 selectedDate = dob,
-                onDateSelected = { newDate ->
+                onDateSelected = { newDateString ->
                     focusManager.clearFocus()
-                    viewModel.updateDateOfBirth(newDate)
+                    viewModel.updateDateOfBirth(newDateString)
                 },
                 modifier = Modifier.fillMaxWidth(),
 
@@ -172,8 +154,8 @@ fun RegisterScreen(
 
 
             // Mensaje de Error
-            if (errorMsg.isNotEmpty()) {
-                Text(errorMsg, color = MaterialTheme.colorScheme.error)
+            if (!errorMsg.isNullOrEmpty()) {
+                Text(errorMsg!!, color = MaterialTheme.colorScheme.error)
                 Spacer(Modifier.height(16.dp))
             }
 
@@ -182,7 +164,7 @@ fun RegisterScreen(
                 onClick = viewModel::onRegisterClick,
                 shape = RoundedCornerShape(25),
                 modifier = Modifier.fillMaxWidth(),
-                enabled = !isLoading
+                enabled = !isLoading && email.isNotEmpty() && password.isNotEmpty() && dob.isNotEmpty()
             ) {
                 if (isLoading) CircularProgressIndicator(modifier = Modifier.size(20.dp))
                 else Text("Siguiente")

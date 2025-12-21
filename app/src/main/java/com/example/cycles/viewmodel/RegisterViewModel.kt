@@ -2,6 +2,7 @@ package com.example.cycles.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.cycles.data.UserCreateRequest
 import com.example.cycles.repository.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -9,12 +10,11 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.Period
 import java.time.format.DateTimeFormatter
-import java.time.format.DateTimeParseException
 import javax.inject.Inject
 
 @HiltViewModel
 class RegisterViewModel @Inject constructor(
-    private val repository: AuthRepository   //inyectamos el repo aquí
+    private val repository: AuthRepository
 ) : ViewModel() {
 
     private val _email = MutableStateFlow("")
@@ -24,133 +24,106 @@ class RegisterViewModel @Inject constructor(
     val password = _password.asStateFlow()
 
     private val _dateOfBirth = MutableStateFlow("")
-    val dateOfBirth: StateFlow<String> = _dateOfBirth.asStateFlow()
-
-    private val _userAge = MutableStateFlow<Int?>(null)
-    val userAge: StateFlow<Int?> = _userAge.asStateFlow()  // ← exponer userAge
+    val dateOfBirth = _dateOfBirth.asStateFlow()
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading = _isLoading.asStateFlow()
-
-    private val _error = MutableStateFlow("")
+    private val _error = MutableStateFlow<String?>(null)
     val error = _error.asStateFlow()
 
-    private val _uiEvent = MutableSharedFlow<Unit>()
-    val uiEvent = _uiEvent.asSharedFlow()
+    private val _isRegisterSuccess = MutableStateFlow(false)
 
-    private val _jwtToken = MutableStateFlow<String?>(null)
-    val jwtToken = _jwtToken.asStateFlow()
+    // 2. VARIABLE PÚBLICA (Inmutable): La UI solo puede leerla (observarla)
+    val isRegisterSuccess = _isRegisterSuccess.asStateFlow()
+
+
 
 
     // --- Actualizaciones de estado ---
-    fun onEmailChange(new: String) {
-        _email.value = new; _error.value = ""
-    }
-
-    fun onPasswordChange(new: String) {
-        _password.value = new; _error.value = ""
-    }
+    fun onEmailChange(newEmail: String) { _email.value = newEmail }
+    fun onPasswordChange(newPass: String) { _password.value = newPass }
 
     fun updateDateOfBirth(newDate: String) {
         _dateOfBirth.value = newDate
-        _error.value = ""
-        calculateAge(newDate)
     }
 
     // --- Cálculo de edad ---
-    private fun calculateAge(dob: String) {
-        if (dob.isBlank()) {
-            _userAge.value = null
-            return
-        }
-        try {
-            val fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy")
-            val birthDate = LocalDate.parse(dob, fmt)
-            val today = LocalDate.now()
-            _userAge.value = Period.between(birthDate, today).years
-        } catch (_: Exception) {
-            _userAge.value = null
-            _error.value = "Formato de fecha inválido"
-        }
-    }
-
-    // --- Validaciones ---
-    private fun isValidEmail(email: String) =
-        android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
-
-    private fun isValidPassword(pw: String) =
-        pw.length in 10..25
-
-    private fun isValidDateOfBirth(dob: String): Boolean {
-        if (dob.isBlank()) return false
+    private fun calculateAgeFromString(dateString: String): Int? {
         return try {
-            val fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy")
-            val birthDate = LocalDate.parse(dob, fmt)
-            val today = LocalDate.now()
-            !birthDate.isAfter(today) && Period.between(birthDate, today).years > 9
-        } catch (_: DateTimeParseException) {
-            false
-        } catch (_: Exception) {
-            false
+            val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+            val birthDate = LocalDate.parse(dateString, formatter)
+            Period.between(birthDate, LocalDate.now()).years
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
         }
     }
 
     // --- Lógica del botón Registrar ---
     fun onRegisterClick() {
-        viewModelScope.launch {
-            _isLoading.value = true
-            _error.value = ""
+        val currentEmail = _email.value
+        val currentPass = _password.value
+        val currentDobString = _dateOfBirth.value
 
-            // 1) Campos obligatorios
-            if (email.value.isBlank() || password.value.isBlank() || dateOfBirth.value.isBlank()) {
-                _error.value = "Todos los campos son obligatorios"
-                _isLoading.value = false
-                return@launch
-            }
-            // 2) Formato email
-            if (!isValidEmail(email.value)) {
-                _error.value = "Correo inválido"
-                _isLoading.value = false
-                return@launch
-            }
-            // 3) Longitud contraseña
-            if (!isValidPassword(password.value)) {
-                _error.value = "Contraseña debe tener 10–25 caracteres"
-                _isLoading.value = false
-                return@launch
-            }
-            // 4) Fecha y edad mínima
-            if (!isValidDateOfBirth(dateOfBirth.value)) {
-                _error.value = "Debes ser mayor de 9 años para continuar"
-                _isLoading.value = false
-                return@launch
-            }
-
-
-            try {
-                repository.registerWithEmail(email.value, password.value)
-                    .addOnSuccessListener { authResult ->
-                        // Registro Exitoso
-                        val user = authResult.user
-                        // OJO: Aquí deberías llamar a tu API Python para guardar la edad (age)
-                        // usando el token del usuario nuevo, si es que tu algoritmo la usa.
-
-                        // Por ahora, emitimos éxito para navegar
-                        viewModelScope.launch {
-                            _uiEvent.emit(Unit)
-                        }
-                    }
-                    .addOnFailureListener { e ->
-                        _error.value = when (e.message) {
-                            // Puedes personalizar mensajes de error de Firebase aquí
-                            else -> "Error al registrar: ${e.localizedMessage}"
-                        }
-                    }
-            } catch (e: Exception) {
-                _error.value = "Error inesperado: ${e.message}"
-            } finally {
-                _isLoading.value = false
-            }
+        if (currentEmail.isBlank() || currentPass.isBlank() || currentDobString.isBlank()) {
+            _error.value = "Por favor completa todos los campos"
+            return
         }
+
+        val age = calculateAgeFromString(currentDobString)
+        if (age == null) {
+            _error.value = "Formato de fecha inválido"
+            return
+        }
+
+        if (age < 14) {
+            _error.value = "Debes ser mayor de 18 años para registrarte ($age años)"
+            return
+        }
+
+        register(currentEmail, currentPass, age.toString())
+    }
+
+    fun register(email: String, password: String, age: String) {
+        _isLoading.value =  true
+
+        // 1. registrar en firebase
+        repository.registerWithEmail(email, password)
+            .addOnSuccessListener { authResult ->
+                val newUid = authResult.user?.uid
+
+                if (newUid != null) {
+                    // datos para python
+                    val newUser = UserCreateRequest(
+                        username = email,
+                        age = age.toInt(),
+                        email = email,
+                        firebaseUid = newUid
+                    )
+
+                    // guardar en atlas
+                    viewModelScope.launch {
+                        val backendSuccess = repository.createUserBackend(newUser)
+
+                        if (backendSuccess) {
+                            _isLoading.value = false
+                            _isRegisterSuccess.value = true
+
+                        } else {
+                            // en caso de que el usuario se haya creado en en firebase pero falló en FastAPI
+                            authResult.user?.delete()
+                            _isLoading.value = false
+                            _error.value = "Error al guardar perfil de usuario"
+
+                        }
+
+                    }
+                }
+            }
+            .addOnFailureListener { e ->
+                _isLoading.value = false
+                _error.value = "Error firebase: ${e.message}"
+            }
+
     }
 }

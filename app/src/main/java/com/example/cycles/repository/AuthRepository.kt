@@ -1,6 +1,7 @@
 package com.example.cycles.repository
 
 import android.util.Log
+import com.example.cycles.data.UserCreateRequest
 import com.example.cycles.network.RecsApiService
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.AuthCredential
@@ -44,18 +45,29 @@ class AuthRepository @Inject constructor(
 
     suspend fun getEmailFromUsername(username: String): String? {
         return try {
+            // 1. Hacemos la llamada
             val response = apiService.getEmailByUsername(username)
-                if (response.isSuccessful && response.body() != null) {
-                    // Si conseguimos datos desde la api (python)
-                    response.body()!!.email
-                } else {
-                    // Si python no consiguió nada (404 o 500)
-                    Log.e("AuthRepo", "Error API: Código ${response.code()} - ${response.message()}")
-                    null
-                }
+
+            // 2. Evaluamos (Alineado verticalmente con el 'val' de arriba)
+            if (response.isSuccessful && response.body() != null) {
+                // Usamos ?. por seguridad, aunque el check != null ya protege bastante
+                response.body()?.email
+            } else {
+                Log.e("AuthRepo", "Error API: Código ${response.code()} - ${response.message()}")
+                null
+            }
         } catch (e: Exception) {
             Log.e("AuthRepo", "Excepción de red: ${e.message}")
             null
+        }
+    }
+    suspend fun createUserBackend(user: UserCreateRequest): Boolean {
+        return try {
+            val response = apiService.createUser(user)
+            response.isSuccessful
+        } catch (e: Exception) {
+            Log.e("AuthRepo", "Excepción de red: ${e.message}")
+            false
         }
     }
 }
