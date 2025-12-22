@@ -18,7 +18,6 @@ import com.example.cycles.viewmodel.ChooseUsernameViewModel
 @Composable
 fun ChooseUsernameScreen(
     navController: NavController,
-    token: String,
     paddingValues: PaddingValues,
     viewModel: ChooseUsernameViewModel = hiltViewModel()
 ) {

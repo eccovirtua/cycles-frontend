@@ -42,11 +42,22 @@ fun RegisterScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val focusManager = LocalFocusManager.current
 
+//    LaunchedEffect(isSuccess) {
+//        if (isSuccess) {
+//            // Si el registro fue exitoso, navegamos al Home
+//            navController.navigate("home_screen") {
+//                // Borramos la pantalla de registro del historial para que no pueda volver atrás
+//                popUpTo("register_screen") { inclusive = true }
+//            }
+//        }
+//    }
     LaunchedEffect(isSuccess) {
         if (isSuccess) {
-            // Si el registro fue exitoso, navegamos al Home
-            navController.navigate("home_screen") {
-                // Borramos la pantalla de registro del historial para que no pueda volver atrás
+            // Obtenemos la edad actual del ViewModel para pasarla
+            val ageToSend = viewModel.getAgeForNavigation()
+            // Navegamos a la pantalla de elegir usuario PASANDO la edad como argumento
+            navController.navigate("choose_username_screen/$ageToSend") {
+                // Quitamos el registro del backstack para que no puedan volver atrás
                 popUpTo("register_screen") { inclusive = true }
             }
         }
@@ -94,7 +105,7 @@ fun RegisterScreen(
                 onValueChange = viewModel::onEmailChange,
 
                 shape = RoundedCornerShape(35),
-                placeholder = { Text(stringResource(R.string.register_emailfield),style = MaterialTheme.typography.bodySmall, fontFamily = HelveticaFamily,) },
+                placeholder = { Text(stringResource(R.string.register_emailfield),style = MaterialTheme.typography.bodySmall, fontFamily = HelveticaFamily) },
                 leadingIcon = {
                     Icon(Icons.Filled.Email, contentDescription = "Icono de correo")
                 },
@@ -121,7 +132,7 @@ fun RegisterScreen(
                 onValueChange = viewModel::onPasswordChange,
 
                 shape = RoundedCornerShape(35),
-                placeholder = { Text(stringResource(R.string.register_pwfield),style = MaterialTheme.typography.bodySmall, fontFamily = HelveticaFamily,) },
+                placeholder = { Text(stringResource(R.string.register_pwfield),style = MaterialTheme.typography.bodySmall, fontFamily = HelveticaFamily) },
 
                 leadingIcon = {
                     Icon(Icons.Filled.Lock, contentDescription = "Icono de contraseña")

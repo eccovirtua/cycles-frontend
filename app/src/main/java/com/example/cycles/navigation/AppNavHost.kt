@@ -23,6 +23,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.example.cycles.ui.screens.ChooseUsernameScreen
 import com.example.cycles.ui.screens.DashboardScreen
 import com.example.cycles.ui.screens.EditProfileScreen
 import com.example.cycles.ui.screens.FinalRecommendationsScreen
@@ -40,7 +41,7 @@ import kotlinx.coroutines.launch
 
 private const val TRANSITION_DURATION = 220
 
-// 🎯 Definición de las transiciones estándar de deslizamiento horizontal
+// animaciones
 private val slideInFromRight = slideInHorizontally(
     initialOffsetX = { it },
     animationSpec = tween(TRANSITION_DURATION)
@@ -82,15 +83,10 @@ fun AppNavHost(
     val layoutDirection = LocalLayoutDirection.current
     val scope = rememberCoroutineScope()
 
-
-    // ✅ Usamos NavHost estándar
     NavHost(
         navController,
         startDestination = Screen.Home.route,
     ) {
-
-        // --- RUTAS PREDETERMINADAS (Deslizamiento Lateral) ---
-
         composable(
             route = Screen.Welcome.route,
             enterTransition = { slideInFromRight },
@@ -125,9 +121,9 @@ fun AppNavHost(
                 }
             )
         }
-        // 2. Pantalla Dinámica de Detalle de Ítem (Asegúrate que esta exista como en el paso anterior)
+
         composable(
-            route = Screen.ItemDetail.route, // "item_detail/{itemId}/{itemType}"
+            route = Screen.ItemDetail.route,
             arguments = listOf(
                 navArgument("itemId") { type = NavType.StringType },
                 navArgument("itemType") { type = NavType.StringType }
@@ -139,23 +135,17 @@ fun AppNavHost(
         ) { backStackEntry ->
             val itemId = backStackEntry.arguments?.getString("itemId") ?: ""
             val itemTypeString = backStackEntry.arguments?.getString("itemType") ?: ""
-
-            // Importa tu enum ItemType
             val itemType = try {
                 com.example.cycles.data.ItemType.valueOf(itemTypeString)
             } catch (_: IllegalArgumentException) {
                 com.example.cycles.data.ItemType.BOOK // Fallback
             }
-
-            // Asegúrate de que ItemDetailScreen exista
             ItemDetailScreen(
                 itemId = itemId,
                 itemType = itemType,
                 onBack = { navController.popBackStack() }
             )
         }
-
-        // --- RUTAS MODALES
         //dashboard
         composable(
             route = Screen.Dashboard.route,
@@ -167,28 +157,26 @@ fun AppNavHost(
             DashboardScreen()
         }
 
-
         composable(
             route = "dashboard?animate={animate}",
             arguments = listOf(navArgument("animate") {
                 type = NavType.BoolType
                 defaultValue = false
             })
-        ) { backStackEntry -> // 'backStackEntry' might still be needed for other things
-            DashboardScreen() // Just call the screen, ViewModel gets the arg
+        ) { backStackEntry ->
+            DashboardScreen()
         }
-        // RUTA PARA LA PANTALLA DE "LISTAS" (de la fase anterior)
+
         composable(
-            route = "lists_route", // Esta es la ruta de BottomNavItem.Lists
+            route = "lists_route",
             enterTransition = { slideInFromRight },
             exitTransition = { slideOutToLeft },
             popEnterTransition = { slideInFromLeft },
             popExitTransition = { slideOutToRight }
         ) {
-            ListsScreen(navController = navController) // Pasamos el navController
+            ListsScreen(navController = navController)
         }
 
-        // 🎯 NUEVA RUTA: DETALLE DE LISTA
         composable(
             route = "list_detail/{listId}",
             arguments = listOf(navArgument("listId") { type = NavType.StringType }),
@@ -199,8 +187,6 @@ fun AppNavHost(
         ) {
             ListDetailScreen(navController = navController)
         }
-
-
         // register
         composable(
             route = Screen.Register.route,
@@ -211,7 +197,6 @@ fun AppNavHost(
             RegisterScreen(navController, paddingValues)
         }
 
-        // forgot password (y sus flujos)
         composable(
             route = Screen.ForgotPassword.route,
             enterTransition = { slideInFromBottom },
@@ -219,17 +204,6 @@ fun AppNavHost(
             popExitTransition = { slideOutToBottom }
         ) {
             ForgotPasswordScreen(navController)
-        }
-
-        composable(
-            route = Screen.VerifyCode.route,
-            arguments = listOf(navArgument("email") { type = NavType.StringType }),
-            enterTransition = { slideInFromBottom },
-            exitTransition = { fadeOut(tween(TRANSITION_DURATION)) },
-            popExitTransition = { slideOutToBottom }
-        ) { back ->
-            val email = back.arguments!!.getString("email")!!
-//            VerifyCodeScreen(navController, email)
         }
 
         composable(
@@ -246,16 +220,14 @@ fun AppNavHost(
             val codeArg  = back.arguments!!.getString("code")!!
 //            ResetPasswordScreen(navController, emailArg, codeArg)
         }
-
         composable(
-            route = Screen.ChooseUsername.route,
-            arguments = listOf(navArgument("token") { type = NavType.StringType }),
+            route = "choose_username_screen/{age}",
+            arguments = listOf(navArgument("age") { type = NavType.IntType }),
             enterTransition = { slideInFromBottom },
             exitTransition = { fadeOut(tween(TRANSITION_DURATION)) },
             popExitTransition = { slideOutToBottom }
-        ) { back ->
-            val token = back.arguments!!.getString("token")!!
-//            ChooseUsernameScreen(navController, token, paddingValues)
+        ) {
+            ChooseUsernameScreen(navController,paddingValues)
         }
 
         // --- RUTAS INTERACTIVAS Y PERFIL (Deslizamiento Lateral) ---
