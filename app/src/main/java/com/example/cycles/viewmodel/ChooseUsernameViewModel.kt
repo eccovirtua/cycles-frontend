@@ -22,6 +22,9 @@ class ChooseUsernameViewModel @Inject constructor(
     // Recuperamos la edad automáticamente. "age" debe coincidir con la ruta del NavHost
     private val age: Int = checkNotNull(savedStateHandle["age"])
 
+    private val emailArg: String? = savedStateHandle["email"]
+    private val passwordArg: String? = savedStateHandle["password"]
+    private val ageArg: Int? = savedStateHandle["age"]
     private val _name = MutableStateFlow("")
     val name = _name.asStateFlow()
     private val _isAvailable = MutableStateFlow<Boolean?>(null) // null=sin verificar, true=libre, false=ocupado

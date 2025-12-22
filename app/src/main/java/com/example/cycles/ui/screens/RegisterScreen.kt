@@ -31,7 +31,7 @@ fun RegisterScreen(
     paddingValues: PaddingValues,
     viewModel: RegisterViewModel = hiltViewModel()
 ) {
-    val isSuccess by viewModel.isRegisterSuccess.collectAsState()
+    val navigateToNextStep by viewModel.isRegisterSuccess.collectAsState()
     // Estados
     val email by viewModel.email.collectAsState()
     val password by viewModel.password.collectAsState()
@@ -51,15 +51,15 @@ fun RegisterScreen(
 //            }
 //        }
 //    }
-    LaunchedEffect(isSuccess) {
-        if (isSuccess) {
-            // Obtenemos la edad actual del ViewModel para pasarla
-            val ageToSend = viewModel.getAgeForNavigation()
-            // Navegamos a la pantalla de elegir usuario PASANDO la edad como argumento
-            navController.navigate("choose_username_screen/$ageToSend") {
-                // Quitamos el registro del backstack para que no puedan volver atrás
-                popUpTo("register_screen") { inclusive = true }
+    LaunchedEffect(navigateToNextStep) {
+        if (navigateToNextStep) {
+            // Pasamos la "mochila" de datos al siguiente fragmento de navegación
+            navController.currentBackStackEntry?.savedStateHandle?.let { handle ->
+                handle["email"] = viewModel.email.value
+                handle["password"] = viewModel.password.value
+                handle["age"] = viewModel.getAgeForNavigation()
             }
+            navController.navigate("choose_username_screen")
         }
     }
 

@@ -1,9 +1,11 @@
 package com.example.cycles.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.cycles.repository.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.Period
 import java.time.format.DateTimeFormatter
@@ -32,6 +34,9 @@ class RegisterViewModel @Inject constructor(
 
     // 2. VARIABLE PÚBLICA (Inmutable): La UI solo puede leerla (observarla)
     val isRegisterSuccess = _isRegisterSuccess.asStateFlow()
+
+    private val _navigateToNextStep = MutableStateFlow(false)
+    val navigateToNextStep = _navigateToNextStep.asStateFlow()
 
     private var _validatedAge: Int = 0
 
@@ -82,8 +87,24 @@ class RegisterViewModel @Inject constructor(
             return
         }
 
-        // Guardar edad antes de registrar
-        _validatedAge = age
+        // Validacion remota
+        viewModelScope.launch {
+            _isLoading.value = true
+            _error.value = null
+
+            if (isEmailFree) {
+                // si está disponible el correo:
+
+                // Guardar edad antes de registrar
+                _validatedAge = age
+                _navigateToNextStep.value = true
+            } else {
+                _error.value = "Este Email ya está en uso."
+            }
+            _isLoading.value = false
+        }
+
+
 
         register(currentEmail, currentPass)
     }

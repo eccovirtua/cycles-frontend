@@ -70,4 +70,14 @@ class AuthRepository @Inject constructor(
             false
         }
     }
+
+    suspend fun checkEmailAvailabilty(email: String): Boolean {
+        return try {
+            val response = apiService.checkEmailAvailability(email)
+            response.isSuccessful
+        } catch (e: Exception) {
+            Log.e("AuthRepo", "El email ya existe: ${e.message}")
+                false
+        }
+    }
 }
