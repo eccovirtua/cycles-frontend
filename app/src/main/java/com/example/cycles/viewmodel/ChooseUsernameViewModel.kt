@@ -19,9 +19,6 @@ class ChooseUsernameViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    // Recuperamos la edad automáticamente. "age" debe coincidir con la ruta del NavHost
-    private val age: Int = checkNotNull(savedStateHandle["age"])
-
     private val emailArg: String? = savedStateHandle["email"]
     private val passwordArg: String? = savedStateHandle["password"]
     private val ageArg: Int? = savedStateHandle["age"]
@@ -41,60 +38,63 @@ class ChooseUsernameViewModel @Inject constructor(
         _error.value = null
     }
 
-    // Opcional: Función para verificar disponibilidad antes de guardar
-    // (Requiere un endpoint GET /users/check/{username} en tu backend)
-    fun checkAvailability() {
-        val username = _name.value
-        if (username.isBlank()) return
+    fun checkUsernameAndRegister(navController: NavController) {
+        val username = _name.value.trim()
 
-        viewModelScope.launch {
-            _isLoading.value = true
-            // Simulamos la verificación o llamamos a repository.checkUsername(username)
-            // Por ahora, asumiremos que si el backend devuelve 409 al crear, es que no está disponible.
-            // Si tienes el endpoint específico, úsalo aquí.
-            _isLoading.value = false
-            _isAvailable.value = true // Asumimos true para permitir el click en "Continuar"
-        }
-    }
-
-    // Finalizar Registro
-    fun saveUsername(navController: NavController) {
-        val username = _name.value
-        val currentUser = FirebaseAuth.getInstance().currentUser
-        if (currentUser == null) {
-            _error.value = "Sesión perdida. Por favor inicia sesión nuevamente."
+        if (emailArg == null || passwordArg == null || ageArg == null) {
+            _error.value = "Error crítico: Faltan datos del registro. Reinicia la app."
             return
         }
 
+        if (username.length < 4) {
+            _error.value = "El nombre de usuario es muy corto"
+            return
+        }
         viewModelScope.launch {
             _isLoading.value = true
             _error.value = null
-
-            // Preparamos el paquete completo para FastAPI
-            val request = UserCreateRequest(
-                username = username,
-                email = currentUser.email ?: "", // Email de Firebase
-                age = age,                       // Edad traída de la pantalla anterior
-                firebaseUid = currentUser.uid    // UID de Firebase
-            )
-            try {
-                // llama a @POST /users/create)
-                val success = repository.createUserBackend(request)
-
-                if (success) {
-                    // EXITO: Usuario creado en Mongo y Firebase.
-
-                    navController.navigate("home_screen") {
-                        popUpTo("auth_graph") { inclusive = true }
-                    }
-                } else {
-                    _error.value = "Error al crear perfil. Puede que el nombre de usuario ya exista."
-                    _isAvailable.value = false
-                }
-            } catch (e: Exception) {
-                _error.value = "Error de conexión: ${e.message}"
-            } finally {
+            // Verificar disponibilidad de Username en Backend
+            val isUserFree = repository.checkUsernameAvailability(username)
+            if (!isUserFree) {
+                _error.value = "El nombre de usuario ya está ocupado"
                 _isLoading.value = false
+                return@launch
+            }
+
+            // Crear en Firebase
+            // Nota: Firebase tiene la última palabra
+            repository.registerWithEmail(emailArg, passwordArg)
+                .addOnSuccessListener { authResult ->
+                    val uid = authResult.user?.uid
+                    if (uid != null) {
+                        // Paso C: Crear en Mongo
+                        finalizeBackendRegistration(username, emailArg, ageArg, uid, navController)
+                    }
+                }
+                .addOnFailureListener { e ->
+                    _isLoading.value = false
+                    if (e.message?.contains("email", ignoreCase = true) == true) {
+                        _error.value = "El correo fue tomado recientemente."
+                    } else {
+                        _error.value = "Error Firebase: ${e.message}"
+                    }
+                }
+        }
+    }
+
+    private fun finalizeBackendRegistration(username: String, email: String, age: Int, uid: String, nav: NavController) {
+        viewModelScope.launch {
+            val request = UserCreateRequest(username, age, email, uid)
+            val success = repository.createUserBackend(request)
+
+            if (success) {
+                _isLoading.value = false
+                nav.navigate("home_screen") { popUpTo("auth_graph") { inclusive = true } }
+            } else {
+                // Borrar de Firebase si falla Mongo
+                FirebaseAuth.getInstance().currentUser?.delete()
+                _isLoading.value = false
+                _error.value = "Error al guardar perfil. Intenta de nuevo."
             }
         }
     }

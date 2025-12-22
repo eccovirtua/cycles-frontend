@@ -18,6 +18,7 @@ import com.example.cycles.data.UserListBasic
 import com.example.cycles.data.UserListDetail
 import com.example.cycles.data.UserLookupResponse
 import com.example.cycles.data.UserUsageStatus
+import com.example.cycles.data.AvailabilityResponse
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -175,6 +176,20 @@ interface RecsApiService {
     suspend fun createUser(
         @Body user: UserCreateRequest
     ): Response<Unit>
+
+    // Verificar Email
+    @GET("users/check-email/{email}")
+    suspend fun checkEmailAvailability(
+        @Path("email") email: String
+    ): Response<AvailabilityResponse>
+
+    // Verificar Username
+    @GET("users/check-username/{username}")
+    suspend fun checkUsernameAvailability(
+        @Path("username") username: String
+    ): Response<AvailabilityResponse>
+
+
 }
 
 

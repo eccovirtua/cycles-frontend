@@ -80,8 +80,6 @@ class RegisterViewModel @Inject constructor(
             _error.value = "Formato de fecha inválido"
             return
         }
-
-
         if (age < 14) {
             _error.value = "Debes ser mayor de 14 años para registrarte ($age años)"
             return
@@ -92,20 +90,20 @@ class RegisterViewModel @Inject constructor(
             _isLoading.value = true
             _error.value = null
 
+            val isEmailFree = repository.checkEmailAvailability(currentEmail)
+
             if (isEmailFree) {
                 // si está disponible el correo:
-
                 // Guardar edad antes de registrar
                 _validatedAge = age
+
+                // Proceder a pantalla de elegir username
                 _navigateToNextStep.value = true
             } else {
                 _error.value = "Este Email ya está en uso."
             }
             _isLoading.value = false
         }
-
-
-
         register(currentEmail, currentPass)
     }
 

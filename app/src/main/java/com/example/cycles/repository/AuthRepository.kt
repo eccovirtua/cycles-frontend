@@ -47,8 +47,6 @@ class AuthRepository @Inject constructor(
         return try {
             // 1. Hacemos la llamada
             val response = apiService.getEmailByUsername(username)
-
-            // 2. Evaluamos (Alineado verticalmente con el 'val' de arriba)
             if (response.isSuccessful && response.body() != null) {
                 // Usamos ?. por seguridad, aunque el check != null ya protege bastante
                 response.body()?.email
@@ -71,13 +69,29 @@ class AuthRepository @Inject constructor(
         }
     }
 
-    suspend fun checkEmailAvailabilty(email: String): Boolean {
+    suspend fun checkEmailAvailability(email: String): Boolean {
         return try {
-            val response = apiService.checkEmailAvailability(email)
-            response.isSuccessful
-        } catch (e: Exception) {
-            Log.e("AuthRepo", "El email ya existe: ${e.message}")
+            val response = apiService.checkEmailAvailability(email) // Asume que devuelve { "available": true }
+            if (response.isSuccessful && response.body() != null) {
+                response.body()!!.available
+            } else {
+                // Si falla el server, asumimos false por seguridad o manejas el error distinto
                 false
+            }
+        } catch (_: Exception) {
+            false
+        }
+    }
+    suspend fun checkUsernameAvailability(username: String): Boolean {
+        return try {
+            val response = apiService.checkUsernameAvailability(username)
+            if (response.isSuccessful && response.body() != null) {
+                response.body()!!.available
+            } else {
+                false
+            }
+        } catch (_: Exception) {
+            false
         }
     }
 }
