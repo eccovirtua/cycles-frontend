@@ -111,8 +111,6 @@ fun RegisterScreen(
         }
     }
 
-
-
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier

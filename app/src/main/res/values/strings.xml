@@ -18,4 +18,11 @@
     <string name="register.tos">Al momento de crear tu cuenta en Recommender admites que leíste los términos y condiciones y te adhieres a estos mismos.</string>
     <string name="register.next">Siguiente</string>
     <string name="register.txtbtn">¿Ya tienes cuenta? Inicia sesión</string>
+    <string name="CU.title">Crea tu perfil</string>
+    <string name="cu_subtitle">Termina de crear tu cuenta eligiendo un nombre de usuario para tu perfil.</string>
+    <string name="cu_topfield">Nombre de usuario</string>
+    <string name="cu_doptopfield">Fecha de nacimiento</string>
+    <string name="cu_dob">Ingresa tu fecha de nacimiento</string>
+    <string name="cu_usernameplaceholder">Mínimo 4 carácteres</string>
+    <string name="cu_finishbtn">Crear cuenta</string>
 </resources>

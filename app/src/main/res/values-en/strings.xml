@@ -18,4 +18,11 @@
     <string name="register.tos">By clicking next and creating your account you agree the terms and conditions of service.</string>
     <string name="register.next">Next</string>
     <string name="register.txtbtn">Already have an account? Sign in here</string>
+    <string name="CU.title">Create your profile</string>
+    <string name="cu_subtitle">Finish your account creation process by selecting a username for your account.</string>
+    <string name="cu_topfield">Username</string>
+    <string name="cu_doptopfield">Date of birth</string>
+    <string name="cu_dob">Enter your date of birth...</string>
+    <string name="cu_usernameplaceholder">(Min. 4 characters long)</string>
+    <string name="cu_finishbtn">Finish</string>
 </resources>

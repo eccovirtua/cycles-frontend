@@ -12,13 +12,16 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import com.example.cycles.R
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.cycles.ui.components.DateOfBirthPicker
+import com.example.cycles.ui.theme.HelveticaFamily
 import com.example.cycles.viewmodel.ChooseUsernameViewModel
 
 
@@ -71,9 +74,10 @@ fun ChooseUsernameScreen(
 
             // Título
             Text(
-                text = "Casi terminamos",
+                text = stringResource(R.string.CU_title),
                 style = MaterialTheme.typography.headlineLarge.copy(
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = HelveticaFamily
                 ),
                 color = MaterialTheme.colorScheme.onBackground
             )
@@ -82,8 +86,9 @@ fun ChooseUsernameScreen(
 
             // Subtítulo
             Text(
-                text = "Elige un nombre de usuario único para identificarte en Cycles.",
+                text = stringResource(R.string.cu_subtitle),
                 style = MaterialTheme.typography.bodySmall,
+                fontFamily = HelveticaFamily,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
@@ -91,8 +96,9 @@ fun ChooseUsernameScreen(
 
             // Etiqueta del campo
             Text(
-                text = "Nombre de usuario",
+                text = stringResource(R.string.cu_topfield),
                 style = MaterialTheme.typography.labelLarge,
+                fontFamily = HelveticaFamily,
                 color = MaterialTheme.colorScheme.onBackground
             )
             Spacer(Modifier.height(4.dp))
@@ -102,7 +108,7 @@ fun ChooseUsernameScreen(
                 value = name,
                 onValueChange = viewModel::onNameChange,
                 shape = RoundedCornerShape(6.dp),
-                placeholder = { Text("Ej: martin_dev", style = MaterialTheme.typography.bodySmall) },
+                placeholder = { Text(stringResource(R.string.cu_usernameplaceholder), style = MaterialTheme.typography.bodySmall, fontFamily = HelveticaFamily) },
                 singleLine = true,
                 leadingIcon = {
                     Icon(Icons.Filled.Person, contentDescription = "Icono de usuario")
@@ -121,7 +127,7 @@ fun ChooseUsernameScreen(
 
             if (showAgeInput) {
                 Spacer(Modifier.height(16.dp))
-                Text("Fecha de nacimiento", style = MaterialTheme.typography.labelLarge)
+                Text(stringResource(R.string.cu_doptopfield), style = MaterialTheme.typography.labelLarge, fontFamily = HelveticaFamily, color = MaterialTheme.colorScheme.onBackground)
 
                 DateOfBirthPicker(
                     selectedDate = dob,
@@ -151,7 +157,7 @@ fun ChooseUsernameScreen(
             Button(
                 onClick = {
                     focusManager.clearFocus()
-                    // Aquí llamamos a la función que dispara todo el proceso final
+
                     viewModel.checkUsernameAndRegister(navController)
                 },
                 shape = RoundedCornerShape(25),
@@ -167,7 +173,7 @@ fun ChooseUsernameScreen(
                         color = MaterialTheme.colorScheme.onPrimary
                     )
                 } else {
-                    Text("Finalizar Registro")
+                    Text(stringResource(R.string.cu_finishbtn), fontFamily = HelveticaFamily)
                 }
             }
 
