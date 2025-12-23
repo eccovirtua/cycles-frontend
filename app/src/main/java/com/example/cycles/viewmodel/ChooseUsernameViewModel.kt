@@ -134,10 +134,17 @@ class ChooseUsernameViewModel @Inject constructor(
                 _isLoading.value = false
                 nav.navigate("home") { popUpTo("auth_graph") { inclusive = true } }
             } else {
-                // Borrar de Firebase si falla Mongo
-                FirebaseAuth.getInstance().currentUser?.delete()
+
+                val isGoogleFlow = (passwordArg == null)
+
+                if (!isGoogleFlow) {
+                    // SOLO borramos si es registro por Email/Pass (porque el usuario acaba de crearla)
+                    FirebaseAuth.getInstance().currentUser?.delete()
+                }
+
+                // Si es Google, NO BORRAMOS NADA. Solo mostramos el error.
                 _isLoading.value = false
-                _error.value = "Error al guardar perfil. Intenta de nuevo."
+                _error.value = "Error al guardar perfil. Es posible que el nombre de usuario ya exista."
             }
         }
     }

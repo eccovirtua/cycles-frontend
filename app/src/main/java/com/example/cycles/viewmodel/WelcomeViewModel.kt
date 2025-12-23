@@ -130,17 +130,15 @@ class WelcomeViewModel @Inject constructor(
     }
     private fun verificarSiExisteEnMongo() {
         viewModelScope.launch {
-            // Esta función debe devolver TRUE si el usuario ya tiene perfil en Mongo
-            // Si no tienes el endpoint específico, intenta hacer un login silencioso o getProfile
+
+            kotlinx.coroutines.delay(500)
             val usuarioExiste = authRepository.checkUserExists()
 
             isLoading.value = false
 
             if (usuarioExiste) {
-                // CAMINO A: Usuario Viejo -> Al Home
                 isLoginSuccess.value = true
             } else {
-                // CAMINO B: Usuario Nuevo (o Limbo) -> A completar registro
                 _navigateToCompleteProfile.value = true
             }
         }

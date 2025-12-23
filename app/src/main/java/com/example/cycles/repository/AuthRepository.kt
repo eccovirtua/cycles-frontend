@@ -97,15 +97,28 @@ class AuthRepository @Inject constructor(
 
     suspend fun checkUserExists(): Boolean {
         return try {
+            // Log antes de llamar
+            Log.d("AUTH_DEBUG", "Preguntando al backend si el usuario existe...")
 
             val response = apiService.checkUserExists()
 
             if (response.isSuccessful && response.body() != null) {
-                response.body()!!.exists
+                val exists = response.body()!!.exists
+                Log.d("AUTH_DEBUG", "Respuesta Backend: Exito. Existe = $exists")
+                exists
             } else {
+                // AQUÍ ESTÁ EL PROBLEMA: Si el server da error, devolvías false silenciosamente.
+                // Ahora veremos por qué falla.
+                val errorBody = response.errorBody()?.string()
+                Log.e("AUTH_DEBUG", "Error Backend: Código ${response.code()} - Body: $errorBody")
+
+                // Si el error es 401 (No autorizado), es culpa del Token/Interceptor.
+                // Si es 500, es culpa de Python.
                 false
             }
         } catch (e: Exception) {
+            // Si no hay internet o la URL está mal, caemos aquí.
+            Log.e("AUTH_DEBUG", "Excepción Red: ${e.localizedMessage}")
             e.printStackTrace()
             false
         }
