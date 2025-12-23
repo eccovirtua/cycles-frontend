@@ -221,8 +221,7 @@ fun AppNavHost(
 //            ResetPasswordScreen(navController, emailArg, codeArg)
         }
         composable(
-            route = "choose_username_screen/{age}",
-            arguments = listOf(navArgument("age") { type = NavType.IntType }),
+            route = Screen.ChooseUsername.route,
             enterTransition = { slideInFromBottom },
             exitTransition = { fadeOut(tween(TRANSITION_DURATION)) },
             popExitTransition = { slideOutToBottom }

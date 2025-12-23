@@ -30,10 +30,7 @@ class RegisterViewModel @Inject constructor(
     private val _error = MutableStateFlow<String?>(null)
     val error = _error.asStateFlow()
 
-    private val _isRegisterSuccess = MutableStateFlow(false)
-
     // 2. VARIABLE PÚBLICA (Inmutable): La UI solo puede leerla (observarla)
-    val isRegisterSuccess = _isRegisterSuccess.asStateFlow()
 
     private val _navigateToNextStep = MutableStateFlow(false)
     val navigateToNextStep = _navigateToNextStep.asStateFlow()
@@ -104,23 +101,5 @@ class RegisterViewModel @Inject constructor(
             }
             _isLoading.value = false
         }
-        register(currentEmail, currentPass)
-    }
-
-    fun register(email: String, password: String) {
-        _isLoading.value =  true
-        // 1. registrar en firebase
-        repository.registerWithEmail(email, password)
-            .addOnSuccessListener { authResult ->
-                val newUid = authResult.user?.uid
-                if (newUid != null) {
-                    _isLoading.value = false
-                    _isRegisterSuccess.value = true
-                }
-            }
-            .addOnFailureListener { e ->
-                _isLoading.value = false
-                _error.value = "Error firebase: ${e.message}"
-            }
     }
 }

@@ -31,7 +31,7 @@ fun RegisterScreen(
     paddingValues: PaddingValues,
     viewModel: RegisterViewModel = hiltViewModel()
 ) {
-    val navigateToNextStep by viewModel.isRegisterSuccess.collectAsState()
+    val navigateToNextStep by viewModel.navigateToNextStep.collectAsState()
     // Estados
     val email by viewModel.email.collectAsState()
     val password by viewModel.password.collectAsState()
@@ -59,7 +59,7 @@ fun RegisterScreen(
                 handle["password"] = viewModel.password.value
                 handle["age"] = viewModel.getAgeForNavigation()
             }
-            navController.navigate("choose_username_screen")
+            navController.navigate(Screen.ChooseUsername.route)
         }
     }
 
