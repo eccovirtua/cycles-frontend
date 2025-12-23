@@ -29,6 +29,7 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.unit.sp
 import com.example.cycles.viewmodel.RegisterViewModel
 import com.example.cycles.ui.components.DateOfBirthPicker
 import com.google.android.gms.common.api.ApiException
@@ -54,7 +55,6 @@ fun RegisterScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val focusManager = LocalFocusManager.current
 
-    // CONFIGURACIÓN DE GOOGLE SIGN IN CLIENT
     val googleSignInClient = remember {
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(context.getString(R.string.default_web_client_id)) // Tu ID de cliente web de Firebase
@@ -265,6 +265,13 @@ fun RegisterScreen(
                     painter = painterResource(id = R.drawable.android_light_rd_na),
                     contentDescription = "Logo de Google",
                     modifier = Modifier.size(40.dp)
+                )
+                Text(
+                    text = stringResource(R.string.home_google),
+                    fontSize = 18.sp,
+                    fontFamily = HelveticaFamily,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             }
 

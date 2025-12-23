@@ -19,6 +19,7 @@ import com.example.cycles.data.UserListDetail
 import com.example.cycles.data.UserLookupResponse
 import com.example.cycles.data.UserUsageStatus
 import com.example.cycles.data.AvailabilityResponse
+import com.example.cycles.data.UserExistsResponse
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -188,6 +189,9 @@ interface RecsApiService {
     suspend fun checkUsernameAvailability(
         @Path("username") username: String
     ): Response<AvailabilityResponse>
+
+    @GET("users/me/exists")
+    suspend fun checkUserExists(): Response<UserExistsResponse>
 
 
 }

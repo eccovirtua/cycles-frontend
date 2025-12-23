@@ -58,6 +58,7 @@ fun WelcomeScreen(
     val isLoading by welcomeViewModel.isLoading
     val errorMsg by welcomeViewModel.loginError
 
+    val navigateToCompleteProfile by welcomeViewModel.navigateToCompleteProfile.collectAsState()
     val scrollState = rememberScrollState()
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -100,6 +101,17 @@ fun WelcomeScreen(
             snackbarHostState.showSnackbar(it)
         }
     }
+    LaunchedEffect(navigateToCompleteProfile) {
+        if (navigateToCompleteProfile) {
+            navController.currentBackStackEntry?.savedStateHandle?.let { handle ->
+                handle["email"] = welcomeViewModel.googleEmail // El email temporal del ViewModel
+                handle["password"] = null // NULL indica flujo Google
+                handle["age"] = null      // NULL indica que debe pedir la edad
+            }
+            navController.navigate(Screen.ChooseUsername.route)
+        }
+    }
+
 
     // --- UI PRINCIPAL ---
     Box(

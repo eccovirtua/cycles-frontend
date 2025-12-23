@@ -30,6 +30,10 @@ class WelcomeViewModel @Inject constructor(
 
     // --- ESTADOS DE UI (Carga y Errores) ---
     var isLoading = mutableStateOf(false)
+
+    private val _navigateToCompleteProfile = MutableStateFlow(false)
+    val navigateToCompleteProfile = _navigateToCompleteProfile.asStateFlow()
+    var googleEmail: String? = null
     var loginError = mutableStateOf<String?>(null)
     var isLoginSuccess = mutableStateOf(false)
 
@@ -113,13 +117,32 @@ class WelcomeViewModel @Inject constructor(
         val credential = GoogleAuthProvider.getCredential(idToken, null)
 
         authRepository.signInWithGoogle(credential)
-            .addOnSuccessListener {
-                isLoading.value = false
-                isLoginSuccess.value = true
+            .addOnSuccessListener { authResult ->
+                val user = authResult.user
+                googleEmail = user?.email
+
+                verificarSiExisteEnMongo()
             }
             .addOnFailureListener { e ->
                 isLoading.value = false
                 loginError.value = "Error Google: ${e.message}"
             }
+    }
+    private fun verificarSiExisteEnMongo() {
+        viewModelScope.launch {
+            // Esta función debe devolver TRUE si el usuario ya tiene perfil en Mongo
+            // Si no tienes el endpoint específico, intenta hacer un login silencioso o getProfile
+            val usuarioExiste = authRepository.checkUserExists()
+
+            isLoading.value = false
+
+            if (usuarioExiste) {
+                // CAMINO A: Usuario Viejo -> Al Home
+                isLoginSuccess.value = true
+            } else {
+                // CAMINO B: Usuario Nuevo (o Limbo) -> A completar registro
+                _navigateToCompleteProfile.value = true
+            }
+        }
     }
 }

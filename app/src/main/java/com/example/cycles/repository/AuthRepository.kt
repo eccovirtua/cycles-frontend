@@ -94,4 +94,20 @@ class AuthRepository @Inject constructor(
             false
         }
     }
+
+    suspend fun checkUserExists(): Boolean {
+        return try {
+
+            val response = apiService.checkUserExists()
+
+            if (response.isSuccessful && response.body() != null) {
+                response.body()!!.exists
+            } else {
+                false
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
 }
