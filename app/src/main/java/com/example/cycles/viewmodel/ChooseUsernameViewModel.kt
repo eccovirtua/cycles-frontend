@@ -1,6 +1,5 @@
 package com.example.cycles.viewmodel
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.cycles.data.UserCreateRequest
@@ -15,13 +14,12 @@ import androidx.navigation.NavController
 
 @HiltViewModel
 class ChooseUsernameViewModel @Inject constructor(
-    private val repository: AuthRepository,
-    savedStateHandle: SavedStateHandle
+    private val repository: AuthRepository
 ) : ViewModel() {
 
-    private val emailArg: String? = savedStateHandle["email"]
-    private val passwordArg: String? = savedStateHandle["password"]
-    private val ageArg: Int? = savedStateHandle["age"]
+    private var emailArg: String? = null
+    private var passwordArg: String? = null
+    private var ageArg: Int? = null
     private val _name = MutableStateFlow("")
     val name = _name.asStateFlow()
     private val _isAvailable = MutableStateFlow<Boolean?>(null) // null=sin verificar, true=libre, false=ocupado
@@ -31,6 +29,13 @@ class ChooseUsernameViewModel @Inject constructor(
     private val _error = MutableStateFlow<String?>(null)
     val error = _error.asStateFlow()
 
+
+    fun setRegistrationData(email: String?, pass: String?, age: Int?) {
+        this.emailArg = email
+        this.passwordArg = pass
+        this.ageArg = age
+    }
+
     fun onNameChange(newName: String) {
         _name.value = newName
         _isAvailable.value = null
@@ -38,9 +43,14 @@ class ChooseUsernameViewModel @Inject constructor(
     }
 
     fun checkUsernameAndRegister(navController: NavController) {
+
         val username = _name.value.trim()
 
-        if (emailArg == null || passwordArg == null || ageArg == null) {
+        val safeEmail = emailArg
+        val safePass = passwordArg
+        val safeAge = ageArg
+
+        if (safeEmail == null || safePass == null || safeAge == null) {
             _error.value = "Error crítico: Faltan datos del registro. Reinicia la app."
             return
         }
@@ -62,12 +72,12 @@ class ChooseUsernameViewModel @Inject constructor(
 
             // Crear en Firebase
             // Nota: Firebase tiene la última palabra
-            repository.registerWithEmail(emailArg, passwordArg)
+            repository.registerWithEmail(safeEmail, safePass)
                 .addOnSuccessListener { authResult ->
                     val uid = authResult.user?.uid
                     if (uid != null) {
                         // Paso C: Crear en Mongo
-                        finalizeBackendRegistration(username, emailArg, ageArg, uid, navController)
+                        finalizeBackendRegistration(username, safeEmail, safeAge, uid, navController)
                     }
                 }
                 .addOnFailureListener { e ->
@@ -88,7 +98,7 @@ class ChooseUsernameViewModel @Inject constructor(
 
             if (success) {
                 _isLoading.value = false
-                nav.navigate("home_screen") { popUpTo("auth_graph") { inclusive = true } }
+                nav.navigate("home") { popUpTo("auth_graph") { inclusive = true } }
             } else {
                 // Borrar de Firebase si falla Mongo
                 FirebaseAuth.getInstance().currentUser?.delete()

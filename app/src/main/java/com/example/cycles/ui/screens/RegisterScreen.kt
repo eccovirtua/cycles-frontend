@@ -42,15 +42,6 @@ fun RegisterScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val focusManager = LocalFocusManager.current
 
-//    LaunchedEffect(isSuccess) {
-//        if (isSuccess) {
-//            // Si el registro fue exitoso, navegamos al Home
-//            navController.navigate("home_screen") {
-//                // Borramos la pantalla de registro del historial para que no pueda volver atrás
-//                popUpTo("register_screen") { inclusive = true }
-//            }
-//        }
-//    }
     LaunchedEffect(navigateToNextStep) {
         if (navigateToNextStep) {
             // Pasamos la "mochila" de datos al siguiente fragmento de navegación

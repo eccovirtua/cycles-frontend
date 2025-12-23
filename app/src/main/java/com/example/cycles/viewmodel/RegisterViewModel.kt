@@ -29,9 +29,6 @@ class RegisterViewModel @Inject constructor(
     val isLoading = _isLoading.asStateFlow()
     private val _error = MutableStateFlow<String?>(null)
     val error = _error.asStateFlow()
-
-    // 2. VARIABLE PÚBLICA (Inmutable): La UI solo puede leerla (observarla)
-
     private val _navigateToNextStep = MutableStateFlow(false)
     val navigateToNextStep = _navigateToNextStep.asStateFlow()
 

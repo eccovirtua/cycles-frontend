@@ -32,7 +32,25 @@ fun ChooseUsernameScreen(
     val isLoading by viewModel.isLoading.collectAsState()
     val errorMsg by viewModel.error.collectAsState()
 
+    val loaded = remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
+
+    LaunchedEffect(Unit) {
+        if (!loaded.value) {
+            val previousBackStack = navController.previousBackStackEntry
+            val savedHandle = previousBackStack?.savedStateHandle
+
+            if (savedHandle != null) {
+                val email = savedHandle.get<String>("email")
+                val password = savedHandle.get<String>("password")
+                val age = savedHandle.get<Int>("age")
+
+                // 2. INYECTARLOS AL VIEWMODEL
+                viewModel.setRegistrationData(email, password, age)
+                loaded.value = true
+            }
+        }
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
