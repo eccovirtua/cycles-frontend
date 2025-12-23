@@ -33,6 +33,9 @@ class RegisterViewModel @Inject constructor(
     private val _navigateToNextStep = MutableStateFlow(false)
     val navigateToNextStep = _navigateToNextStep.asStateFlow()
 
+    private val _navigateToHome = MutableStateFlow(false)
+    val navigateToHome = _navigateToHome.asStateFlow()
+
     private var _validatedAge: Int = 0
     private val _navigateToNextStepGoogle = MutableStateFlow(false)
     val navigateToNextStepGoogle = _navigateToNextStepGoogle.asStateFlow()
@@ -60,7 +63,7 @@ class RegisterViewModel @Inject constructor(
                 val user = authResult.user
                 googleEmail = user?.email
                 _isLoading.value = false
-                _navigateToNextStepGoogle.value = true
+                verificarSiExisteEnMongo()
             }
             .addOnFailureListener { e ->
                 _isLoading.value = false
@@ -122,6 +125,25 @@ class RegisterViewModel @Inject constructor(
                 _error.value = "Este Email ya está en uso."
             }
             _isLoading.value = false
+        }
+    }
+
+    private fun verificarSiExisteEnMongo() {
+        viewModelScope.launch {
+            // Delay de seguridad para el Token (igual que en WelcomeViewModel)
+            kotlinx.coroutines.delay(400)
+
+            val usuarioExiste = repository.checkUserExists()
+
+            _isLoading.value = false
+
+            if (usuarioExiste) {
+                // CASO A: El usuario se equivocó y usó una cuenta ya registrada -> LO MANDAMOS AL HOME
+                _navigateToHome.value = true
+            } else {
+                // CASO B: Usuario realmente nuevo -> SEGUIMOS EL REGISTRO
+                _navigateToNextStepGoogle.value = true
+            }
         }
     }
 }

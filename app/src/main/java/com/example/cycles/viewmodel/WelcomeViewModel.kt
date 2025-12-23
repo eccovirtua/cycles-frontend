@@ -131,7 +131,7 @@ class WelcomeViewModel @Inject constructor(
     private fun verificarSiExisteEnMongo() {
         viewModelScope.launch {
 
-            kotlinx.coroutines.delay(500)
+            kotlinx.coroutines.delay(400)
             val usuarioExiste = authRepository.checkUserExists()
 
             isLoading.value = false

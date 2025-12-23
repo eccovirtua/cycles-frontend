@@ -11,7 +11,6 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -52,6 +51,7 @@ fun RegisterScreen(
     val context = LocalContext.current
     val dob by viewModel.dateOfBirth.collectAsState()
 
+    val navigateToHome by viewModel.navigateToHome.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val focusManager = LocalFocusManager.current
 
@@ -99,6 +99,15 @@ fun RegisterScreen(
                 handle["age"] = viewModel.getAgeForNavigation()
             }
             navController.navigate(Screen.ChooseUsername.route)
+        }
+    }
+
+    LaunchedEffect(navigateToHome) {
+        if (navigateToHome) {
+            navController.navigate(Screen.Home.route) {
+                // Limpiamos la pila para que no pueda volver atrás al registro
+                popUpTo("auth_graph") { inclusive = true }
+            }
         }
     }
 
