@@ -11,6 +11,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import androidx.navigation.NavController
+import java.time.LocalDate
+import java.time.Period
+import java.time.format.DateTimeFormatter
 
 @HiltViewModel
 class ChooseUsernameViewModel @Inject constructor(
@@ -28,12 +31,24 @@ class ChooseUsernameViewModel @Inject constructor(
 
     private val _error = MutableStateFlow<String?>(null)
     val error = _error.asStateFlow()
+    private val _dateOfBirth = MutableStateFlow("")
+    val dateOfBirth = _dateOfBirth.asStateFlow()
+
+    private val _showAgeInput = MutableStateFlow(false)
+    val showAgeInput = _showAgeInput.asStateFlow()
 
 
     fun setRegistrationData(email: String?, pass: String?, age: Int?) {
         this.emailArg = email
         this.passwordArg = pass
         this.ageArg = age
+
+        _showAgeInput.value = age == null || age == -1
+
+    }
+
+    fun updateDateOfBirth(newDate: String) {
+        _dateOfBirth.value = newDate
     }
 
     fun onNameChange(newName: String) {
@@ -49,16 +64,31 @@ class ChooseUsernameViewModel @Inject constructor(
         val safeEmail = emailArg
         val safePass = passwordArg
         val safeAge = ageArg
-
-        if (safeEmail == null || safePass == null || safeAge == null) {
-            _error.value = "Error crítico: Faltan datos del registro. Reinicia la app."
-            return
-        }
+        val isGoogleFlow = (safePass == null)
 
         if (username.length < 4) {
             _error.value = "El nombre de usuario es muy corto"
             return
         }
+        var finalAge = safeAge
+        if (isGoogleFlow) {
+            val dateString = _dateOfBirth.value
+            if (dateString.isBlank()) {
+                _error.value = "Por favor ingresa tu fecha de nacimiento"
+                return
+            }
+            finalAge = calculateAgeFromString(dateString) // Usamos tu función privada
+
+            if (finalAge == null || finalAge < 18) {
+                _error.value = "Debes ser mayor de 18 años"
+                return
+            }
+        }
+        if (!isGoogleFlow && (safeEmail == null || finalAge == null)) {
+            _error.value = "Error de datos. Reinicia el registro."
+            return
+        }
+
         viewModelScope.launch {
             _isLoading.value = true
             _error.value = null
@@ -70,24 +100,28 @@ class ChooseUsernameViewModel @Inject constructor(
                 return@launch
             }
 
-            // Crear en Firebase
-            // Nota: Firebase tiene la última palabra
-            repository.registerWithEmail(safeEmail, safePass)
-                .addOnSuccessListener { authResult ->
-                    val uid = authResult.user?.uid
-                    if (uid != null) {
-                        // Paso C: Crear en Mongo
-                        finalizeBackendRegistration(username, safeEmail, safeAge, uid, navController)
-                    }
-                }
-                .addOnFailureListener { e ->
+            if (isGoogleFlow) {
+                val currentUser = FirebaseAuth.getInstance().currentUser
+                if (currentUser != null) {
+                    finalizeBackendRegistration(username, currentUser.email!!, finalAge!!, currentUser.uid, navController)
+                } else {
+                    _error.value = "Error de sesión. Intenta loguearte de nuevo."
                     _isLoading.value = false
-                    if (e.message?.contains("email", ignoreCase = true) == true) {
-                        _error.value = "El correo fue tomado recientemente."
-                    } else {
-                        _error.value = "Error Firebase: ${e.message}"
-                    }
                 }
+            } else {
+                // CAMINO EMAIL: Creamos usuario en Firebase primero
+                repository.registerWithEmail(emailArg!!, passwordArg!!)
+                    .addOnSuccessListener { authResult ->
+                        val uid = authResult.user?.uid
+                        if (uid != null) {
+                            finalizeBackendRegistration(username, emailArg!!, finalAge!!, uid, navController)
+                        }
+                    }
+                    .addOnFailureListener {
+                        _isLoading.value = false
+                        _error.value = "Error: ${it.message}"
+                    }
+            }
         }
     }
 
@@ -105,6 +139,16 @@ class ChooseUsernameViewModel @Inject constructor(
                 _isLoading.value = false
                 _error.value = "Error al guardar perfil. Intenta de nuevo."
             }
+        }
+    }
+    private fun calculateAgeFromString(dateString: String): Int? {
+        return try {
+            val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+            val birthDate = LocalDate.parse(dateString, formatter)
+            Period.between(birthDate, LocalDate.now()).years
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
         }
     }
 }

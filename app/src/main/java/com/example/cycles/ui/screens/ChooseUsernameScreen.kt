@@ -18,6 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.example.cycles.ui.components.DateOfBirthPicker
 import com.example.cycles.viewmodel.ChooseUsernameViewModel
 
 
@@ -35,6 +36,9 @@ fun ChooseUsernameScreen(
     val loaded = remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
 
+    val dob by viewModel.dateOfBirth.collectAsState()
+
+
     LaunchedEffect(Unit) {
         if (!loaded.value) {
             val previousBackStack = navController.previousBackStackEntry
@@ -51,6 +55,8 @@ fun ChooseUsernameScreen(
             }
         }
     }
+
+    val showAgeInput by viewModel.showAgeInput.collectAsState()
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -111,6 +117,22 @@ fun ChooseUsernameScreen(
                     .fillMaxWidth(),
                 enabled = !isLoading // Se bloquea mientras carga
             )
+            Spacer(Modifier.height(12.dp))
+
+            if (showAgeInput) {
+                Spacer(Modifier.height(16.dp))
+                Text("Fecha de nacimiento", style = MaterialTheme.typography.labelLarge)
+
+                DateOfBirthPicker(
+                    selectedDate = dob,
+                    onDateSelected = { newDateString ->
+                        focusManager.clearFocus()
+                        viewModel.updateDateOfBirth(newDateString)
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+
+                    )
+            }
 
             // Mensaje de Error (solo si hay error)
             if (!errorMsg.isNullOrEmpty()) {

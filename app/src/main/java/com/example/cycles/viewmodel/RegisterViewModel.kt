@@ -3,6 +3,7 @@ package com.example.cycles.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.cycles.repository.AuthRepository
+import com.google.firebase.auth.GoogleAuthProvider
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -33,15 +34,39 @@ class RegisterViewModel @Inject constructor(
     val navigateToNextStep = _navigateToNextStep.asStateFlow()
 
     private var _validatedAge: Int = 0
+    private val _navigateToNextStepGoogle = MutableStateFlow(false)
+    val navigateToNextStepGoogle = _navigateToNextStepGoogle.asStateFlow()
+
+    var googleEmail: String? = null
 
     // --- Actualizaciones de estado ---
-    fun onEmailChange(newEmail: String) { _email.value = newEmail }
-    fun onPasswordChange(newPass: String) { _password.value = newPass }
+    fun onEmailChange(newEmail: String) {
+        _email.value = newEmail
+    }
+
+    fun onPasswordChange(newPass: String) {
+        _password.value = newPass
+    }
 
     fun updateDateOfBirth(newDate: String) {
         _dateOfBirth.value = newDate
     }
+    fun onGoogleSignInResult(idToken: String) {
+        _isLoading.value = true
+        val credential = GoogleAuthProvider.getCredential(idToken, null)
 
+        repository.signInWithGoogle(credential)
+            .addOnSuccessListener { authResult ->
+                val user = authResult.user
+                googleEmail = user?.email
+                _isLoading.value = false
+                _navigateToNextStepGoogle.value = true
+            }
+            .addOnFailureListener { e ->
+                _isLoading.value = false
+                _error.value = "Error Google: ${e.message}"
+            }
+    }
     // --- Cálculo de edad ---
     private fun calculateAgeFromString(dateString: String): Int? {
         return try {
