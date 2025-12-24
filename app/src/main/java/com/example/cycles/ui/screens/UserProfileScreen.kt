@@ -54,17 +54,30 @@ fun UserProfileScreen(
     viewModel: UserProfileViewModel = hiltViewModel(),
     onBackClick: () -> Unit,
     screenPadding: PaddingValues,
-    onLogoutClick: () -> Unit,
     onEditClick: () -> Unit
 ) {
     val state by viewModel.state.collectAsState()
+    val isLoggedOut by viewModel.isLoggedOut.collectAsState()
+
+
+    LaunchedEffect(isLoggedOut) {
+        if (isLoggedOut) {
+            // Navegamos a la pantalla de bienvenida (Welcome)
+            navController.navigate(Screen.Welcome.route) {
+                // popUpTo(0) borra TODA la pila de pantallas anteriores.
+                // Así, si el usuario presiona "Atrás" en el Welcome, se sale de la app
+                // en lugar de volver al Perfil.
+                popUpTo(0) { inclusive = true }
+            }
+        }
+    }
 
     // Carga inicial y recarga de sección
     LaunchedEffect(Unit) {
         viewModel.loadUserProfileData()
         // Carga la sección inicial si aún no se ha cargado
         if (state.activeLists.isEmpty() && state.archivedLists.isEmpty() && state.favoriteItems.isEmpty()) {
-            viewModel.onSectionSelected(state.sectionIndex) // Carga la pestaña actual
+
         }
     }
 
@@ -78,7 +91,7 @@ fun UserProfileScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = onLogoutClick) {
+                    IconButton(onClick = { viewModel.performLogout() }) {
                         Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = "Cerrar Sesión")
                     }
                 },
@@ -110,7 +123,7 @@ fun UserProfileScreen(
 
             // --- Tabs Header ---
             stickyHeader {
-                SectionTabs(state.sectionIndex, viewModel::onSectionSelected)
+
             }
 
             // --- Section Content Item ---
@@ -121,14 +134,6 @@ fun UserProfileScreen(
 //                        .heightIn(min = 300.dp) // Altura mínima para contenido
                         .padding(top = 8.dp) // Espacio después de las pestañas
                 ) {
-                    // Contenido de la sección seleccionada
-                    SectionContent(
-                        state = state,
-                        navController = navController,
-                        onArchive = viewModel::archiveList,
-                        onUnarchive = viewModel::unarchiveList
-                    )
-
                     // Indicador de carga centrado
                     if (state.isLoadingSection) {
                         CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))

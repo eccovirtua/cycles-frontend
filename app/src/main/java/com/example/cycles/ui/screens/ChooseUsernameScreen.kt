@@ -1,29 +1,32 @@
 package com.example.cycles.ui.screens
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import com.example.cycles.R
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
+import com.example.cycles.R
 import com.example.cycles.ui.components.DateOfBirthPicker
 import com.example.cycles.ui.theme.HelveticaFamily
 import com.example.cycles.viewmodel.ChooseUsernameViewModel
-
 
 @Composable
 fun ChooseUsernameScreen(
@@ -31,16 +34,29 @@ fun ChooseUsernameScreen(
     paddingValues: PaddingValues,
     viewModel: ChooseUsernameViewModel = hiltViewModel()
 ) {
-    // Estados observados del ViewModel
+    // --- ESTADOS ---
     val name by viewModel.name.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val errorMsg by viewModel.error.collectAsState()
+    val dob by viewModel.dateOfBirth.collectAsState()
+    val showAgeInput by viewModel.showAgeInput.collectAsState()
+
+    // Estados para la foto
+    val selectedImageUri by viewModel.selectedImageUri.collectAsState()
+    val googlePhotoUrl by viewModel.currentGooglePhotoUrl.collectAsState()
 
     val loaded = remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
 
-    val dob by viewModel.dateOfBirth.collectAsState()
+    // --- LÓGICA DE FOTO ---
+    // 1. Calculamos qué mostrar (Prioridad: Nueva selección -> Foto Google -> Null)
+    val imageModelToDisplay = selectedImageUri ?: googlePhotoUrl
 
+    // 2. Configuramos el lanzador de la galería
+    val photoPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia(),
+        onResult = { uri -> viewModel.onImageSelected(uri) }
+    )
 
     LaunchedEffect(Unit) {
         if (!loaded.value) {
@@ -52,14 +68,12 @@ fun ChooseUsernameScreen(
                 val password = savedHandle.get<String>("password")
                 val age = savedHandle.get<Int>("age")
 
-                // 2. INYECTARLOS AL VIEWMODEL
+                // Inyectamos datos al ViewModel
                 viewModel.setRegistrationData(email, password, age)
                 loaded.value = true
             }
         }
     }
-
-    val showAgeInput by viewModel.showAgeInput.collectAsState()
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -94,7 +108,50 @@ fun ChooseUsernameScreen(
 
             Spacer(Modifier.height(30.dp))
 
-            // Etiqueta del campo
+            // ---------------------------------------------------------
+            // ZONA DE FOTO DE PERFIL (Integrado aquí)
+            // ---------------------------------------------------------
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(), // Para poder centrarlo horizontalmente
+                contentAlignment = Alignment.Center
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(100.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .clickable {
+                            // Lanzamos el picker solo para imágenes
+                            photoPickerLauncher.launch(
+                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                            )
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (imageModelToDisplay != null) {
+                        AsyncImage(
+                            model = imageModelToDisplay, // Coil maneja Uri y String (URL) automáticamente
+                            contentDescription = "Foto perfil",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                    } else {
+                        // Icono Placeholder
+                        Icon(
+                            imageVector = Icons.Default.Person,
+                            contentDescription = "Agregar foto",
+                            modifier = Modifier.size(40.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+            // ---------------------------------------------------------
+
+            Spacer(Modifier.height(30.dp))
+
+            // Etiqueta del campo Usuario
             Text(
                 text = stringResource(R.string.cu_topfield),
                 style = MaterialTheme.typography.labelLarge,
@@ -103,7 +160,7 @@ fun ChooseUsernameScreen(
             )
             Spacer(Modifier.height(4.dp))
 
-            // Campo de Texto
+            // Campo de Texto Usuario
             OutlinedTextField(
                 value = name,
                 onValueChange = viewModel::onNameChange,
@@ -121,10 +178,11 @@ fun ChooseUsernameScreen(
                 modifier = Modifier
                     .height(53.dp)
                     .fillMaxWidth(),
-                enabled = !isLoading // Se bloquea mientras carga
+                enabled = !isLoading
             )
             Spacer(Modifier.height(12.dp))
 
+            // Input de Edad (Condicional)
             if (showAgeInput) {
                 Spacer(Modifier.height(16.dp))
                 Text(stringResource(R.string.cu_doptopfield), style = MaterialTheme.typography.labelLarge, fontFamily = HelveticaFamily, color = MaterialTheme.colorScheme.onBackground)
@@ -136,11 +194,10 @@ fun ChooseUsernameScreen(
                         viewModel.updateDateOfBirth(newDateString)
                     },
                     modifier = Modifier.fillMaxWidth(),
-
-                    )
+                )
             }
 
-            // Mensaje de Error (solo si hay error)
+            // Mensaje de Error
             if (!errorMsg.isNullOrEmpty()) {
                 Spacer(Modifier.height(8.dp))
                 Text(
@@ -150,21 +207,18 @@ fun ChooseUsernameScreen(
                 )
             }
 
-            // Empujamos el botón hacia abajo (opcional, si prefieres pegado al input quita el weight)
             Spacer(modifier = Modifier.weight(1f))
 
-            // Botón Finalizar Registro
+            // Botón Finalizar
             Button(
                 onClick = {
                     focusManager.clearFocus()
-
                     viewModel.checkUsernameAndRegister(navController)
                 },
                 shape = RoundedCornerShape(25),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
-                // Solo habilitado si no está cargando y el usuario escribió al menos 4 caracteres
                 enabled = !isLoading && name.length >= 4
             ) {
                 if (isLoading) {

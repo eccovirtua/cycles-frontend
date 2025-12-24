@@ -35,17 +35,6 @@ fun EditProfileScreen(
 ) {
     val state by viewModel.state.collectAsState()
 
-    // 🎯 CLAVE: Launcher para seleccionar imagen de la galería
-    val imagePickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent(),
-        onResult = { uri: Uri? ->
-            if (uri != null) {
-                // Notificar al ViewModel con la URI local seleccionada
-                viewModel.onProfilePhotoSelected(uri)
-            }
-        }
-    )
-
     // 🛑 ARREGLO CLAVE: Escuchar el evento de navegación directamente desde el ViewModel.
     // Se elimina el código del Snackbar para navegar inmediatamente al recibir el evento.
     LaunchedEffect(Unit) {
@@ -124,32 +113,25 @@ fun EditProfileScreen(
                 newUri = state.newProfileUri
             ) {
                 // Iniciar la selección de imagen (solo imágenes)
-                imagePickerLauncher.launch("image/*")
+//                imagePickerLauncher.launch("image/*")
             }
 
             Spacer(Modifier.height(32.dp))
 
             // 2. Campo de Edición de Nombre
-            OutlinedTextField(
-                value = state.newName,
-                onValueChange = viewModel::onNameChange,
-                label = { Text("") },
-                modifier = Modifier.fillMaxWidth(),
-                enabled = !state.isLoading
-            )
 
             Spacer(Modifier.height(16.dp))
 
             // 3. Campo de Edición de Biografía
-            OutlinedTextField(
-                value = state.newBio,
-                onValueChange = viewModel::onBioChange,
-                label = { Text("") },
-                minLines = 3,
-                maxLines = 5,
-                modifier = Modifier.fillMaxWidth(),
-                enabled = !state.isLoading
-            )
+//            OutlinedTextField(
+//                value = state.newBio,
+////                onValueChange = viewModel::onBioChange,
+//                label = { Text("") },
+//                minLines = 3,
+//                maxLines = 5,
+//                modifier = Modifier.fillMaxWidth(),
+//                enabled = !state.isLoading
+//            )
         }
     }
 }

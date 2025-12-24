@@ -318,14 +318,6 @@ fun AppNavHost(
                 navController = navController,
                 onBackClick = { navController.popBackStack() },
                 screenPadding = profilePadding,
-                onLogoutClick = {
-                    scope.launch {
-//                        LoginViewModel.logout()
-                        navController.navigate(Screen.Welcome.route) {
-                            popUpTo(Screen.Home.route) { inclusive = true }
-                        }
-                    }
-                },
                 onEditClick = { navController.navigate(Screen.EditProfile.route) }
             )
         }

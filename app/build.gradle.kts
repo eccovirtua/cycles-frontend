@@ -167,5 +167,7 @@ dependencies {
 
 
     implementation(libs.androidx.appcompat)
+    implementation(libs.kotlinx.coroutines.play.services)
+    implementation(libs.firebase.storage)
 
 }

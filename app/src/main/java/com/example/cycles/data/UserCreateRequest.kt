@@ -7,5 +7,7 @@ data class UserCreateRequest (
     val age: Int,
     val email: String,
     @SerializedName("firebaseUid")
-    val firebaseUid: String
+    val firebaseUid: String,
+    @SerializedName("profile_picture")
+    val profilePicture: String?
 )
