@@ -233,17 +233,6 @@ fun HomeScreen (
         }
     }
 
-    // Verifica si el token está vacío y redirige al welcome
-//    LaunchedEffect(Unit) {
-//        val token = authViewModel.rawTokenFlow.first()
-//        // Esto suspende hasta que DataStore emita su primer valor real
-//
-//        if (token.isNullOrEmpty()) {
-//            navController.navigate(Screen.Welcome.route) {
-//                popUpTo(Screen.Home.route) { inclusive = true }
-//            }
-//        }
-//    }
 }
 @Composable
 fun RemainingSessionsCard(remaining: Int?) {

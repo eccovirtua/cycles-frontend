@@ -16,6 +16,7 @@ import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.storage.FirebaseStorage
 import jakarta.inject.Inject
 import kotlinx.coroutines.tasks.await
+import androidx.core.net.toUri
 
 
 class AuthRepository @Inject constructor(
@@ -163,7 +164,7 @@ class AuthRepository @Inject constructor(
 
             // Si photoUrl es null, no lo tocamos, o podríamos borrarlo si quisieras
             if (photoUrl != null) {
-                builder.setPhotoUri(Uri.parse(photoUrl))
+                builder.photoUri = photoUrl.toUri()
             }
 
             user.updateProfile(builder.build()).await()
@@ -171,20 +172,24 @@ class AuthRepository @Inject constructor(
     }
     suspend fun uploadProfilePicture(uid: String, imageUri: Uri): String? {
         return try {
-            // 1. Definimos la ruta: carpeta "profile_images", archivo "UID.jpg"
-            // Al usar el UID como nombre, si el usuario sube otra foto, sobrescribe la anterior (ahorrando espacio)
+            Log.d("UPLOAD_DEBUG", "Iniciando subida para: $uid")
+            Log.d("UPLOAD_DEBUG", "URI del archivo: $imageUri")
+
             val imageRef = storageRef.child("profile_images/$uid.jpg")
 
-            // 2. Subimos el archivo (putFile) y esperamos a que termine (await)
+            // Subir
             imageRef.putFile(imageUri).await()
+            Log.d("UPLOAD_DEBUG", "Subida completada. Obteniendo URL...")
 
-            // 3. Pedimos la URL de descarga pública
+            // Obtener URL
             val downloadUrl = imageRef.downloadUrl.await()
+            Log.d("UPLOAD_DEBUG", "URL Final: $downloadUrl")
 
-            // 4. Devolvemos la URL como String
             downloadUrl.toString()
 
         } catch (e: Exception) {
+            // AQUÍ VEREMOS EL ERROR REAL
+            Log.e("UPLOAD_DEBUG", "❌ ERROR SUBIENDO: ${e.message}")
             e.printStackTrace()
             null
         }

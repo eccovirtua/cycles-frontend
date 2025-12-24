@@ -32,34 +32,6 @@ class FinalRecommendationsViewModel @Inject constructor(
 
     private var currentSessionId: String = ""
     private var sessionQualityScore: Float = 0.0f
-
-
-
-
-//    fun loadFinalRecommendations(sessionId: String) {
-//        if (sessionId == currentSessionId) return
-//        currentSessionId = sessionId
-//
-//        viewModelScope.launch {
-//            _uiState.update { it.copy(isLoading = true) }
-//            try {
-//                val statsBefore = StatsCache.statsBeforeSession
-//
-//                val response = repository.finalizeSession(sessionId)
-//                sessionQualityScore = response.sessionAvgQuality
-//
-//                _uiState.update {
-//                    it.copy(
-//                        isLoading = false,
-//                        recommendations = response.recommendations,
-//                        statsBeforeSession = statsBefore
-//                    )
-//                }
-//            } catch (e: Exception) {
-//                _uiState.update{ it.copy( isLoading = false, error = e.message ?: "Error desconocido")}
-//            }
-//        }
-//    }
 fun loadFinalRecommendations(sessionId: String) {
     // Evita recargar si ya tenemos datos para esta sesión Y stats 'before' está presente
     if (sessionId == currentSessionId && _uiState.value.statsBeforeSession != null) {

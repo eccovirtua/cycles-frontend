@@ -11,6 +11,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
@@ -21,7 +22,7 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
 
-    // Interceptor para Firebase
+    // 1. Interceptor de Auth (CORREGIDO)
     @Singleton
     @Provides
     fun provideAuthInterceptor(): Interceptor = Interceptor { chain ->
@@ -29,32 +30,46 @@ object NetworkModule {
         val requestBuilder = chain.request().newBuilder()
 
         if (user != null) {
-
             try {
-                val tokenResult = Tasks.await(user.getIdToken(true))
+                // CAMBIO IMPORTANTE: forceRefresh = false
+                // Esto usa la caché local y solo renueva si expiró.
+                val tokenResult = Tasks.await(user.getIdToken(false))
                 val token = tokenResult.token
+
                 if (token != null) {
                     requestBuilder.addHeader("Authorization", "Bearer $token")
+                    Log.d("AuthInterceptor", "Token inyectado correctamente") // Log de éxito
                 }
             } catch (e: Exception) {
-                Log.e("AuthInterceptor", "Error obteniendo token", e)
+                // Si falla (ej: sin internet para renovar), dejamos pasar la petición
+                // para que el backend devuelva 401 y la UI lo maneje.
+                Log.e("AuthInterceptor", "Error obteniendo token: ${e.message}")
             }
+        } else {
+            Log.w("AuthInterceptor", "Usuario no logueado, enviando sin token")
         }
         chain.proceed(requestBuilder.build())
     }
 
-    // 3. Inyectar interceptor en OkHttpClient
+    // 2. Cliente HTTP
     @Singleton
     @Provides
     fun provideOkHttpClient(authInterceptor: Interceptor): OkHttpClient {
+
+        val logging = HttpLoggingInterceptor().apply {
+            level = HttpLoggingInterceptor.Level.BODY
+        }
+
         return OkHttpClient.Builder()
             .addInterceptor(authInterceptor)
-            .connectTimeout(30, TimeUnit.SECONDS)
+            .addInterceptor(logging)
+            .connectTimeout(30, TimeUnit.SECONDS) // Cloud Run a veces tarda en despertar
             .readTimeout(30, TimeUnit.SECONDS)
+            .writeTimeout(30, TimeUnit.SECONDS)
             .build()
     }
 
-
+    // 3. Retrofit
     @Singleton
     @Provides
     fun provideRecsApiService(okHttpClient: OkHttpClient): RecsApiService {
@@ -65,6 +80,7 @@ object NetworkModule {
             .build()
             .create(RecsApiService::class.java)
     }
+
     @Provides
     @Singleton
     fun provideFirebaseAuth(): FirebaseAuth = FirebaseAuth.getInstance()

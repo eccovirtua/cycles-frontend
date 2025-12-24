@@ -26,7 +26,7 @@ data class DashboardUiState(
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
     private val repository: RecsRepository,
-    savedStateHandle: SavedStateHandle // 👈 Inject SavedStateHandle
+    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(DashboardUiState())
