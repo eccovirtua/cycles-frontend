@@ -7,7 +7,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material3.*
@@ -31,9 +30,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.FormatListBulleted
+import androidx.compose.material.icons.automirrored.filled.StarHalf
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FormatListBulleted
+import androidx.compose.material.icons.filled.GraphicEq
 import androidx.compose.material.icons.filled.RateReview
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.StarOutline
@@ -41,6 +42,8 @@ import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.sp
+import kotlin.math.floor
 
 data class ProfileTab(val title: String, val icon: ImageVector)
 // --- Pantalla Principal ---
@@ -56,19 +59,25 @@ fun UserProfileScreen(
     val state by viewModel.state.collectAsState()
     val isLoggedOut by viewModel.isLoggedOut.collectAsState()
 
-    // --- DATOS FALSOS PARA PRUEBA (Reemplazar con datos del ViewModel) ---
-    // Generamos 53 items para probar que el grid funcione con filas incompletas al final
+    // --- DATOS FALSOS ---
     val fakeFavorites = remember { List(53) { "https://picsum.photos/200?random=$it" } }
-    val fakeReviews = remember { List(10) { it } } // Simula 10 reseñas
-    val fakeLists = remember { List(5) { it } }    // Simula 5 listas
-    // ---------------------------------------------------------------------
+
+    // Lista de reseñas con calificación DOUBLE para probar medias estrellas
+    val fakeReviews = remember {
+        List(10) { index ->
+            Triple(index, (1..5).random() + if(index % 2 == 0) 0.5 else 0.0, "21/01/2026")
+        }
+    }
+
+    val fakeLists = remember { List(5) { it } }
+    // --------------------
 
     var selectedTabIndex by remember { mutableIntStateOf(0) }
 
     val tabs = listOf(
-        ProfileTab("Favoritos", Icons.Default.Favorite), // Icono Corazón
-        ProfileTab("Reseñas", Icons.Default.RateReview), // Icono Reseña
-        ProfileTab("Listas", Icons.AutoMirrored.Filled.FormatListBulleted) // Icono Lista
+        ProfileTab("Favoritos", Icons.Default.Favorite),
+        ProfileTab("Reseñas", Icons.Default.RateReview),
+        ProfileTab("Listas", Icons.AutoMirrored.Filled.FormatListBulleted)
     )
 
     LaunchedEffect(isLoggedOut) {
@@ -83,25 +92,22 @@ fun UserProfileScreen(
         viewModel.loadUserProfileData()
     }
 
-
     Scaffold(
         contentWindowInsets = WindowInsets(0.dp)
     ) { innerPadding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                // Aplicamos solo el padding inferior del scaffold (navegación por gestos)
                 .padding(bottom = innerPadding.calculateBottomPadding())
         ) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                // CORRECCIÓN: Sumamos el screenPadding para que el contenido no se corte abajo
                 contentPadding = PaddingValues(
                     bottom = 20.dp + screenPadding.calculateBottomPadding(),
                     top = 0.dp
                 )
             ) {
-                // 1. HEADER
+                // 1. HEADER (Rediseñado)
                 item {
                     ProfileHeaderContent(state, onEditClick)
                 }
@@ -139,7 +145,6 @@ fun UserProfileScreen(
                 when (selectedTabIndex) {
                     0 -> { // FAVORITOS
                         val chunkedItems = fakeFavorites.chunked(5)
-                        // CORRECCIÓN: Usamos 'items' explícitamente para evitar confusión con Int
                         items(items = chunkedItems) { rowImages ->
                             Row(
                                 modifier = Modifier
@@ -160,11 +165,12 @@ fun UserProfileScreen(
                         }
                     }
                     1 -> { // RESEÑAS
-                        items(items = fakeReviews) { index ->
+                        items(items = fakeReviews) { (index, rating, date) ->
                             ReviewItemCard(
                                 itemName = "Album/Pelicula #$index",
-                                rating = (1..5).random(),
-                                reviewText = if (index % 2 == 0) "Una obra maestra..." else null,
+                                rating = rating, // Pasamos Double (ej: 3.5)
+                                date = date,     // Pasamos fecha
+                                reviewText = if (index % 2 == 0) "Una obra maestra absoluta..." else null,
                                 imageUrl = "https://picsum.photos/200?random=$index"
                             )
                             HorizontalDivider(thickness = 0.5.dp, color = Color.LightGray.copy(alpha = 0.3f))
@@ -195,6 +201,8 @@ fun UserProfileScreen(
         }
     }
 }
+
+// --- Componentes Auxiliares ---
 
 @Composable
 fun CircleOverlayButton(
@@ -228,6 +236,7 @@ fun ProfileHeaderContent(state: UserProfileState, onEditClick: () -> Unit) {
         )
 
         Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+            // Fila: Foto y Botón Editar (Se mantiene igual para alinear la foto)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -235,15 +244,14 @@ fun ProfileHeaderContent(state: UserProfileState, onEditClick: () -> Unit) {
                 verticalAlignment = Alignment.Bottom,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                // CORRECCIÓN: Foto redonda con borde
                 Image(
                     painter = rememberAsyncImagePainter(model = state.profileImageUrl),
                     contentDescription = "Foto perfil",
                     modifier = Modifier
                         .size(120.dp)
-                        .clip(CircleShape) // 1. Recortamos primero
+                        .clip(CircleShape)
                         .background(MaterialTheme.colorScheme.surface)
-                        .border(3.dp, MaterialTheme.colorScheme.surface, CircleShape), // 2. Borde redondo
+                        .border(3.dp, MaterialTheme.colorScheme.surface, CircleShape),
                     contentScale = ContentScale.Crop
                 )
                 OutlinedButton(
@@ -253,24 +261,99 @@ fun ProfileHeaderContent(state: UserProfileState, onEditClick: () -> Unit) {
                     Text("Editar Perfil")
                 }
             }
-            Column(modifier = Modifier.offset(y = (-40).dp)) {
-                Text(
-                    text = state.name.ifEmpty { "Usuario" },
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = state.username.ifEmpty { "@usuario" },
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = state.bio.ifEmpty { "Sin biografía." },
-                    style = MaterialTheme.typography.bodyMedium,
-                    maxLines = 3,
-                    overflow = TextOverflow.Ellipsis
-                )
+
+            // NUEVA ESTRUCTURA DE INFORMACIÓN
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .offset(y = (-40).dp), // Subimos todo un poco
+                horizontalArrangement = Arrangement.SpaceBetween, // Espacio entre Info y Widget
+                verticalAlignment = Alignment.Top
+            ) {
+                // IZQUIERDA: Info Usuario
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = state.username.ifEmpty { "@usuario" },
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    // Fila de Edad y País
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "23 Años", // Placeholder (usar datos reales luego)
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = " • ",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = "Chile", // Placeholder
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+
+                // DERECHA: Widget "Escuchando Ahora" (Estilo Last.fm / RYM)
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.5f),
+                    modifier = Modifier
+                        .width(140.dp)
+                        .height(55.dp) // Altura compacta
+                        .clickable { /* Ir al item */ }
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(6.dp)
+                    ) {
+                        // Icono animado o carátula pequeña
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(RoundedCornerShape(4.dp))
+                                .background(MaterialTheme.colorScheme.primaryContainer)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.GraphicEq, // Icono de música
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.width(8.dp))
+
+                        Column(verticalArrangement = Arrangement.Center) {
+                            Text(
+                                text = "Escuchando",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.primary,
+                                fontSize = 9.sp
+                            )
+                            Text(
+                                text = "Radiohead",
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.Bold,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                            Text(
+                                text = "In Rainbows",
+                                style = MaterialTheme.typography.labelSmall,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
             }
         }
     }
@@ -290,7 +373,7 @@ fun FavoriteGridItem(imageUrl: String) {
 }
 
 @Composable
-fun ReviewItemCard(itemName: String, rating: Int, reviewText: String?, imageUrl: String) {
+fun ReviewItemCard(itemName: String, rating: Double, date: String, reviewText: String?, imageUrl: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -307,25 +390,78 @@ fun ReviewItemCard(itemName: String, rating: Int, reviewText: String?, imageUrl:
             contentScale = ContentScale.Crop
         )
         Spacer(modifier = Modifier.width(12.dp))
-        Column {
-            Text(text = itemName, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                repeat(5) { index ->
-                    Icon(
-                        imageVector = if (index < rating) Icons.Filled.Star else Icons.Outlined.StarOutline,
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp),
-                        tint = if (index < rating) Color(0xFFFFC107) else Color.Gray
-                    )
-                }
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(text = "$rating/5", style = MaterialTheme.typography.labelMedium)
+
+        Column(modifier = Modifier.weight(1f)) {
+            // CABECERA DE LA RESEÑA: Título a la izq, Fecha a la derecha
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween, // Esto separa Título y Fecha
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = itemName,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.weight(1f) // El título ocupa lo que necesite pero deja espacio
+                )
+
+                // FECHA A LA DERECHA
+                Text(
+                    text = date,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
+
+            // ESTRELLAS CON DECIMALES
+            RatingStars(rating = rating)
+
             if (!reviewText.isNullOrEmpty()) {
                 Spacer(modifier = Modifier.height(4.dp))
-                Text(text = reviewText, style = MaterialTheme.typography.bodyMedium, maxLines = 3, overflow = TextOverflow.Ellipsis)
+                Text(
+                    text = reviewText,
+                    style = MaterialTheme.typography.bodyMedium,
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis
+                )
             }
         }
+    }
+}
+
+// COMPONENTE PARA ESTRELLAS CON DECIMALES
+@Composable
+fun RatingStars(rating: Double) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        val fullStars = floor(rating).toInt()
+        val hasHalfStar = (rating - fullStars) >= 0.5
+
+        repeat(5) { index ->
+            val icon = when {
+                index < fullStars -> Icons.Filled.Star // Estrella completa
+                index == fullStars && hasHalfStar -> Icons.AutoMirrored.Filled.StarHalf // Media estrella
+                else -> Icons.Outlined.StarOutline // Estrella vacía
+            }
+
+            val tint = if (index < fullStars || (index == fullStars && hasHalfStar))
+                Color(0xFFFFC107) // Amarillo
+            else
+                Color.Gray // Gris
+
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                modifier = Modifier.size(16.dp),
+                tint = tint
+            )
+        }
+
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            text = "$rating",
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 
@@ -345,7 +481,7 @@ fun ListItemCard(listName: String, itemCount: Int, description: String) {
                 }
             }
         },
-        trailingContent = { Icon(Icons.Default.FormatListBulleted, contentDescription = null, tint = Color.Gray) },
+        trailingContent = { Icon(Icons.AutoMirrored.Filled.FormatListBulleted, contentDescription = null, tint = Color.Gray) },
         modifier = Modifier.clickable { }
     )
     HorizontalDivider(thickness = 0.5.dp)
