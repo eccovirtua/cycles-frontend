@@ -7,7 +7,6 @@
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
 
-<!--para testear conexion a bd en entorno local usar en el tag de abajo android:usesCleartextTraffic="true"-->
     <application
 
         android:name=".MyApp"
@@ -34,9 +33,9 @@
         </activity>
         <activity
             android:name="com.canhub.cropper.CropImageActivity"
-            android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
+            android:theme="@style/Theme.AppCompat"
             android:exported="false"
-            tools:replace="android:exported"
+            tools:replace="android:theme,android:exported"
             />
     </application>
 </manifest>

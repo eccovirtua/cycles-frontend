@@ -253,7 +253,7 @@ fun WelcomeScreen(
 
 
             /// CAMBIAR A LA PÁGINA DE RECUPERAR CONTRASEÑA
-            TextButton(onClick = { navController.navigate(Screen.ChooseUsername.route) }) {
+            TextButton(onClick = { navController.navigate(Screen.Profile.route) }) {
                 Text(stringResource(R.string.home_forgotpassword), fontFamily = HelveticaFamily)
             }
 

@@ -9,7 +9,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.GridOn
 import androidx.compose.material.icons.filled.PermIdentity
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
@@ -79,17 +78,16 @@ fun ChooseUsernameScreen(
         if (uri == null) return
 
         val options = CropImageOptions().apply {
+            // 1. Aspecto Cuadrado
             aspectRatioX = 1; aspectRatioY = 1
             fixAspectRatio = true
-
-            // Colores (Asegúrate de que contrasten bien)
-            toolbarColor = primaryColorInt
-            progressBarColor = primaryColorInt
-            activityMenuIconColor = androidx.compose.ui.graphics.Color.DarkGray.toArgb()
-
-            // Títulos de la barra (Ahora sí se verán)
+            // 2. Títulos
             activityTitle = "Ajustar Foto"
-            cropMenuCropButtonTitle = "Listo" // Texto del botón de confirmar
+            cropMenuCropButtonTitle = "Listo"
+
+            toolbarColor = primaryColorInt      // Color de fondo de la barra
+            toolbarTitleColor = Color.Black.toArgb() // Color del Título
+            activityMenuIconColor = Color.Black.toArgb()
         }
 
         cropImageLauncher.launch(CropImageContractOptions(uri, options))
@@ -236,12 +234,6 @@ fun ChooseUsernameScreen(
                                     .background(Color.Black.copy(alpha = 0.3f)),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Icon(
-                                    imageVector = Icons.Default.GridOn, // Icono de Cuadrícula
-                                    contentDescription = "Recortar",
-                                    tint = Color.White.copy(alpha = 0.8f), // Blanco casi sólido
-                                    modifier = Modifier.size(28.dp)
-                                )
                             }
                         }
                     } else {
