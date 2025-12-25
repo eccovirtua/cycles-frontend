@@ -1,5 +1,6 @@
 package com.example.cycles.ui.screens
 
+import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -8,24 +9,34 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.GridOn
 import androidx.compose.material.icons.filled.PermIdentity
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import coil.ImageLoader
 import coil.compose.AsyncImage
+import coil.decode.ImageDecoderDecoder
 import com.example.cycles.R
 import com.example.cycles.ui.components.DateOfBirthPicker
 import com.example.cycles.ui.theme.HelveticaFamily
 import com.example.cycles.viewmodel.ChooseUsernameViewModel
+import androidx.core.net.toUri
+import com.canhub.cropper.CropImageContract
+import com.canhub.cropper.CropImageContractOptions
+import com.canhub.cropper.CropImageOptions
+import androidx.compose.ui.graphics.toArgb
 
 @Composable
 fun ChooseUsernameScreen(
@@ -34,28 +45,80 @@ fun ChooseUsernameScreen(
     viewModel: ChooseUsernameViewModel = hiltViewModel()
 ) {
     // --- ESTADOS ---
+
     val name by viewModel.name.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val errorMsg by viewModel.error.collectAsState()
     val dob by viewModel.dateOfBirth.collectAsState()
     val showAgeInput by viewModel.showAgeInput.collectAsState()
-
+    val primaryColorInt = MaterialTheme.colorScheme.primary.toArgb()
     // Estados para la foto
     val selectedImageUri by viewModel.selectedImageUri.collectAsState()
     val googlePhotoUrl by viewModel.currentGooglePhotoUrl.collectAsState()
 
+    val context = LocalContext.current
+
     val loaded = remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
 
-    // --- LÓGICA DE FOTO ---
-    // 1. Calculamos qué mostrar (Prioridad: Nueva selección -> Foto Google -> Null)
     val imageModelToDisplay = selectedImageUri ?: googlePhotoUrl
+
+    fun isGif(uri: Uri): Boolean {
+        val type = context.contentResolver.getType(uri)
+        return type?.contains("gif", ignoreCase = true) == true
+    }
+
+    val cropImageLauncher = rememberLauncherForActivityResult(contract = CropImageContract()) { result ->
+        if (result.isSuccessful) {
+            viewModel.onCropSuccess(result.uriContent)
+        } else {
+            // Manejo de error o cancelación silenciosa
+        }
+    }
+    fun launchCropper(uri: Uri?) {
+        if (uri == null) return
+
+        val options = CropImageOptions().apply {
+            aspectRatioX = 1; aspectRatioY = 1
+            fixAspectRatio = true
+
+            // Colores (Asegúrate de que contrasten bien)
+            toolbarColor = primaryColorInt
+            progressBarColor = primaryColorInt
+            activityMenuIconColor = androidx.compose.ui.graphics.Color.DarkGray.toArgb()
+
+            // Títulos de la barra (Ahora sí se verán)
+            activityTitle = "Ajustar Foto"
+            cropMenuCropButtonTitle = "Listo" // Texto del botón de confirmar
+        }
+
+        cropImageLauncher.launch(CropImageContractOptions(uri, options))
+    }
 
     // 2. Configuramos el lanzador de la galería
     val photoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
-        onResult = { uri -> viewModel.onImageSelected(uri) }
+        onResult = { uri ->
+            if (uri != null) {
+                // LÓGICA DE BYPASS:
+                if (isGif(uri)) {
+                    // Si es GIF -> Lo mandamos directo (Coil hará el recorte visual)
+                    viewModel.onCropSuccess(uri)
+                } else {
+                    // Si NO es GIF -> Abrimos el recortador para ajuste manual
+                    launchCropper(uri)
+                }
+            }
+        }
     )
+
+    val gifImageLoader = remember {
+        ImageLoader.Builder(context)
+            .components {
+                add(ImageDecoderDecoder.Factory())
+            }
+            .build()
+    }
 
     LaunchedEffect(Unit) {
         if (!loaded.value) {
@@ -122,30 +185,71 @@ fun ChooseUsernameScreen(
                 horizontalArrangement = Arrangement.Start
             ) {
 
+
                 //  LA FOTO
                 Box(
+
                     modifier = Modifier
-                        .size(120.dp)
+                        .size(150.dp)
                         .background(MaterialTheme.colorScheme.surfaceVariant)
                         .clickable {
-                            photoPickerLauncher.launch(
-                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                            )
+                            // LÓGICA AL TOCAR LA FOTO EXISTENTE:
+                            if (selectedImageUri != null) {
+                                // Si hay foto local, revisamos si es GIF
+                                if (isGif(selectedImageUri!!)) {
+                                    // GIF no se puede re-recortar, abrimos galería para cambiarlo
+                                    photoPickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                                } else {
+                                    // JPG se puede re-ajustar
+                                    launchCropper(selectedImageUri)
+                                }
+                            } else if (googlePhotoUrl != null) {
+                                launchCropper(googlePhotoUrl!!.toUri())
+                            } else {
+                                photoPickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                            }
                         },
-                    contentAlignment = Alignment.Center
+                    contentAlignment = Alignment.Center,
+
                 ) {
+
                     if (imageModelToDisplay != null) {
+                        // A. LA IMAGEN DE FONDO
                         AsyncImage(
                             model = imageModelToDisplay,
+                            imageLoader = gifImageLoader,
                             contentDescription = "Foto perfil",
                             modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Fit
+                            contentScale = ContentScale.Crop
                         )
+
+                        // B. LA CAPA DE LA CUADRÍCULA (Overlay)
+                        // Lógica: Mostrar solo si NO es un GIF local.
+                        // (Si es URL de Google asumimos que no es GIF y mostramos la rejilla).
+                        val isGifFile = if (selectedImageUri != null) isGif(selectedImageUri!!) else false
+
+                        if (!isGifFile) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    // Fondo negro al 30% para que el icono blanco se vea bien
+                                    .background(Color.Black.copy(alpha = 0.3f)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.GridOn, // Icono de Cuadrícula
+                                    contentDescription = "Recortar",
+                                    tint = Color.White.copy(alpha = 0.8f), // Blanco casi sólido
+                                    modifier = Modifier.size(28.dp)
+                                )
+                            }
+                        }
                     } else {
+                        // C. ICONO POR DEFECTO (Cuando no hay foto)
                         Icon(
                             imageVector = Icons.Default.PermIdentity,
                             contentDescription = "Agregar foto",
-                            modifier = Modifier.size(40.dp),
+                            modifier = Modifier.size(50.dp),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
@@ -178,6 +282,7 @@ fun ChooseUsernameScreen(
                         )
                     }
 
+
                     // Botón ELIMINAR FOTO
                     OutlinedButton(
                         onClick = { viewModel.onImageRemoved() },
@@ -185,18 +290,14 @@ fun ChooseUsernameScreen(
                         enabled = imageModelToDisplay != null // Desactivado si ya está default
                     ) {
                         Text(
-                            text = "Eliminar foto   ",
+                            text = "Eliminar foto  ",
                             fontFamily = HelveticaFamily,
                             color = MaterialTheme.colorScheme.error // Rojo para indicar borrado
                         )
                     }
                 }
             }
-
-            // ---------------------------------------------------------
-
             Spacer(Modifier.height(30.dp))
-
             // Etiqueta del campo Usuario
             Text(
                 text = stringResource(R.string.cu_topfield),
@@ -276,7 +377,6 @@ fun ChooseUsernameScreen(
                     Text(stringResource(R.string.cu_finishbtn), fontFamily = HelveticaFamily)
                 }
             }
-
             Spacer(Modifier.height(20.dp))
         }
     }

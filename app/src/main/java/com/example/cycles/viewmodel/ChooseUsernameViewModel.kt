@@ -221,4 +221,8 @@ class ChooseUsernameViewModel @Inject constructor(
         _selectedImageUri.value = null
         _currentGooglePhotoUrl.value = null
     }
+    fun onCropSuccess(uri: Uri?) {
+        _selectedImageUri.value = uri
+    }
+
 }

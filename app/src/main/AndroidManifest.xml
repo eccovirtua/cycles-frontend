@@ -9,6 +9,7 @@
 
 <!--para testear conexion a bd en entorno local usar en el tag de abajo android:usesCleartextTraffic="true"-->
     <application
+
         android:name=".MyApp"
         android:usesCleartextTraffic="true"
         android:allowBackup="true"
@@ -31,6 +32,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name="com.canhub.cropper.CropImageActivity"
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
+            android:exported="false"
+            tools:replace="android:exported"
+            />
     </application>
-
 </manifest>

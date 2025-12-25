@@ -170,4 +170,7 @@ dependencies {
     implementation(libs.kotlinx.coroutines.play.services)
     implementation(libs.firebase.storage)
 
+    implementation(libs.coil.gif)
+    implementation(libs.vanniktech.android.image.cropper)
+
 }
