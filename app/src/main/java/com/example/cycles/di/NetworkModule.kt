@@ -21,8 +21,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
-
-    // 1. Interceptor de Auth (CORREGIDO)
     @Singleton
     @Provides
     fun provideAuthInterceptor(): Interceptor = Interceptor { chain ->
@@ -31,18 +29,14 @@ object NetworkModule {
 
         if (user != null) {
             try {
-                // CAMBIO IMPORTANTE: forceRefresh = false
-                // Esto usa la caché local y solo renueva si expiró.
                 val tokenResult = Tasks.await(user.getIdToken(false))
                 val token = tokenResult.token
 
                 if (token != null) {
                     requestBuilder.addHeader("Authorization", "Bearer $token")
-                    Log.d("AuthInterceptor", "Token inyectado correctamente") // Log de éxito
+                    Log.d("AuthInterceptor", "Token inyectado correctamente")
                 }
             } catch (e: Exception) {
-                // Si falla (ej: sin internet para renovar), dejamos pasar la petición
-                // para que el backend devuelva 401 y la UI lo maneje.
                 Log.e("AuthInterceptor", "Error obteniendo token: ${e.message}")
             }
         } else {

@@ -216,4 +216,9 @@ class ChooseUsernameViewModel @Inject constructor(
             null
         }
     }
+
+    fun onImageRemoved() {
+        _selectedImageUri.value = null
+        _currentGooglePhotoUrl.value = null
+    }
 }

@@ -49,7 +49,6 @@ fun WelcomeScreen(
     val context = LocalContext.current
 
     // --- ESTADOS ---
-    // 1. Conectamos los inputs al ViewModel (Fuente de verdad)
     val email by welcomeViewModel.email.collectAsState()
     val password by welcomeViewModel.password.collectAsState()
 
@@ -252,7 +251,9 @@ fun WelcomeScreen(
 
             Spacer(Modifier.height(2.dp))
 
-            TextButton(onClick = { navController.navigate(Screen.ForgotPassword.route) }) {
+
+            /// CAMBIAR A LA PÁGINA DE RECUPERAR CONTRASEÑA
+            TextButton(onClick = { navController.navigate(Screen.ChooseUsername.route) }) {
                 Text(stringResource(R.string.home_forgotpassword), fontFamily = HelveticaFamily)
             }
 

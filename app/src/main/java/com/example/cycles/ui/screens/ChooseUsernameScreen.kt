@@ -6,15 +6,14 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PermIdentity
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
@@ -106,23 +105,29 @@ fun ChooseUsernameScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
-            Spacer(Modifier.height(30.dp))
+            Spacer(Modifier.height(35.dp))
 
-            // ---------------------------------------------------------
-            // ZONA DE FOTO DE PERFIL (Integrado aquí)
-            // ---------------------------------------------------------
-            Box(
+            Text(
+                text = "Foto de perfil",
+                style = MaterialTheme.typography.labelLarge,
+                fontFamily = HelveticaFamily,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            Spacer(Modifier.height(7.dp))
+
+            Row(
                 modifier = Modifier
-                    .fillMaxWidth(), // Para poder centrarlo horizontalmente
-                contentAlignment = Alignment.Center
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Start
             ) {
+
+                //  LA FOTO
                 Box(
                     modifier = Modifier
-                        .size(100.dp)
-                        .clip(CircleShape)
+                        .size(120.dp)
                         .background(MaterialTheme.colorScheme.surfaceVariant)
                         .clickable {
-                            // Lanzamos el picker solo para imágenes
                             photoPickerLauncher.launch(
                                 PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
                             )
@@ -131,22 +136,63 @@ fun ChooseUsernameScreen(
                 ) {
                     if (imageModelToDisplay != null) {
                         AsyncImage(
-                            model = imageModelToDisplay, // Coil maneja Uri y String (URL) automáticamente
+                            model = imageModelToDisplay,
                             contentDescription = "Foto perfil",
                             modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Crop
+                            contentScale = ContentScale.Fit
                         )
                     } else {
-                        // Icono Placeholder
                         Icon(
-                            imageVector = Icons.Default.Person,
+                            imageVector = Icons.Default.PermIdentity,
                             contentDescription = "Agregar foto",
                             modifier = Modifier.size(40.dp),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
+
+                Spacer(modifier = Modifier.width(20.dp))
+
+
+                // LOS BOTONES
+                Column(
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.Start
+                ) {
+                    // Botón CAMBIAR FOTO
+                    OutlinedButton(
+                        onClick = {
+                            photoPickerLauncher.launch(
+                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                            )
+                        },
+                        shape = RoundedCornerShape(35),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = MaterialTheme.colorScheme.primary
+                        )
+                    ) {
+                        Text(
+                            text = "Cambiar foto",
+                            fontFamily = HelveticaFamily,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+
+                    // Botón ELIMINAR FOTO
+                    OutlinedButton(
+                        onClick = { viewModel.onImageRemoved() },
+                        shape = RoundedCornerShape(35),
+                        enabled = imageModelToDisplay != null // Desactivado si ya está default
+                    ) {
+                        Text(
+                            text = "Eliminar foto   ",
+                            fontFamily = HelveticaFamily,
+                            color = MaterialTheme.colorScheme.error // Rojo para indicar borrado
+                        )
+                    }
+                }
             }
+
             // ---------------------------------------------------------
 
             Spacer(Modifier.height(30.dp))
@@ -164,7 +210,7 @@ fun ChooseUsernameScreen(
             OutlinedTextField(
                 value = name,
                 onValueChange = viewModel::onNameChange,
-                shape = RoundedCornerShape(6.dp),
+                shape = RoundedCornerShape(35),
                 placeholder = { Text(stringResource(R.string.cu_usernameplaceholder), style = MaterialTheme.typography.bodySmall, fontFamily = HelveticaFamily) },
                 singleLine = true,
                 leadingIcon = {
