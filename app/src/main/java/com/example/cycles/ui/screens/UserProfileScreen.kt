@@ -28,11 +28,17 @@ import com.example.cycles.viewmodel.UserProfileViewModel
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.filled.Book
-import androidx.compose.material.icons.filled.Movie
-import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.automirrored.filled.FormatListBulleted
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FormatListBulleted
+import androidx.compose.material.icons.filled.RateReview
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 
@@ -50,14 +56,19 @@ fun UserProfileScreen(
     val state by viewModel.state.collectAsState()
     val isLoggedOut by viewModel.isLoggedOut.collectAsState()
 
-    // Estado para controlar qué pestaña está activa (0: Libros, 1: Música, 2: Películas)
+    // --- DATOS FALSOS PARA PRUEBA (Reemplazar con datos del ViewModel) ---
+    // Generamos 53 items para probar que el grid funcione con filas incompletas al final
+    val fakeFavorites = remember { List(53) { "https://picsum.photos/200?random=$it" } }
+    val fakeReviews = remember { List(10) { it } } // Simula 10 reseñas
+    val fakeLists = remember { List(5) { it } }    // Simula 5 listas
+    // ---------------------------------------------------------------------
+
     var selectedTabIndex by remember { mutableIntStateOf(0) }
 
-    // Lista de pestañas
     val tabs = listOf(
-        ProfileTab("Libros", Icons.Default.Book),
-        ProfileTab("Música", Icons.Default.MusicNote),
-        ProfileTab("Películas", Icons.Default.Movie)
+        ProfileTab("Favoritos", Icons.Default.Favorite), // Icono Corazón
+        ProfileTab("Reseñas", Icons.Default.RateReview), // Icono Reseña
+        ProfileTab("Listas", Icons.AutoMirrored.Filled.FormatListBulleted) // Icono Lista
     )
 
     LaunchedEffect(isLoggedOut) {
@@ -74,29 +85,32 @@ fun UserProfileScreen(
 
 
     Scaffold(
-        contentWindowInsets = WindowInsets(0.dp) // Permitimos que el contenido llegue hasta arriba (detras status bar)
+        contentWindowInsets = WindowInsets(0.dp)
     ) { innerPadding ->
-
-        // BOX PRINCIPAL: Permite superponer elementos (Z-Index)
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(
-                    bottom = innerPadding.calculateBottomPadding()
-                )
+                // Aplicamos solo el padding inferior del scaffold (navegación por gestos)
+                .padding(bottom = innerPadding.calculateBottomPadding())
         ) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(bottom = 150.dp) // Espacio extra al final
+                // CORRECCIÓN: Sumamos el screenPadding para que el contenido no se corte abajo
+                contentPadding = PaddingValues(
+                    bottom = 20.dp + screenPadding.calculateBottomPadding(),
+                    top = 0.dp
+                )
             ) {
-                // --- Header Item ---
+                // 1. HEADER
                 item {
                     ProfileHeaderContent(state, onEditClick)
                 }
+
+                // 2. STICKY HEADER
                 stickyHeader {
                     Surface(
-                        color = MaterialTheme.colorScheme.background, // Color de fondo para que no sea transparente al pegar
-                        modifier = Modifier.fillMaxWidth()
+                        color = MaterialTheme.colorScheme.background,
+                        shadowElevation = 4.dp
                     ) {
                         TabRow(
                             selectedTabIndex = selectedTabIndex,
@@ -121,63 +135,78 @@ fun UserProfileScreen(
                     }
                 }
 
-                items(20) { index ->
-                    val category = tabs[selectedTabIndex].title
-                    ListItem(
-                        headlineContent = { Text("$category Item #$index") },
-                        supportingContent = { Text("Detalle del contenido de $category") },
-                        leadingContent = {
-                            Icon(
-                                imageVector = tabs[selectedTabIndex].icon,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.secondary
+                // 3. CONTENIDO
+                when (selectedTabIndex) {
+                    0 -> { // FAVORITOS
+                        val chunkedItems = fakeFavorites.chunked(5)
+                        // CORRECCIÓN: Usamos 'items' explícitamente para evitar confusión con Int
+                        items(items = chunkedItems) { rowImages ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 2.dp, vertical = 2.dp),
+                                horizontalArrangement = Arrangement.spacedBy(2.dp)
+                            ) {
+                                rowImages.forEach { imageUrl ->
+                                    Box(modifier = Modifier.weight(1f)) {
+                                        FavoriteGridItem(imageUrl)
+                                    }
+                                }
+                                val emptySlots = 5 - rowImages.size
+                                repeat(emptySlots) {
+                                    Spacer(modifier = Modifier.weight(1f))
+                                }
+                            }
+                        }
+                    }
+                    1 -> { // RESEÑAS
+                        items(items = fakeReviews) { index ->
+                            ReviewItemCard(
+                                itemName = "Album/Pelicula #$index",
+                                rating = (1..5).random(),
+                                reviewText = if (index % 2 == 0) "Una obra maestra..." else null,
+                                imageUrl = "https://picsum.photos/200?random=$index"
                             )
-                        },
-                        modifier = Modifier.clickable { /* Acción al tocar item */ }
-                    )
-                    HorizontalDivider(thickness = 0.5.dp, color = Color.LightGray.copy(alpha = 0.5f))
+                            HorizontalDivider(thickness = 0.5.dp, color = Color.LightGray.copy(alpha = 0.3f))
+                        }
+                    }
+                    2 -> { // LISTAS
+                        items(items = fakeLists) { index ->
+                            ListItemCard(
+                                listName = "Mis favoritos 2024",
+                                itemCount = (5..50).random(),
+                                description = "Recopilación del año."
+                            )
+                        }
+                    }
                 }
             }
 
-            // Botones de Navegación Personalizados
-            // Usamos una Fila en la parte superior
+            // BOTONES FLOTANTES
             Row(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .statusBarsPadding() // Baja los botones para no tapar la hora/batería
-                    .padding(horizontal = 16.dp, vertical = 8.dp), // Margen externo
-                horizontalArrangement = Arrangement.SpaceBetween, // Uno a la izq, otro a la der
-                verticalAlignment = Alignment.CenterVertically
+                    .statusBarsPadding()
+                    .padding(16.dp)
             ) {
-                // Botón Atrás
-                CircleOverlayButton(
-                    onClick = onBackClick,
-                    icon = { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Atrás", tint = Color.White) }
-                )
-
-                // Botón Logout
-                CircleOverlayButton(
-                    onClick = { viewModel.performLogout() },
-                    icon = { Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = "Logout", tint = Color.White) }
-                )
+                CircleOverlayButton(onClick = onBackClick, icon = { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Atrás", tint = Color.White) })
+                Spacer(modifier = Modifier.weight(1f))
+                CircleOverlayButton(onClick = { viewModel.performLogout() }, icon = { Icon(Icons.AutoMirrored.Filled.ExitToApp, "Logout", tint = Color.White) })
             }
         }
     }
 }
 
-// --- Componente Auxiliar para los botones flotantes ---
 @Composable
 fun CircleOverlayButton(
     onClick: () -> Unit,
     icon: @Composable () -> Unit
 ) {
-    // Usamos Surface para darle forma redonda, borde y fondo semitransparente
     Surface(
         onClick = onClick,
         shape = CircleShape,
-        color = Color.Black.copy(alpha = 0.3f), // Fondo semitransparente
-        border = BorderStroke(1.dp, Color.DarkGray), // El borde gris oscuro
-        modifier = Modifier.size(35.dp) // Tamaño del botón
+        color = Color.Black.copy(alpha = 0.3f),
+        border = BorderStroke(1.dp, Color.DarkGray),
+        modifier = Modifier.size(35.dp)
     ) {
         Box(contentAlignment = Alignment.Center) {
             icon()
@@ -185,16 +214,12 @@ fun CircleOverlayButton(
     }
 }
 
-
-// --- Composables Auxiliares ---
-
 @Composable
 fun ProfileHeaderContent(state: UserProfileState, onEditClick: () -> Unit) {
     Column(modifier = Modifier.fillMaxWidth()) {
-        // Imagen de Portada
         Image(
             painter = rememberAsyncImagePainter(model = state.coverImageUrl),
-            contentDescription = "Portada de perfil",
+            contentDescription = "Portada",
             modifier = Modifier
                 .fillMaxWidth()
                 .height(180.dp)
@@ -202,9 +227,7 @@ fun ProfileHeaderContent(state: UserProfileState, onEditClick: () -> Unit) {
             contentScale = ContentScale.Crop
         )
 
-        // Contenido debajo de la portada
         Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-            // Fila: Foto de perfil y botón Editar
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -212,33 +235,32 @@ fun ProfileHeaderContent(state: UserProfileState, onEditClick: () -> Unit) {
                 verticalAlignment = Alignment.Bottom,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                // Foto de Perfil
+                // CORRECCIÓN: Foto redonda con borde
                 Image(
                     painter = rememberAsyncImagePainter(model = state.profileImageUrl),
-                    contentDescription = "Foto de perfil",
+                    contentDescription = "Foto perfil",
                     modifier = Modifier
                         .size(120.dp)
+                        .clip(CircleShape) // 1. Recortamos primero
                         .background(MaterialTheme.colorScheme.surface)
-                        .border(3.dp, MaterialTheme.colorScheme.surface), // Borde circular
+                        .border(3.dp, MaterialTheme.colorScheme.surface, CircleShape), // 2. Borde redondo
                     contentScale = ContentScale.Crop
                 )
-                // Botón Editar Perfil
                 OutlinedButton(
                     onClick = onEditClick,
-                    modifier = Modifier.padding(bottom = 12.dp) // Alineación visual con la foto
+                    modifier = Modifier.padding(bottom = 12.dp)
                 ) {
                     Text("Editar Perfil")
                 }
             }
-            // Columna: Nombre, Username, Bio
             Column(modifier = Modifier.offset(y = (-40).dp)) {
                 Text(
-                    text = state.name.ifEmpty { "DefaultNombre" },
+                    text = state.name.ifEmpty { "Usuario" },
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = state.username.ifEmpty { "@Defaultusername" },
+                    text = state.username.ifEmpty { "@usuario" },
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -249,8 +271,82 @@ fun ProfileHeaderContent(state: UserProfileState, onEditClick: () -> Unit) {
                     maxLines = 3,
                     overflow = TextOverflow.Ellipsis
                 )
-                Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }
+}
+
+@Composable
+fun FavoriteGridItem(imageUrl: String) {
+    Image(
+        painter = rememberAsyncImagePainter(model = imageUrl),
+        contentDescription = null,
+        modifier = Modifier
+            .aspectRatio(1f)
+            .clip(RoundedCornerShape(4.dp))
+            .background(Color.LightGray),
+        contentScale = ContentScale.Crop
+    )
+}
+
+@Composable
+fun ReviewItemCard(itemName: String, rating: Int, reviewText: String?, imageUrl: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { }
+            .padding(12.dp)
+    ) {
+        Image(
+            painter = rememberAsyncImagePainter(model = imageUrl),
+            contentDescription = null,
+            modifier = Modifier
+                .size(60.dp)
+                .clip(RoundedCornerShape(4.dp))
+                .background(Color.Gray),
+            contentScale = ContentScale.Crop
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+        Column {
+            Text(text = itemName, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                repeat(5) { index ->
+                    Icon(
+                        imageVector = if (index < rating) Icons.Filled.Star else Icons.Outlined.StarOutline,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = if (index < rating) Color(0xFFFFC107) else Color.Gray
+                    )
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(text = "$rating/5", style = MaterialTheme.typography.labelMedium)
+            }
+            if (!reviewText.isNullOrEmpty()) {
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(text = reviewText, style = MaterialTheme.typography.bodyMedium, maxLines = 3, overflow = TextOverflow.Ellipsis)
+            }
+        }
+    }
+}
+
+@Composable
+fun ListItemCard(listName: String, itemCount: Int, description: String) {
+    ListItem(
+        headlineContent = { Text(listName, fontWeight = FontWeight.SemiBold) },
+        supportingContent = { Text(description, maxLines = 2, overflow = TextOverflow.Ellipsis) },
+        leadingContent = {
+            Surface(
+                shape = RoundedCornerShape(8.dp),
+                color = MaterialTheme.colorScheme.primaryContainer,
+                modifier = Modifier.size(48.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Text(text = itemCount.toString(), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                }
+            }
+        },
+        trailingContent = { Icon(Icons.Default.FormatListBulleted, contentDescription = null, tint = Color.Gray) },
+        modifier = Modifier.clickable { }
+    )
+    HorizontalDivider(thickness = 0.5.dp)
 }

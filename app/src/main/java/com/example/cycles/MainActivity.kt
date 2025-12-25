@@ -2,7 +2,6 @@ package com.example.cycles
 
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.Scaffold
 import androidx.activity.enableEdgeToEdge
@@ -15,7 +14,6 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.ui.Modifier
@@ -56,7 +54,6 @@ class MainActivity : AppCompatActivity() {
 
                 val screensWithBottomBar = listOf(
                     Screen.Home.route,
-                    "profile_route",
                     Screen.InteractiveMusic.route,
                     Screen.InteractiveBooks.route,
                     Screen.InteractiveMovies.route,
@@ -86,7 +83,6 @@ class MainActivity : AppCompatActivity() {
                                         navController = navController,
                                         modifier = Modifier
                                             .fillMaxWidth()
-//                                            .padding(horizontal = 25.dp, vertical = 45.dp)
                                     )
                                 }
                             }
