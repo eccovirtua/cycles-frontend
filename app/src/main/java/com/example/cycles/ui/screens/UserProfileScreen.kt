@@ -36,7 +36,6 @@ import androidx.compose.material.icons.automirrored.filled.StarHalf
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.GraphicEq
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.StarHalf
 import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.ui.draw.clip
@@ -77,7 +76,7 @@ fun UserProfileScreen(
 
     val tabs = listOf(
         ProfileTab("Favoritos", Icons.Default.Favorite),
-        ProfileTab("Ratings", Icons.Default.StarHalf),
+        ProfileTab("Ratings", Icons.AutoMirrored.Filled.StarHalf),
         ProfileTab("Listas", Icons.AutoMirrored.Filled.FormatListBulleted)
     )
 
@@ -282,20 +281,22 @@ fun ProfileHeaderContent(state: UserProfileState, onEditClick: () -> Unit) {
                     // Fila de Edad y País
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            text = "23", // Placeholder (usar datos reales luego)
+                            text = "${state.age} Años",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
-                        Text(
-                            text = " • ",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Text(
-                            text = " 🌎 Chile", // Placeholder
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        if (state.country.isNotEmpty() && state.country != "") {
+                            Text(
+                                text = " • ",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Text(
+                                text = state.country,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 }
 

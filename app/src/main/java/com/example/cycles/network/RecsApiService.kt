@@ -19,6 +19,7 @@ import com.example.cycles.data.UserListDetail
 import com.example.cycles.data.UserLookupResponse
 import com.example.cycles.data.UserUsageStatus
 import com.example.cycles.data.AvailabilityResponse
+import com.example.cycles.data.UserDto
 import com.example.cycles.data.UserExistsResponse
 import retrofit2.Response
 import retrofit2.http.Body
@@ -173,8 +174,10 @@ interface RecsApiService {
     @GET("users/me/exists")
     suspend fun checkUserExists(): Response<UserExistsResponse>
 
-
+    @GET("/users/{uid}")
+    suspend fun getUserProfile(@Path("uid") uid: String): Response<UserDto>
 }
+
 
 
 

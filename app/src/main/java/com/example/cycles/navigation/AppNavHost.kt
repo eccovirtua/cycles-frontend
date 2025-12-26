@@ -25,7 +25,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.cycles.ui.screens.ChooseUsernameScreen
 import com.example.cycles.ui.screens.DashboardScreen
-import com.example.cycles.ui.screens.EditProfileScreen
 import com.example.cycles.ui.screens.FinalRecommendationsScreen
 import com.example.cycles.ui.screens.ForgotPasswordScreen
 import com.example.cycles.ui.screens.HomeScreen
@@ -329,9 +328,7 @@ fun AppNavHost(
             popEnterTransition = { slideInFromLeft },
             popExitTransition = { slideOutToRight }
         ) {
-            EditProfileScreen(
-                onBackClick = { navController.popBackStack() }
-            )
+
         }
     }
 }

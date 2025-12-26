@@ -50,3 +50,16 @@ data class ItemDetailResponse(
     val listeners: Int?
     // Añade aquí cualquier otro campo que tu backend devuelva
 )
+
+data class UserDto(
+    @SerializedName("firebaseUid") val firebaseUid: String,
+    @SerializedName("email") val email: String,
+    @SerializedName("name") val name: String, // Esto lo usaremos como username
+    @SerializedName("age") val age: Int,
+    @SerializedName("profile_picture") val profilePictureUrl: String,
+
+    // Campos OPCIONALES (Solo existen si el usuario editó perfil)
+    @SerializedName("country") val country: String? = null,
+    @SerializedName("cover_image") val coverImageUrl: String? = null
+
+)
