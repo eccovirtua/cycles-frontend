@@ -90,6 +90,7 @@ dependencies {
     implementation(libs.lifecycle.runtime.ktx)
     implementation(libs.firebase.crashlytics.buildtools)
     implementation(libs.androidx.compose.ui.text)
+    implementation(libs.firebase.firestore.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -149,8 +150,7 @@ dependencies {
     implementation(libs.converter.moshi)
     implementation(libs.moshi.kotlin)
     implementation(libs.androidx.material.icons.extended)
-    implementation(libs.coil.compose) //coil: libreria para el proceso de carga de imagenes desde api
-    // 👇 ESTA ES LA DEPENDENCIA FALTANTE
+    implementation(libs.coil.compose)
     debugImplementation(libs.androidx.ui.tooling)
 
     // También es buena práctica añadir esto si quieres interactuar con la preview:

@@ -35,8 +35,8 @@ import androidx.compose.material.icons.automirrored.filled.FormatListBulleted
 import androidx.compose.material.icons.automirrored.filled.StarHalf
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.GraphicEq
-import androidx.compose.material.icons.filled.RateReview
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.StarHalf
 import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.ui.draw.clip
@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.sp
 import kotlin.math.floor
 
 data class ProfileTab(val title: String, val icon: ImageVector)
+
 // --- Pantalla Principal ---
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -62,7 +63,7 @@ fun UserProfileScreen(
     // --- DATOS FALSOS ---
     val fakeFavorites = remember { List(53) { "https://picsum.photos/200?random=$it" } }
 
-    // Lista de reseñas con calificación DOUBLE para probar medias estrellas
+
     val fakeReviews = remember {
         List(10) { index ->
             Triple(index, (1..5).random() + if(index % 2 == 0) 0.5 else 0.0, "21/01/2026")
@@ -70,13 +71,13 @@ fun UserProfileScreen(
     }
 
     val fakeLists = remember { List(5) { it } }
-    // --------------------
+
 
     var selectedTabIndex by remember { mutableIntStateOf(0) }
 
     val tabs = listOf(
         ProfileTab("Favoritos", Icons.Default.Favorite),
-        ProfileTab("Reseñas", Icons.Default.RateReview),
+        ProfileTab("Ratings", Icons.Default.StarHalf),
         ProfileTab("Listas", Icons.AutoMirrored.Filled.FormatListBulleted)
     )
 
@@ -107,7 +108,7 @@ fun UserProfileScreen(
                     top = 0.dp
                 )
             ) {
-                // 1. HEADER (Rediseñado)
+                // 1. HEADER
                 item {
                     ProfileHeaderContent(state, onEditClick)
                 }
@@ -144,7 +145,7 @@ fun UserProfileScreen(
                 // 3. CONTENIDO
                 when (selectedTabIndex) {
                     0 -> { // FAVORITOS
-                        val chunkedItems = fakeFavorites.chunked(5)
+                        val chunkedItems = fakeFavorites.chunked(4)
                         items(items = chunkedItems) { rowImages ->
                             Row(
                                 modifier = Modifier
@@ -157,14 +158,15 @@ fun UserProfileScreen(
                                         FavoriteGridItem(imageUrl)
                                     }
                                 }
-                                val emptySlots = 5 - rowImages.size
+                                val emptySlots = 4 - rowImages.size
                                 repeat(emptySlots) {
                                     Spacer(modifier = Modifier.weight(1f))
                                 }
                             }
                         }
                     }
-                    1 -> { // RESEÑAS
+                    1 -> {
+                        // RESEÑAS
                         items(items = fakeReviews) { (index, rating, date) ->
                             ReviewItemCard(
                                 itemName = "Album/Pelicula #$index",
@@ -249,9 +251,8 @@ fun ProfileHeaderContent(state: UserProfileState, onEditClick: () -> Unit) {
                     contentDescription = "Foto perfil",
                     modifier = Modifier
                         .size(120.dp)
-                        .clip(CircleShape)
                         .background(MaterialTheme.colorScheme.surface)
-                        .border(3.dp, MaterialTheme.colorScheme.surface, CircleShape),
+                        .border(3.dp, MaterialTheme.colorScheme.surface),
                     contentScale = ContentScale.Crop
                 )
                 OutlinedButton(
@@ -262,11 +263,10 @@ fun ProfileHeaderContent(state: UserProfileState, onEditClick: () -> Unit) {
                 }
             }
 
-            // NUEVA ESTRUCTURA DE INFORMACIÓN
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .offset(y = (-40).dp), // Subimos todo un poco
+                    .offset(y = (-40).dp),
                 horizontalArrangement = Arrangement.SpaceBetween, // Espacio entre Info y Widget
                 verticalAlignment = Alignment.Top
             ) {
@@ -282,7 +282,7 @@ fun ProfileHeaderContent(state: UserProfileState, onEditClick: () -> Unit) {
                     // Fila de Edad y País
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            text = "23 Años", // Placeholder (usar datos reales luego)
+                            text = "23", // Placeholder (usar datos reales luego)
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -292,20 +292,20 @@ fun ProfileHeaderContent(state: UserProfileState, onEditClick: () -> Unit) {
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Text(
-                            text = "Chile", // Placeholder
+                            text = " 🌎 Chile", // Placeholder
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
 
-                // DERECHA: Widget "Escuchando Ahora" (Estilo Last.fm / RYM)
+                // DERECHA: Widget "Escuchando Ahora"
                 Surface(
                     shape = RoundedCornerShape(8.dp),
                     color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.5f),
                     modifier = Modifier
-                        .width(140.dp)
-                        .height(55.dp) // Altura compacta
+                        .width(170.dp)
+                        .height(65.dp) // Altura compacta
                         .clickable { /* Ir al item */ }
                 ) {
                     Row(
@@ -324,7 +324,7 @@ fun ProfileHeaderContent(state: UserProfileState, onEditClick: () -> Unit) {
                                 imageVector = Icons.Default.GraphicEq, // Icono de música
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                                modifier = Modifier.size(24.dp)
+                                modifier = Modifier.size(25.dp)
                             )
                         }
 
@@ -332,7 +332,7 @@ fun ProfileHeaderContent(state: UserProfileState, onEditClick: () -> Unit) {
 
                         Column(verticalArrangement = Arrangement.Center) {
                             Text(
-                                text = "Escuchando",
+                                text = "Escuchando ahora: ",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.primary,
                                 fontSize = 9.sp
@@ -385,7 +385,6 @@ fun ReviewItemCard(itemName: String, rating: Double, date: String, reviewText: S
             contentDescription = null,
             modifier = Modifier
                 .size(60.dp)
-                .clip(RoundedCornerShape(4.dp))
                 .background(Color.Gray),
             contentScale = ContentScale.Crop
         )
