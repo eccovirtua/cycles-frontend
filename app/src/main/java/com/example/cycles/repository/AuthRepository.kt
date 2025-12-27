@@ -16,13 +16,15 @@ import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.tasks.await
 import androidx.core.net.toUri
+import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
 
 class AuthRepository @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
     private val apiService: RecsApiService,
-    private val storage: FirebaseStorage
+    private val storage: FirebaseStorage,
+    @ApplicationContext private val context: Context
 ) {
     // Login con Email
     fun loginWithEmail(email: String, pass: String): Task<AuthResult> {
@@ -39,11 +41,8 @@ class AuthRepository @Inject constructor(
         return firebaseAuth.signInWithCredential(credential)
     }
 
-    fun logout(context: Context) {
-        // 1. Cerrar sesión en Firebase
+    fun logout() {
         firebaseAuth.signOut()
-
-        // 2. Cerrar sesión en el Cliente de Google (Para que pida cuenta la próxima vez)
         try {
             val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(context.getString(R.string.default_web_client_id))

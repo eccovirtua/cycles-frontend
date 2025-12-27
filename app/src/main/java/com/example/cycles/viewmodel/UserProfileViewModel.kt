@@ -4,6 +4,7 @@ package com.example.cycles.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.cycles.repository.AuthRepository
 import com.example.cycles.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.update
@@ -28,7 +29,8 @@ data class UserProfileState(
 @HiltViewModel
 class UserProfileViewModel @Inject constructor(
     private val auth: FirebaseAuth,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val userAuth: AuthRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UserProfileState())
@@ -79,7 +81,7 @@ class UserProfileViewModel @Inject constructor(
     }
 
     fun performLogout() {
-        auth.signOut()
+        userAuth.logout()
         _isLoggedOut.value = true
     }
 }
