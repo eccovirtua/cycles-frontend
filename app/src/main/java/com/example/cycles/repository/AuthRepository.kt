@@ -14,14 +14,15 @@ import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.storage.FirebaseStorage
-import jakarta.inject.Inject
 import kotlinx.coroutines.tasks.await
 import androidx.core.net.toUri
+import javax.inject.Inject
 
 
 class AuthRepository @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
-    private val apiService: RecsApiService
+    private val apiService: RecsApiService,
+    private val storage: FirebaseStorage
 ) {
     // Login con Email
     fun loginWithEmail(email: String, pass: String): Task<AuthResult> {
@@ -37,8 +38,6 @@ class AuthRepository @Inject constructor(
     fun signInWithGoogle(credential: AuthCredential): Task<AuthResult> {
         return firebaseAuth.signInWithCredential(credential)
     }
-
-    private val storageRef = FirebaseStorage.getInstance().reference
 
     fun logout(context: Context) {
         // 1. Cerrar sesión en Firebase
@@ -172,24 +171,23 @@ class AuthRepository @Inject constructor(
     }
     suspend fun uploadProfilePicture(uid: String, imageUri: Uri): String? {
         return try {
-            Log.d("UPLOAD_DEBUG", "Iniciando subida para: $uid")
-            Log.d("UPLOAD_DEBUG", "URI del archivo: $imageUri")
+            Log.e("UPLOAD_DEBUG", "1. Iniciando subida para UID: $uid")
 
-            val imageRef = storageRef.child("profile_images/$uid.jpg")
+            val storageRef = storage.reference.child("profile_images/$uid.jpg")
 
-            // Subir
-            imageRef.putFile(imageUri).await()
-            Log.d("UPLOAD_DEBUG", "Subida completada. Obteniendo URL...")
+            Log.e("UPLOAD_DEBUG", "3. Ejecutando putFile...")
+            // AQUI ES DONDE PROBABLEMENTE FALLA POR PERMISOS
+            storageRef.putFile(imageUri).await()
 
-            // Obtener URL
-            val downloadUrl = imageRef.downloadUrl.await()
-            Log.d("UPLOAD_DEBUG", "URL Final: $downloadUrl")
+            Log.e("UPLOAD_DEBUG", "4. putFile completado.")
+            val downloadUrl = storageRef.downloadUrl.await().toString()
 
-            downloadUrl.toString()
+            Log.e("UPLOAD_DEBUG", "6. URL obtenida: $downloadUrl")
+            downloadUrl
 
         } catch (e: Exception) {
-            // AQUÍ VEREMOS EL ERROR REAL
-            Log.e("UPLOAD_DEBUG", "❌ ERROR SUBIENDO: ${e.message}")
+            // SI MONGO RECIBE NULL, ES PORQUE ENTRAS AQUI
+            Log.e("UPLOAD_DEBUG", "!!! ERROR EN SUBIDA !!!: ${e.message}")
             e.printStackTrace()
             null
         }

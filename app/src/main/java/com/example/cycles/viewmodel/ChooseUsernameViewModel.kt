@@ -3,57 +3,62 @@ package com.example.cycles.viewmodel
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.cycles.data.UserCreateRequest
+import com.example.cycles.data.UserCreateRequest // Asegúrate de importar tu modelo correcto
 import com.example.cycles.repository.AuthRepository
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import javax.inject.Inject
-import androidx.navigation.NavController
+import kotlinx.coroutines.tasks.await // Importante para evitar callbacks
 import java.time.LocalDate
 import java.time.Period
 import java.time.format.DateTimeFormatter
+import javax.inject.Inject
+import androidx.navigation.NavController
 
 @HiltViewModel
 class ChooseUsernameViewModel @Inject constructor(
     private val repository: AuthRepository
 ) : ViewModel() {
 
+    // --- Variables de Argumentos ---
     private var emailArg: String? = null
     private var passwordArg: String? = null
     private var ageArg: Int? = null
+
+    // --- Estados UI ---
     private val _name = MutableStateFlow("")
     val name = _name.asStateFlow()
-    private val _isAvailable = MutableStateFlow<Boolean?>(null) // null=sin verificar, true=libre, false=ocupado
+
     private val _isLoading = MutableStateFlow(false)
     val isLoading = _isLoading.asStateFlow()
 
-    // Estado para la imagen que el usuario selecciona de la GALERÍA
     private val _selectedImageUri = MutableStateFlow<Uri?>(null)
     val selectedImageUri = _selectedImageUri.asStateFlow()
 
-    // Estado para mostrar la foto de Google pre-cargada (si existe)
     private val _currentGooglePhotoUrl = MutableStateFlow<String?>(null)
     val currentGooglePhotoUrl = _currentGooglePhotoUrl.asStateFlow()
+
     private val _error = MutableStateFlow<String?>(null)
     val error = _error.asStateFlow()
+
     private val _dateOfBirth = MutableStateFlow("")
     val dateOfBirth = _dateOfBirth.asStateFlow()
 
     private val _showAgeInput = MutableStateFlow(false)
     val showAgeInput = _showAgeInput.asStateFlow()
 
-
+    // Inicialización de datos
     fun setRegistrationData(email: String?, pass: String?, age: Int?) {
         this.emailArg = email
         this.passwordArg = pass
         this.ageArg = age
+
+        // Determinar si pedimos fecha de nacimiento (Flujo Google o Edad no recibida)
         _showAgeInput.value = age == null || age == -1
 
-        // si no viene una pass es flujo google,
-        // por ende cargar la foto de perfil que tiene el usuario en su cuenta google
+        // Si es flujo Google (sin pass), intentamos cargar la foto de la cuenta
         if (pass == null) {
             val user = FirebaseAuth.getInstance().currentUser
             _currentGooglePhotoUrl.value = user?.photoUrl?.toString()
@@ -66,121 +71,152 @@ class ChooseUsernameViewModel @Inject constructor(
 
     fun onNameChange(newName: String) {
         _name.value = newName
-        _isAvailable.value = null
         _error.value = null
     }
-    fun onImageSelected(uri: Uri?) {
+
+    // Esta función reemplaza a onImageSelected
+    fun onCropSuccess(uri: Uri?) {
         _selectedImageUri.value = uri
+        // Si el usuario elige una foto propia, limpiamos la de Google visualmente para que no haya confusión
+        if (uri != null) {
+            _currentGooglePhotoUrl.value = null
+        }
+    }
+
+    fun onImageRemoved() {
+        _selectedImageUri.value = null
+        // Si borra su selección, intentamos recuperar la de Google si existe
+        if (passwordArg == null) {
+            _currentGooglePhotoUrl.value = FirebaseAuth.getInstance().currentUser?.photoUrl?.toString()
+        }
     }
 
     fun checkUsernameAndRegister(navController: NavController) {
         val username = _name.value.trim()
-        val safeEmail = emailArg
-        val safePass = passwordArg
-        val safeAge = ageArg
-        val isGoogleFlow = (safePass == null)
+        val imageUri = _selectedImageUri.value
+        val isGoogleFlow = (passwordArg == null)
 
-        val newImageUri = _selectedImageUri.value
+        // 1. Validaciones Iniciales
+        if (username.length < 4) {
+            _error.value = "El nombre de usuario debe tener al menos 4 caracteres"
+            return
+        }
 
+        // Validación de Foto
         if (isGoogleFlow) {
-            // Caso raro: Cuenta Google sin foto y no seleccionó una
-            if (newImageUri == null && _currentGooglePhotoUrl.value == null) {
+            if (imageUri == null && _currentGooglePhotoUrl.value == null) {
                 _error.value = "Por favor selecciona una imagen de perfil"
                 return
             }
         } else {
-            if (newImageUri == null) {
+            if (imageUri == null) {
                 _error.value = "Es obligatorio elegir una foto de perfil"
                 return
             }
         }
-        if (username.length < 4) {
-            _error.value = "El nombre de usuario es muy corto"
-            return
-        }
-        var finalAge = safeAge
-        if (isGoogleFlow) {
+
+        // 2. Cálculo de Edad
+        val finalAge: Int? = if (isGoogleFlow) {
             val dateString = _dateOfBirth.value
             if (dateString.isBlank()) {
                 _error.value = "Por favor ingresa tu fecha de nacimiento"
                 return
             }
-            finalAge = calculateAgeFromString(dateString) // Usamos tu función privada
-
-            if (finalAge == null || finalAge < 18) {
-                _error.value = "Debes ser mayor de 18 años"
-                return
-            }
+            calculateAgeFromString(dateString)
+        } else {
+            ageArg
         }
-        if (!isGoogleFlow && (safeEmail == null || finalAge == null)) {
-            _error.value = "Error de datos. Reinicia el registro."
+
+        if (finalAge == null || finalAge < 18) {
+            _error.value = "Debes ser mayor de 18 años para registrarte"
             return
         }
 
+        // 3. Inicio del proceso asíncrono
         viewModelScope.launch {
             _isLoading.value = true
             _error.value = null
-            // Verificar disponibilidad de Username en Backend
-            val isUserFree = repository.checkUsernameAvailability(username)
-            if (!isUserFree) {
-                _error.value = "El nombre de usuario ya está ocupado"
-                _isLoading.value = false
-                return@launch
-            }
 
-            var finalPhotoUrl: String? = null
+            try {
+                // A. Verificar disponibilidad de Username
+                val isAvailable = repository.checkUsernameAvailability(username)
+                if (!isAvailable) {
+                    _error.value = "El nombre de usuario ya está ocupado"
+                    _isLoading.value = false
+                    return@launch
+                }
 
-            if (newImageUri != null) {
+                // B. Ejecutar Registro según el flujo
                 if (isGoogleFlow) {
-                    val currentUser = FirebaseAuth.getInstance().currentUser!!
-                    val url = repository.uploadProfilePicture(currentUser.uid, newImageUri)
-                    if (url != null) {
-                        finalPhotoUrl = url
-                        // Actualizamos Firebase Auth
-                        repository.updateUserProfileAuth(username, url)
-                    }
-                    // Finalizar
-                    finalizeBackendRegistration(username, currentUser.email!!, finalAge!!, currentUser.uid, navController, finalPhotoUrl)
+                    performGoogleRegistration(username, finalAge, imageUri, navController)
+                } else {
+                    performEmailRegistration(username, finalAge, imageUri!!, navController)
                 }
-                else {
-                    // Flujo Email con foto seleccionada (Obligatorio)
-                    repository.registerWithEmail(emailArg!!, passwordArg!!)
-                        .addOnSuccessListener { authResult ->
-                            val uid = authResult.user?.uid
-                            if (uid != null) {
-                                viewModelScope.launch {
-                                    val url = repository.uploadProfilePicture(uid, newImageUri)
-                                    if (url != null) {
-                                        finalPhotoUrl = url
-                                        repository.updateUserProfileAuth(username, url)
-                                    }
-                                    finalizeBackendRegistration(username, emailArg!!, finalAge!!, uid, navController, finalPhotoUrl)
-                                }
-                            }
-                        }
-                        .addOnFailureListener {
-                            _isLoading.value = false
-                            _error.value = "Error registro: ${it.message}"
-                        }
-                }
-            }
-            // 2. Si NO eligió foto nueva (Solo válido para Google)
-            else if (isGoogleFlow) {
-                val currentUser = FirebaseAuth.getInstance().currentUser
-                if (currentUser != null) {
-                    // Usamos la URL que ya tenía Google
-                    finalPhotoUrl = currentUser.photoUrl?.toString()
 
-                    // Solo actualizamos el nombre en Auth (la foto ya es la correcta)
-                    repository.updateUserProfileAuth(username, finalPhotoUrl)
-
-                    finalizeBackendRegistration(username, currentUser.email!!, finalAge!!, currentUser.uid, navController, finalPhotoUrl)
-                }
+            } catch (e: Exception) {
+                _error.value = "Error: ${e.message}"
+                _isLoading.value = false
             }
         }
     }
 
-    private fun finalizeBackendRegistration(
+    private suspend fun performGoogleRegistration(
+        username: String,
+        age: Int,
+        newImageUri: Uri?,
+        navController: NavController
+    ) {
+        val currentUser = FirebaseAuth.getInstance().currentUser ?: throw Exception("Usuario no autenticado")
+
+        // 1. Determinar URL de la foto
+        var finalPhotoUrl: String? = currentUser.photoUrl?.toString()
+
+        // Si el usuario eligió una foto nueva, la subimos
+        if (newImageUri != null) {
+            val uploadedUrl = repository.uploadProfilePicture(currentUser.uid, newImageUri)
+            if (uploadedUrl != null) {
+                finalPhotoUrl = uploadedUrl
+            }
+        }
+
+        // 2. Actualizar perfil en Auth (Nombre y Foto)
+        repository.updateUserProfileAuth(username, finalPhotoUrl)
+
+        // 3. Guardar en Backend
+        finalizeBackendRegistration(username, currentUser.email ?: "", age, currentUser.uid, navController, finalPhotoUrl)
+    }
+
+    private suspend fun performEmailRegistration(
+        username: String,
+        age: Int,
+        imageUri: Uri,
+        navController: NavController
+    ) {
+        // 1. Crear usuario en Firebase Auth y ESPERAR
+        // Asumimos que registerWithEmail retorna un Task
+        val authResult = repository.registerWithEmail(emailArg!!, passwordArg!!).await()
+        val uid = authResult.user?.uid ?: throw Exception("No se pudo obtener el UID")
+
+        try {
+            // 2. Subir Foto (Obligatoria en este flujo)
+            val photoUrl = repository.uploadProfilePicture(uid, imageUri)
+
+            // 3. Actualizar perfil Auth
+            if (photoUrl != null) {
+                repository.updateUserProfileAuth(username, photoUrl)
+            }
+
+            // 4. Guardar en Backend
+            finalizeBackendRegistration(username, emailArg!!, age, uid, navController, photoUrl)
+
+        } catch (e: Exception) {
+            // Si algo falla después de crear el Auth, borramos el usuario para no dejar "zombies"
+            FirebaseAuth.getInstance().currentUser?.delete()
+            throw e
+        }
+    }
+
+    private suspend fun finalizeBackendRegistration(
         username: String,
         email: String,
         age: Int,
@@ -188,41 +224,37 @@ class ChooseUsernameViewModel @Inject constructor(
         nav: NavController,
         photoUrl: String?
     ) {
-        viewModelScope.launch {
-            // Ahora pasamos photoUrl al request
-            val request = UserCreateRequest(username, age, email, uid, photoUrl)
-            val success = repository.createUserBackend(request)
+        // Aquí se soluciona el BUG anterior: Se pasa la photoUrl correcta
+        val request = UserCreateRequest(
+            firebaseUid = uid,
+            email = email,
+            username = username,
+            age = age,
+            profilePicture = photoUrl
+        )
 
-            if (success) {
-                _isLoading.value = false
-                nav.navigate("home") { popUpTo("auth_graph") { inclusive = true } }
-            } else {
-                val isGoogleFlow = (passwordArg == null)
-                if (!isGoogleFlow) {
-                    FirebaseAuth.getInstance().currentUser?.delete()
-                }
-                _isLoading.value = false
-                _error.value = "Error al guardar perfil. Intenta nuevamente."
+        val success = repository.createUserBackend(request)
+
+        if (success) {
+            _isLoading.value = false
+            nav.navigate("home") { popUpTo("auth_graph") { inclusive = true } }
+        } else {
+            // Falló el backend
+            if (passwordArg != null) { // Si era flujo email, revertimos
+                FirebaseAuth.getInstance().currentUser?.delete()
             }
+            _error.value = "Error al guardar perfil en servidor."
+            _isLoading.value = false
         }
     }
+
     private fun calculateAgeFromString(dateString: String): Int? {
         return try {
             val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
             val birthDate = LocalDate.parse(dateString, formatter)
             Period.between(birthDate, LocalDate.now()).years
-        } catch (e: Exception) {
-            e.printStackTrace()
+        } catch (_: Exception) {
             null
         }
     }
-
-    fun onImageRemoved() {
-        _selectedImageUri.value = null
-        _currentGooglePhotoUrl.value = null
-    }
-    fun onCropSuccess(uri: Uri?) {
-        _selectedImageUri.value = uri
-    }
-
 }
