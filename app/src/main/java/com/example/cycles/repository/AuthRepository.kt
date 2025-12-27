@@ -16,6 +16,7 @@ import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.tasks.await
 import androidx.core.net.toUri
+import com.example.cycles.data.UserUpdateRequest
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
@@ -189,6 +190,26 @@ class AuthRepository @Inject constructor(
             Log.e("UPLOAD_DEBUG", "!!! ERROR EN SUBIDA !!!: ${e.message}")
             e.printStackTrace()
             null
+        }
+    }
+    suspend fun uploadCoverPicture(uid: String, imageUri: Uri): String? {
+        return try {
+            val storageRef = storage.reference.child("cover_images/$uid.jpg") // Carpeta distinta
+            storageRef.putFile(imageUri).await()
+            storageRef.downloadUrl.await().toString()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
+
+    suspend fun updateUserBackend(uid: String, request: UserUpdateRequest): Boolean {
+        return try {
+            val response = apiService.updateUser(uid, request)
+            response.isSuccessful
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
         }
     }
 }

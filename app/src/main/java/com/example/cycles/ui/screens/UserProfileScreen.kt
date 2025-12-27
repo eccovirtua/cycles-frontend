@@ -280,17 +280,26 @@ fun ProfileHeaderContent(state: UserProfileState, onEditClick: () -> Unit) {
 
                     // Fila de Edad y País
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = "${state.age}",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        if (state.country.isNotEmpty() && state.country != "") {
+                        if (state.showAge) {
+                            Text(
+                                text = "${state.age} Años",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+
+                        // 2. LÓGICA DEL SEPARADOR
+                        // Solo mostramos el punto si la edad es visible Y hay un país que mostrar
+                        if (state.showAge && state.country.isNotEmpty() && state.country != "Jupiter") {
                             Text(
                                 text = " • ",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
+                        }
+
+                        // 3. LÓGICA DE PAÍS
+                        if (state.country.isNotEmpty() && state.country != "Jupiter") {
                             Text(
                                 text = state.country,
                                 style = MaterialTheme.typography.bodyMedium,

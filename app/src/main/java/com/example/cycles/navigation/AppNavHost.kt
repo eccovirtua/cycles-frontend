@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
 
@@ -36,7 +35,7 @@ import com.example.cycles.ui.screens.RegisterScreen
 import com.example.cycles.ui.screens.SearchScreen
 import com.example.cycles.ui.screens.UserProfileScreen
 import com.example.cycles.ui.screens.WelcomeScreen
-import kotlinx.coroutines.launch
+import com.example.cycles.ui.screens.EditProfileScreen
 
 private const val TRANSITION_DURATION = 220
 
@@ -80,7 +79,6 @@ fun AppNavHost(
     onTitleClick: () -> Unit
 ) {
     val layoutDirection = LocalLayoutDirection.current
-    val scope = rememberCoroutineScope()
 
     NavHost(
         navController,
@@ -328,7 +326,13 @@ fun AppNavHost(
             popEnterTransition = { slideInFromLeft },
             popExitTransition = { slideOutToRight }
         ) {
-
+            EditProfileScreen(
+                onBackClick = {
+                    // Acción al tocar la flecha atrás o cancelar:
+                    // Simplemente volvemos a la pantalla anterior (Perfil)
+                    navController.popBackStack()
+                }
+            )
         }
     }
 }

@@ -60,6 +60,7 @@ data class UserDto(
 
     // Campos OPCIONALES (Solo existen si el usuario editó perfil)
     @SerializedName("country") val country: String? = null,
-    @SerializedName("cover_image") val coverImageUrl: String? = null
+    @SerializedName("cover_image") val coverImageUrl: String? = null,
+    @SerializedName("show_age") val showAge: Boolean? = true
 
 )

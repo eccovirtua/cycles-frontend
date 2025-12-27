@@ -21,6 +21,7 @@ import com.example.cycles.data.UserUsageStatus
 import com.example.cycles.data.AvailabilityResponse
 import com.example.cycles.data.UserDto
 import com.example.cycles.data.UserExistsResponse
+import com.example.cycles.data.UserUpdateRequest
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -176,6 +177,12 @@ interface RecsApiService {
 
     @GET("/users/{uid}")
     suspend fun getUserProfile(@Path("uid") uid: String): Response<UserDto>
+
+    @PUT("/users/{uid}")
+    suspend fun updateUser(
+        @Path("uid") uid: String,
+        @Body request: UserUpdateRequest
+    ): Response<Map<String, String>>
 }
 
 

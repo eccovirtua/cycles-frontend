@@ -21,4 +21,5 @@ class UserRepository @Inject constructor(
             Result.failure(e)
         }
     }
+
 }

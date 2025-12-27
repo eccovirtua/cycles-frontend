@@ -15,7 +15,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-// Estado de la UI (Sin Bio)
 data class UserProfileState(
     val isLoading: Boolean = false,
     val username: String = "",        // Mapeado desde 'name'
@@ -23,6 +22,7 @@ data class UserProfileState(
     val country: String = "",         // Puede venir null
     val profileImageUrl: String? = null, // Viene del backend
     val coverImageUrl: String? = null,   // Puede venir null
+    val showAge: Boolean = true,
     val error: String? = null
 )
 
@@ -66,7 +66,8 @@ class UserProfileViewModel @Inject constructor(
                         // Si coverImageUrl es null en el JSON, se queda null en el estado
                         coverImageUrl = userDto.coverImageUrl,
                         // Si country es null, ponemos un texto por defecto o vacío
-                        country = userDto.country ?: ""
+                        country = userDto.country ?: "",
+                        showAge = userDto.showAge ?: true
                     )
                 }
             }.onFailure { exception ->
