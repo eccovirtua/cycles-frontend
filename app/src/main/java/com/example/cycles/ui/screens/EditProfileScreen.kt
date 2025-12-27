@@ -1,6 +1,7 @@
 package com.example.cycles.ui.screens
 
 import android.net.Uri
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -43,7 +44,23 @@ fun EditProfileScreen(
 ) {
     val state by viewModel.state.collectAsState()
 
-    // Efecto para navegar atrás cuando se guarda exitosamente
+
+    var (showDiscardDialog, setShowDiscardDialog) = remember { mutableStateOf(false) }
+    val (showSaveConfirmationDialog, setShowSaveConfirmationDialog) = remember { mutableStateOf(false) }
+
+    // Lógica para decidir qué hacer cuando se intenta volver atrás
+    val onBackRequested = {
+        if (viewModel.hasChanges()) {
+            setShowDiscardDialog(true)
+        } else {
+            onBackClick()
+        }
+    }
+
+    BackHandler {
+        onBackRequested()
+    }
+
     LaunchedEffect(state.isSavedSuccess) {
         if (state.isSavedSuccess) {
             onBackClick()
@@ -64,13 +81,13 @@ fun EditProfileScreen(
             TopAppBar(
                 title = { Text("Editar Perfil", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
-                    IconButton(onClick = onBackClick) {
+                    IconButton(onClick = onBackRequested) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Cancelar")
                     }
                 },
                 actions = {
                     Button(
-                        onClick = { viewModel.saveChanges() },
+                        onClick = { setShowSaveConfirmationDialog(true) },
                         enabled = !state.isLoading,
                         modifier = Modifier.padding(end = 16.dp)
                     ) {
@@ -132,7 +149,7 @@ fun EditProfileScreen(
 
                 ListItem(
                     headlineContent = { Text("Mostrar edad en el perfil") },
-                    supportingContent = { Text("Si desactivas esto, tu edad será privada.") },
+                    supportingContent = { Text("Si desactivas esto, ocultas la edad de tu perfil") },
                     leadingContent = {
                         Icon(if (state.isAgeVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff, contentDescription = null)
                     },
@@ -149,7 +166,76 @@ fun EditProfileScreen(
             }
         }
     }
+    if (showDiscardDialog) {
+        AlertDialog(
+            onDismissRequest = { showDiscardDialog = false },
+            title = { Text("¿Descartar cambios?") },
+            text = { Text("Has realizado modificaciones. Si sales ahora, se perderán los cambios.") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDiscardDialog = false
+                        onBackClick()
+                    }
+                ) {
+                    Text("Descartar", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDiscardDialog = false }) {
+                    Text("Seguir editando")
+                }
+            }
+        )
+    }
+
+    if (showDiscardDialog) {
+        AlertDialog(
+            onDismissRequest = { setShowDiscardDialog(false) },
+            title = { Text("¿Descartar cambios?") },
+            text = { Text("Has realizado modificaciones. Si sales ahora, se perderán los cambios.") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        setShowDiscardDialog(false)
+                        onBackClick()
+                    }
+                ) {
+                    Text("Descartar", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { setShowDiscardDialog(false) }) {
+                    Text("Seguir editando")
+                }
+            }
+        )
+    }
+
+    if (showSaveConfirmationDialog) {
+        AlertDialog(
+            onDismissRequest = { setShowSaveConfirmationDialog(false) },
+            title = { Text("Guardar cambios") },
+            text = { Text("¿Quieres actualizar tu perfil con esta información?") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        setShowSaveConfirmationDialog(false)
+                        viewModel.saveChanges()
+                    }
+                ) {
+                    Text("Confirmar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { setShowSaveConfirmationDialog(false) }) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
 }
+
 
 // --- Header Actualizado para soportar URL y URI ---
 @Composable

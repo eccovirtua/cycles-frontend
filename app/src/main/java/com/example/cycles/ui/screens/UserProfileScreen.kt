@@ -59,6 +59,8 @@ fun UserProfileScreen(
     val state by viewModel.state.collectAsState()
     val isLoggedOut by viewModel.isLoggedOut.collectAsState()
 
+    val (showLogoutDialog, setShowLogoutDialog) = remember { mutableStateOf(false) }
+
     // --- DATOS FALSOS ---
     val fakeFavorites = remember { List(53) { "https://picsum.photos/200?random=$it" } }
 
@@ -197,9 +199,31 @@ fun UserProfileScreen(
             ) {
                 CircleOverlayButton(onClick = onBackClick, icon = { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Atrás", tint = Color.White) })
                 Spacer(modifier = Modifier.weight(1f))
-                CircleOverlayButton(onClick = { viewModel.performLogout() }, icon = { Icon(Icons.AutoMirrored.Filled.ExitToApp, "Logout", tint = Color.White) })
-            }
+                CircleOverlayButton(onClick = { setShowLogoutDialog(true) }, icon = { Icon(Icons.AutoMirrored.Filled.ExitToApp, "Logout", tint = Color.White) })            }
         }
+    }
+    // Dialogo usando el booleano (show) y el setter (setShow)
+    if (showLogoutDialog) {
+        AlertDialog(
+            onDismissRequest = { setShowLogoutDialog(false) },
+            title = { Text("Cerrar Sesión") },
+            text = { Text("¿Estás seguro de que quieres salir de tu cuenta?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        setShowLogoutDialog(false)
+                        viewModel.performLogout()
+                    }
+                ) {
+                    Text("Salir", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { setShowLogoutDialog(false) }) {
+                    Text("Cancelar")
+                }
+            }
+        )
     }
 }
 
@@ -282,7 +306,7 @@ fun ProfileHeaderContent(state: UserProfileState, onEditClick: () -> Unit) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         if (state.showAge) {
                             Text(
-                                text = "${state.age} Años",
+                                text = "${state.age}",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )

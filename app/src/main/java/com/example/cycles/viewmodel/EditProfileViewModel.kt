@@ -23,7 +23,11 @@ data class EditProfileState(
     val newProfileUri: Uri? = null,        // URI local si seleccionó nueva foto
     val newCoverUri: Uri? = null,          // URI local si seleccionó nueva portada
     val error: String? = null,
-    val isSavedSuccess: Boolean = false
+    val isSavedSuccess: Boolean = false,
+
+
+    val originalCountry: String = "",
+    val originalIsAgeVisible: Boolean = true,
 )
 
 @HiltViewModel
@@ -40,6 +44,14 @@ class EditProfileViewModel @Inject constructor(
         loadCurrentUserData()
     }
 
+    fun hasChanges(): Boolean {
+        val s = _state.value
+        return s.country != s.originalCountry ||
+                s.isAgeVisible != s.originalIsAgeVisible ||
+                s.newProfileUri != null || // Si seleccionó nueva foto
+                s.newCoverUri != null      // Si seleccionó nueva portada
+    }
+
     private fun loadCurrentUserData() {
         val uid = auth.currentUser?.uid ?: return
         viewModelScope.launch {
@@ -50,10 +62,13 @@ class EditProfileViewModel @Inject constructor(
                     it.copy(
                         isLoading = false,
                         country = user.country ?: "",
-                        // Asumimos que user.show_age viene del backend, si no, por defecto true
-                        // isAgeVisible = user.show_age ?: true,
+                        isAgeVisible = user.showAge ?: true,
+
+                        originalCountry = user.country ?: "",
+                        originalIsAgeVisible = user.showAge ?: true,
+
                         currentProfileUrl = user.profilePictureUrl,
-                        currentCoverUrl = user.coverImageUrl
+                        currentCoverUrl = user.coverImageUrl,
                     )
                 }
             }.onFailure {
