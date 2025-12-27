@@ -1,6 +1,7 @@
 package com.example.cycles.viewmodel
 
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.cycles.repository.UserRepository
@@ -50,6 +51,7 @@ class UserProfileViewModel @Inject constructor(
             val result = userRepository.getUserProfile(currentUser.uid)
 
             result.onSuccess { userDto ->
+                Log.e("UserProfileVM", "URL de Foto recibida: '${userDto.profilePictureUrl}'")
                 _state.update {
                     it.copy(
                         isLoading = false,

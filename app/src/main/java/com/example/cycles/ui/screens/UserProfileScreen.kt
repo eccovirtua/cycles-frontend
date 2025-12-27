@@ -281,7 +281,7 @@ fun ProfileHeaderContent(state: UserProfileState, onEditClick: () -> Unit) {
                     // Fila de Edad y País
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            text = "${state.age} Años",
+                            text = "${state.age}",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
