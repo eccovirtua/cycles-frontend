@@ -2,6 +2,7 @@ package com.example.cycles.ui.screens
 
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -26,7 +27,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -39,6 +39,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
+import com.example.cycles.navigation.Screen
 import com.example.cycles.viewmodel.HomeViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -51,7 +52,7 @@ enum class AppDomain(val title: String, val route: String, val icon: androidx.co
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(
+fun BooksHomeScreen(
     navController: NavHostController,
     paddingValues: PaddingValues,
     onTitleClick: () -> Unit // Acción al clicar el texto "Recommendr" (Easter egg o refresh)
@@ -62,8 +63,7 @@ fun HomeScreen(
     // Estado del diálogo de cambio de dominio
     var showDomainDialog by remember { mutableStateOf(false) }
 
-    // El dominio actual de ESTA pantalla (Hardcoded porque estamos en HomeScreen de Movies)
-    val currentDomain = AppDomain.MOVIES
+    val currentDomain = AppDomain.BOOKS
 
     val lifecycleOwner = LocalLifecycleOwner.current
     LaunchedEffect(lifecycleOwner.lifecycle) {
@@ -71,6 +71,9 @@ fun HomeScreen(
             homeViewModel.loadUsageStatus()
         }
     }
+
+    val interactiveRoute = "interactive_books" // Ruta al recomendador de películas
+    val domainItemName = "libro" // Para el texto "Descubre tu próximo..."
 
     var selectedTabIndex by remember { mutableIntStateOf(0) }
     val tabs = listOf("Películas", "Reseñas", "Listas", "Dashboard")
@@ -101,7 +104,8 @@ fun HomeScreen(
             // 1. HEADER
             item {
                 Column(
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 20.dp),
+
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 20.dp).fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     CyclesTitleComposable(
@@ -114,7 +118,13 @@ fun HomeScreen(
             // 2. TARJETA SESIONES
             item {
                 Box(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
-                    RemainingSessionsCard(remaining = homeState.remainingSessions)
+                    InteractiveRecommendationCard(
+                        domainName = domainItemName,
+                        onClick = {
+                            // Navegar a la pantalla de "Tinder" de películas
+                            navController.navigate(interactiveRoute)
+                        }
+                    )
                 }
             }
 
@@ -192,9 +202,24 @@ fun HomeScreen(
             onDismiss = { showDomainDialog = false },
             onDomainSelected = { newDomain ->
                 showDomainDialog = false
-                // Aquí navegas a la ruta correspondiente
-                // navController.navigate(newDomain.route)
-                println("Navegando a: ${newDomain.title}")
+
+                if (newDomain != currentDomain) {
+                    // Aquí usamos las rutas definidas en Screen.kt
+                    val targetRoute = when(newDomain) {
+                        AppDomain.MOVIES -> Screen.HomeMovies.route
+                        AppDomain.BOOKS -> Screen.HomeBooks.route
+                        AppDomain.MUSIC -> Screen.HomeMusic.route
+                    }
+
+                    navController.navigate(targetRoute) {
+                        // Limpia el stack para no acumular pantallas
+                        popUpTo(navController.graph.startDestinationId) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
             }
         )
     }
@@ -217,7 +242,7 @@ fun CyclesTitleComposable(
 
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text(
-            text = "Recommendr Movies",
+            text = "Recommendr (Movies)",
             style = baseStyle.copy(brush = gradientBrush),
             modifier = Modifier
                 .scale(scaleFactor)
@@ -256,7 +281,7 @@ fun DomainSelectionDialog(
         title = { Text("Selecciona un Dominio") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                AppDomain.values().forEach { domain ->
+                AppDomain.entries.forEach { domain ->
                     val isSelected = domain == currentDomain
 
                     Surface(
@@ -427,46 +452,73 @@ fun DashboardPreviewSection(navController: NavHostController) {
 }
 
 @Composable
-fun RemainingSessionsCard(remaining: Int?) {
-    val infiniteTransition = rememberInfiniteTransition(label = "floating_anim")
-    val offsetY by infiniteTransition.animateFloat(
-        initialValue = -3f,
-        targetValue = 3f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 2000, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "offset_y"
-    )
-
-    val containerColor = if (remaining == 0) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.primaryContainer
+fun InteractiveRecommendationCard(
+    domainName: String, // "película", "libro", "álbum"
+    onClick: () -> Unit
+) {
+    // Animación suave de escala al pulsar (opcional, para dar feedback táctil)
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val scale by animateFloatAsState(targetValue = if (isPressed) 0.97f else 1f, label = "scale")
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(40.dp)
-            .graphicsLayer { translationY = offsetY },
-        shape = RoundedCornerShape(8.dp),
-        colors = CardDefaults.cardColors(containerColor = containerColor)
+            .height(75.dp) // Un poco más alto para destacar
+            .scale(scale)
+            .clickable(interactionSource = interactionSource, indication = null, onClick = onClick),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
     ) {
-        Row(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+                .background(
+                    // Un gradiente para que se vea "inteligente" o "tecnológico"
+                    Brush.horizontalGradient(
+                        colors = listOf(
+                            Color(0xFF2196F3), // Azul
+                            Color(0xFF9C27B0)  // Violeta
+                        )
+                    )
+                )
         ) {
-            Text(
-                text = "Acceder a tus recomendaciones:",
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onPrimaryContainer
-            )
-            Text(
-                text = remaining?.toString() ?: "--",
-                style = MaterialTheme.typography.headlineLarge,
-                fontWeight = FontWeight.Black,
-                color = MaterialTheme.colorScheme.onPrimaryContainer
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 20.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Descubre tu próximo $domainName",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                    Text(
+                        text = "Recomendaciones con IA",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.White.copy(alpha = 0.8f)
+                    )
+                }
+
+                // Icono de "Magia" o "IA"
+                Surface(
+                    color = Color.White.copy(alpha = 0.2f),
+                    shape = androidx.compose.foundation.shape.CircleShape,
+                    modifier = Modifier.size(40.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowForward, // O Icons.Filled.AutoAwesome
+                            contentDescription = null,
+                            tint = Color.White
+                        )
+                    }
+                }
+            }
         }
     }
 }

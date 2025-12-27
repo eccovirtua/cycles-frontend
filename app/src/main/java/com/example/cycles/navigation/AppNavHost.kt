@@ -21,11 +21,11 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.example.cycles.ui.screens.BooksHomeScreen
 import com.example.cycles.ui.screens.ChooseUsernameScreen
 import com.example.cycles.ui.screens.DashboardScreen
 import com.example.cycles.ui.screens.FinalRecommendationsScreen
 import com.example.cycles.ui.screens.ForgotPasswordScreen
-import com.example.cycles.ui.screens.HomeScreen
 import com.example.cycles.ui.screens.InteractiveRecScreen
 import com.example.cycles.ui.screens.ItemDetailScreen
 import com.example.cycles.ui.screens.ListDetailScreen
@@ -81,7 +81,7 @@ fun AppNavHost(
 
     NavHost(
         navController,
-        startDestination = Screen.Home.route,
+        startDestination = Screen.HomeMovies.route,
     ) {
         composable(
             route = Screen.Welcome.route,
@@ -94,13 +94,38 @@ fun AppNavHost(
         }
 
         composable(
-            route = Screen.Home.route,
+            route = Screen.HomeMovies.route,
             enterTransition = { slideInFromRight },
             exitTransition = { slideOutToLeft },
             popEnterTransition = { slideInFromLeft },
             popExitTransition = { slideOutToRight }
         ) {
-            HomeScreen(navController, paddingValues, onTitleClick = onTitleClick)
+            // Asumiendo que renombraste tu HomeScreen actual a MoviesHomeScreen
+            MoviesHomeScreen(navController, paddingValues, onTitleClick)
+        }
+
+        // --- HOME LIBROS ---
+        composable(
+            route = Screen.HomeBooks.route,
+            enterTransition = { slideInFromRight },
+            exitTransition = { slideOutToLeft },
+            popEnterTransition = { slideInFromLeft },
+            popExitTransition = { slideOutToRight }
+        ) {
+            // Tienes que crear este archivo/función
+            BooksHomeScreen(navController, paddingValues, onTitleClick)
+        }
+
+        // --- HOME MÚSICA ---
+        composable(
+            route = Screen.HomeMusic.route,
+            enterTransition = { slideInFromRight },
+            exitTransition = { slideOutToLeft },
+            popEnterTransition = { slideInFromLeft },
+            popExitTransition = { slideOutToRight }
+        ) {
+            // Tienes que crear este archivo/función
+            MusicHomeScreen(navController, paddingValues, onTitleClick)
         }
 
         composable(
