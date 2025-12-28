@@ -89,7 +89,7 @@ fun MoviesHomeScreen(
                 ) {
                     // COMPONENTE COMPARTIDO
                     CyclesTitleComposable(
-                        titleText = "Recommendr Movies", // Personalizamos el título
+                        titleText = "Recommendr (Movies)", // Personalizamos el título
                         // Usamos el gradiente por defecto (Rojo)
                         onTitleClick = onTitleClick,
                         onEditClick = { showDomainDialog = true }

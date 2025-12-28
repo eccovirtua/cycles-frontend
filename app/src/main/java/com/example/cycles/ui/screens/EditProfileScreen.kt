@@ -10,7 +10,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -24,7 +23,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -248,8 +246,8 @@ fun EditProfileHeader(
     onEditCoverClick: () -> Unit
 ) {
     // Lógica de visualización: Si hay URI nueva, usa esa. Si no, usa URL remota. Si no, placeholder.
-    val finalProfileModel = profileUri ?: profileUrl ?: "https://via.placeholder.com/150"
-    val finalCoverModel = coverUri ?: coverUrl ?: "https://via.placeholder.com/600x200"
+    val finalProfileModel = profileUri ?: profileUrl ?: ""
+    val finalCoverModel = coverUri ?: coverUrl ?: ""
 
     Box(modifier = Modifier.fillMaxWidth().height(240.dp)) {
         // Portada
@@ -275,7 +273,7 @@ fun EditProfileHeader(
         Box(modifier = Modifier.align(Alignment.BottomStart).padding(start = 24.dp)) {
             Box(
                 contentAlignment = Alignment.Center,
-                modifier = Modifier.size(120.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surface).border(4.dp, MaterialTheme.colorScheme.surface, CircleShape).clickable(onClick = onEditProfileClick)
+                modifier = Modifier.size(120.dp).background(MaterialTheme.colorScheme.surface).border(4.dp, MaterialTheme.colorScheme.surface).clickable(onClick = onEditProfileClick)
             ) {
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current).data(finalProfileModel).crossfade(true).build(),

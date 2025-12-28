@@ -60,6 +60,8 @@ class MainActivity : AppCompatActivity() {
                     Screen.InteractiveMusic.route,
                     Screen.InteractiveBooks.route,
                     Screen.InteractiveMovies.route,
+                    Screen.List.route,
+                    Screen.Profile.route,
                     "interactive/{domain}"
                 )
 

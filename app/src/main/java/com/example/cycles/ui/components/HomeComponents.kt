@@ -26,7 +26,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.FormatListBulleted
+import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Movie
+import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -49,6 +55,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -61,7 +68,16 @@ import com.example.cycles.navigation.AppDomain
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-// 1. MODIFICADO: Ahora acepta título y colores dinámicos
+
+enum class SearchFilter(val label: String, val icon: ImageVector) {
+    ALL("todo", Icons.Default.Search),
+    MOVIES("películas", Icons.Default.Movie),
+    BOOKS("libros", Icons.Default.Book),
+    MUSIC("música", Icons.Default.MusicNote),
+    USERS("usuarios", Icons.Default.Person),
+    LISTS("listas", Icons.AutoMirrored.Filled.List)
+}
+
 @Composable
 fun CyclesTitleComposable(
     titleText: String, // Texto dinámico ("Recommendr Music", etc)

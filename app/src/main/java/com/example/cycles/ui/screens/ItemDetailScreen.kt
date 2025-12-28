@@ -20,7 +20,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.cycles.data.ItemDetailResponse
 import com.example.cycles.data.ItemType
-import com.example.cycles.ui.components.AddToListDialog
 import com.example.cycles.viewmodel.ItemDetailViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -39,12 +38,7 @@ fun ItemDetailScreen(
 
 
     var showAddToListDialog by remember { mutableStateOf(false) }
-    if (showAddToListDialog) {
-        AddToListDialog(
-            itemIdToAdd = itemId,
-            onDismiss = { showAddToListDialog = false }
-        )
-    }
+
 
 
     Scaffold(
@@ -59,12 +53,7 @@ fun ItemDetailScreen(
                 actions = {
                     // --- Botón Añadir a Lista (EXISTENTE) ---
                     var showAddToListDialog by remember { mutableStateOf(false) }
-                    if (showAddToListDialog) {
-                        AddToListDialog(
-                            itemIdToAdd = itemId,
-                            onDismiss = { showAddToListDialog = false }
-                        )
-                    }
+
                     IconButton(onClick = { showAddToListDialog = true }) {
                         Icon(Icons.AutoMirrored.Filled.PlaylistAdd, contentDescription = "Añadir a lista")
                     }

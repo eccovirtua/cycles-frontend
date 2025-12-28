@@ -238,7 +238,7 @@ fun CircleOverlayButton(
         onClick = onClick,
         shape = CircleShape,
         color = Color.Black.copy(alpha = 0.3f),
-        border = BorderStroke(1.dp, Color.DarkGray),
+        border = BorderStroke(0.dp, Color.DarkGray),
         modifier = Modifier.size(35.dp)
     ) {
         Box(contentAlignment = Alignment.Center) {
@@ -269,13 +269,15 @@ fun ProfileHeaderContent(state: UserProfileState, onEditClick: () -> Unit) {
                 verticalAlignment = Alignment.Bottom,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
+                val imageShape = RoundedCornerShape(15)
                 Image(
                     painter = rememberAsyncImagePainter(model = state.profileImageUrl),
                     contentDescription = "Foto perfil",
                     modifier = Modifier
                         .size(120.dp)
+                        .clip(imageShape)
                         .background(MaterialTheme.colorScheme.surface)
-                        .border(3.dp, MaterialTheme.colorScheme.surface),
+                        .border(3.dp, MaterialTheme.colorScheme.surface, imageShape),
                     contentScale = ContentScale.Crop
                 )
                 OutlinedButton(

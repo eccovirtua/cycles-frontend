@@ -15,7 +15,7 @@ sealed class BottomNavItem(
     object Home : BottomNavItem(Screen.HomeMovies.route, "Inicio", Icons.Filled.Tv)
 
     // 🎯 LISTAS
-    object Lists : BottomNavItem("lists_route", "Listas", Icons.Filled.Bookmarks)
+    object Lists : BottomNavItem(Screen.List.route, "Listas", Icons.Filled.Bookmarks)
 
     // 🎯 PERFIL
     object Profile : BottomNavItem(Screen.Profile.route, "Perfil", Icons.Filled.AccountBox)

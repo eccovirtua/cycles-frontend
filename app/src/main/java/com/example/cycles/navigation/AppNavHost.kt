@@ -3,13 +3,8 @@ package com.example.cycles.navigation
 //conveniente usar route = "nombre de las pantallas" y NombreDeLaPantalla(navController)
 
 
-import androidx.compose.animation.core.tween // Necesario para el timing
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
@@ -28,7 +23,6 @@ import com.example.cycles.ui.screens.FinalRecommendationsScreen
 import com.example.cycles.ui.screens.ForgotPasswordScreen
 import com.example.cycles.ui.screens.InteractiveRecScreen
 import com.example.cycles.ui.screens.ItemDetailScreen
-import com.example.cycles.ui.screens.ListDetailScreen
 import com.example.cycles.ui.screens.ListsScreen
 import com.example.cycles.ui.screens.RegisterScreen
 import com.example.cycles.ui.screens.SearchScreen
@@ -37,41 +31,6 @@ import com.example.cycles.ui.screens.WelcomeScreen
 import com.example.cycles.ui.screens.EditProfileScreen
 import com.example.cycles.ui.screens.MoviesHomeScreen
 import com.example.cycles.ui.screens.MusicHomeScreen
-
-private const val TRANSITION_DURATION = 220
-
-// animaciones
-private val slideInFromRight = slideInHorizontally(
-    initialOffsetX = { it },
-    animationSpec = tween(TRANSITION_DURATION)
-) + fadeIn(animationSpec = tween(TRANSITION_DURATION))
-
-private val slideOutToLeft = slideOutHorizontally(
-    targetOffsetX = { -it },
-    animationSpec = tween(TRANSITION_DURATION)
-) + fadeOut(animationSpec = tween(TRANSITION_DURATION))
-
-private val slideInFromLeft = slideInHorizontally(
-    initialOffsetX = { -it },
-    animationSpec = tween(TRANSITION_DURATION)
-) + fadeIn(animationSpec = tween(TRANSITION_DURATION))
-
-private val slideOutToRight = slideOutHorizontally(
-    targetOffsetX = { it },
-    animationSpec = tween(TRANSITION_DURATION)
-) + fadeOut(animationSpec = tween(TRANSITION_DURATION))
-
-// 🎯 Definición de las transiciones modales (entrada/salida vertical)
-private val slideInFromBottom = slideInVertically(
-    initialOffsetY = { it },
-    animationSpec = tween(TRANSITION_DURATION)
-) + fadeIn(animationSpec = tween(TRANSITION_DURATION))
-
-private val slideOutToBottom = slideOutVertically(
-    targetOffsetY = { it },
-    animationSpec = tween(TRANSITION_DURATION)
-) + fadeOut(animationSpec = tween(TRANSITION_DURATION))
-
 
 @Composable
 fun AppNavHost(
@@ -84,23 +43,19 @@ fun AppNavHost(
     NavHost(
         navController,
         startDestination = Screen.HomeMovies.route,
+        enterTransition = { EnterTransition.None },
+        exitTransition = { ExitTransition.None },
+        popEnterTransition = { EnterTransition.None },
+        popExitTransition = { ExitTransition.None }
     ) {
         composable(
-            route = Screen.Welcome.route,
-            enterTransition = { slideInFromRight },
-            exitTransition = { slideOutToLeft },
-            popEnterTransition = { slideInFromLeft },
-            popExitTransition = { slideOutToRight }
+            route = Screen.Welcome.route
         ) {
             WelcomeScreen(navController = navController, onTitleClick = onTitleClick, paddingValues = paddingValues)
         }
 
         composable(
-            route = Screen.HomeMovies.route,
-            enterTransition = { slideInFromRight },
-            exitTransition = { slideOutToLeft },
-            popEnterTransition = { slideInFromLeft },
-            popExitTransition = { slideOutToRight }
+            route = Screen.HomeMovies.route
         ) {
             // Asumiendo que renombraste tu HomeScreen actual a MoviesHomeScreen
             MoviesHomeScreen(navController, paddingValues, onTitleClick)
@@ -108,11 +63,7 @@ fun AppNavHost(
 
         // --- HOME LIBROS ---
         composable(
-            route = Screen.HomeBooks.route,
-            enterTransition = { slideInFromRight },
-            exitTransition = { slideOutToLeft },
-            popEnterTransition = { slideInFromLeft },
-            popExitTransition = { slideOutToRight }
+            route = Screen.HomeBooks.route
         ) {
             // Tienes que crear este archivo/función
             BooksHomeScreen(navController, paddingValues, onTitleClick)
@@ -120,22 +71,14 @@ fun AppNavHost(
 
         // --- HOME MÚSICA ---
         composable(
-            route = Screen.HomeMusic.route,
-            enterTransition = { slideInFromRight },
-            exitTransition = { slideOutToLeft },
-            popEnterTransition = { slideInFromLeft },
-            popExitTransition = { slideOutToRight }
+            route = Screen.HomeMusic.route
         ) {
             // Tienes que crear este archivo/función
             MusicHomeScreen(navController, paddingValues, onTitleClick)
         }
 
         composable(
-            route = Screen.Search.route,
-            enterTransition = { slideInFromRight },
-            exitTransition = { slideOutToLeft },
-            popEnterTransition = { slideInFromLeft },
-            popExitTransition = { slideOutToRight }
+            route = Screen.Search.route
         ) {
             SearchScreen(
                 onItemClick = { itemId, itemType ->
@@ -150,11 +93,7 @@ fun AppNavHost(
             arguments = listOf(
                 navArgument("itemId") { type = NavType.StringType },
                 navArgument("itemType") { type = NavType.StringType }
-            ),
-            enterTransition = { slideInFromRight },
-            exitTransition = { slideOutToLeft },
-            popEnterTransition = { slideInFromLeft },
-            popExitTransition = { slideOutToRight }
+            )
         ) { backStackEntry ->
             val itemId = backStackEntry.arguments?.getString("itemId") ?: ""
             val itemTypeString = backStackEntry.arguments?.getString("itemType") ?: ""
@@ -171,11 +110,7 @@ fun AppNavHost(
         }
         //dashboard
         composable(
-            route = Screen.Dashboard.route,
-            enterTransition = { slideInFromBottom},
-            exitTransition = { fadeOut(tween(TRANSITION_DURATION))},
-            popExitTransition = { slideOutToBottom }
-
+            route = Screen.Dashboard.route
         ) {
             DashboardScreen()
         }
@@ -191,40 +126,25 @@ fun AppNavHost(
         }
 
         composable(
-            route = "lists_route",
-            enterTransition = { slideInFromRight },
-            exitTransition = { slideOutToLeft },
-            popEnterTransition = { slideInFromLeft },
-            popExitTransition = { slideOutToRight }
+            route = "lists_route"
         ) {
             ListsScreen(navController = navController)
         }
 
         composable(
             route = "list_detail/{listId}",
-            arguments = listOf(navArgument("listId") { type = NavType.StringType }),
-            enterTransition = { slideInFromRight },
-            exitTransition = { slideOutToLeft },
-            popEnterTransition = { slideInFromLeft },
-            popExitTransition = { slideOutToRight }
+            arguments = listOf(navArgument("listId") { type = NavType.StringType })
         ) {
-            ListDetailScreen(navController = navController)
         }
         // register
         composable(
-            route = Screen.Register.route,
-            enterTransition = { slideInFromBottom },
-            exitTransition = { fadeOut(tween(TRANSITION_DURATION)) },
-            popExitTransition = { slideOutToBottom }
+            route = Screen.Register.route
         ) {
             RegisterScreen(navController, paddingValues)
         }
 
         composable(
-            route = Screen.ForgotPassword.route,
-            enterTransition = { slideInFromBottom },
-            exitTransition = { fadeOut(tween(TRANSITION_DURATION)) },
-            popExitTransition = { slideOutToBottom }
+            route = Screen.ForgotPassword.route
         ) {
             ForgotPasswordScreen(navController)
         }
@@ -235,19 +155,13 @@ fun AppNavHost(
                 navArgument("email") { type = NavType.StringType },
                 navArgument("code")   { type = NavType.StringType }
             ),
-            enterTransition = { slideInFromBottom },
-            exitTransition = { fadeOut(tween(TRANSITION_DURATION)) },
-            popExitTransition = { slideOutToBottom }
         ) { back ->
             val emailArg = back.arguments!!.getString("email")!!
             val codeArg  = back.arguments!!.getString("code")!!
 //            ResetPasswordScreen(navController, emailArg, codeArg)
         }
         composable(
-            route = Screen.ChooseUsername.route,
-            enterTransition = { slideInFromBottom },
-            exitTransition = { fadeOut(tween(TRANSITION_DURATION)) },
-            popExitTransition = { slideOutToBottom }
+            route = Screen.ChooseUsername.route
         ) {
             ChooseUsernameScreen(navController,paddingValues)
         }
@@ -255,31 +169,19 @@ fun AppNavHost(
         // --- RUTAS INTERACTIVAS Y PERFIL (Deslizamiento Lateral) ---
 
         composable(
-            route = Screen.InteractiveMusic.route,
-            enterTransition = { slideInFromRight },
-            exitTransition = { slideOutToLeft },
-            popEnterTransition = { slideInFromLeft },
-            popExitTransition = { slideOutToRight }
+            route = Screen.InteractiveMusic.route
         ) {
             InteractiveRecScreen(navController = navController, domain = "music")
         }
 
         composable(
-            route = Screen.InteractiveBooks.route,
-            enterTransition = { slideInFromRight },
-            exitTransition = { slideOutToLeft },
-            popEnterTransition = { slideInFromLeft },
-            popExitTransition = { slideOutToRight }
+            route = Screen.InteractiveBooks.route
         ) {
             InteractiveRecScreen(navController = navController, domain = "book")
         }
 
         composable(
-            route = Screen.InteractiveMovies.route,
-            enterTransition = { slideInFromRight },
-            exitTransition = { slideOutToLeft },
-            popEnterTransition = { slideInFromLeft },
-            popExitTransition = { slideOutToRight }
+            route = Screen.InteractiveMovies.route
         ) {
             InteractiveRecScreen(navController = navController, domain = "movie")
         }
@@ -288,10 +190,6 @@ fun AppNavHost(
         // Pantalla interactiva (dinámica)
         composable(
             route = "interactive/{domain}",
-            enterTransition = { slideInFromRight },
-            exitTransition = { slideOutToLeft },
-            popEnterTransition = { slideInFromLeft },
-            popExitTransition = { slideOutToRight }
         ) { backStackEntry ->
             val domain = backStackEntry.arguments?.getString("domain") ?: ""
             InteractiveRecScreen(
@@ -306,11 +204,7 @@ fun AppNavHost(
             arguments = listOf(
                 navArgument("domain") { type = NavType.StringType },
                 navArgument("sessionId") { type = NavType.StringType }
-            ),
-            enterTransition = { slideInFromRight },
-            exitTransition = { slideOutToLeft },
-            popEnterTransition = { slideInFromLeft },
-            popExitTransition = { slideOutToRight }
+            )
         ) { backStackEntry ->
             val domain = backStackEntry.arguments?.getString("domain") ?: return@composable
             val sessionId = backStackEntry.arguments?.getString("sessionId") ?: return@composable
@@ -323,11 +217,7 @@ fun AppNavHost(
         }
 
         composable(
-            route = "profile_route",
-            enterTransition = { slideInFromRight },
-            exitTransition = { slideOutToLeft },
-            popEnterTransition = { slideInFromLeft },
-            popExitTransition = { slideOutToRight }
+            route = "profile_route"
         ) {
             val profilePadding = PaddingValues(
                 top = paddingValues.calculateTopPadding(),
@@ -346,11 +236,7 @@ fun AppNavHost(
         }
 
         composable(
-            route = Screen.EditProfile.route,
-            enterTransition = { slideInFromRight },
-            exitTransition = { slideOutToLeft },
-            popEnterTransition = { slideInFromLeft },
-            popExitTransition = { slideOutToRight }
+            route = Screen.EditProfile.route
         ) {
             EditProfileScreen(
                 onBackClick = {

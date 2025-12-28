@@ -29,6 +29,7 @@ sealed class Screen(val route: String) {
 
     data object Search : Screen("search")
 
+    data object List: Screen("lists_route")
     data object InteractiveMusic : Screen("interactive_music")
     data object InteractiveBooks : Screen("interactive_books")
     data object InteractiveMovies : Screen("interactive_movies")
