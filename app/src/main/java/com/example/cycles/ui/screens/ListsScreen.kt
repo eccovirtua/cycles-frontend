@@ -29,13 +29,11 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavController
 import com.example.cycles.data.UserListBasic
-// IMPORTANTE: Importamos lo que moviste a ListComponent.kt
 import com.example.cycles.ui.components.ListCreateDialog
 import com.example.cycles.ui.components.availableIcons
 import com.example.cycles.ui.components.defaultIcon
 import com.example.cycles.viewmodel.ListsViewModel
 
-// Enum para las pestañas de esta pantalla
 enum class ListsMainTab(val title: String) {
     DISCOVERY("Explorar"),
     MY_COLLECTION("Mi Colección")
@@ -133,7 +131,6 @@ fun ListsScreen(
         }
     ) { padding ->
 
-        // Usamos el diálogo importado de ListComponent.kt
         if (showCreateDialog) {
             ListCreateDialog(viewModel = viewModel, onDismiss = { showCreateDialog = false })
         }
@@ -168,9 +165,11 @@ fun DiscoveryContent(navController: NavController) {
         contentPadding = PaddingValues(bottom = 20.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
+
         // 1. FEATURED LISTS
         item {
             Column {
+                Spacer(modifier = Modifier.height(15.dp))
                 SectionHeader("Listas Destacadas", "Selección curada por editores")
                 LazyRow(
                     contentPadding = PaddingValues(horizontal = 16.dp),
