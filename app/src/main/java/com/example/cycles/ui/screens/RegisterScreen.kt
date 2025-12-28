@@ -104,7 +104,7 @@ fun RegisterScreen(
 
     LaunchedEffect(navigateToHome) {
         if (navigateToHome) {
-            navController.navigate(Screen.Home.route) {
+            navController.navigate(Screen.HomeMovies.route) {
                 // Limpiamos la pila para que no pueda volver atrás al registro
                 popUpTo("auth_graph") { inclusive = true }
             }

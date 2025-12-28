@@ -89,7 +89,7 @@ fun WelcomeScreen(
     // Navegación al éxito
     LaunchedEffect(isSuccess) {
         if (isSuccess) {
-            navController.navigate(Screen.Home.route) {
+            navController.navigate(Screen.HomeMovies.route) {
                 popUpTo(Screen.Welcome.route) { inclusive = true }
             }
         }

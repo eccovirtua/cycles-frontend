@@ -53,7 +53,10 @@ class MainActivity : AppCompatActivity() {
                 val currentRoute = navBackStackEntry?.destination?.route
 
                 val screensWithBottomBar = listOf(
-                    Screen.Home.route,
+                    Screen.HomeMovies.route,
+                    Screen.HomeBooks.route,
+                    Screen.HomeMusic.route,
+                    Screen.Search.route,
                     Screen.InteractiveMusic.route,
                     Screen.InteractiveBooks.route,
                     Screen.InteractiveMovies.route,

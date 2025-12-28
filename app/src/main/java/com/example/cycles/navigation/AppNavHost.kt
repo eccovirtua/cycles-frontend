@@ -35,6 +35,8 @@ import com.example.cycles.ui.screens.SearchScreen
 import com.example.cycles.ui.screens.UserProfileScreen
 import com.example.cycles.ui.screens.WelcomeScreen
 import com.example.cycles.ui.screens.EditProfileScreen
+import com.example.cycles.ui.screens.MoviesHomeScreen
+import com.example.cycles.ui.screens.MusicHomeScreen
 
 private const val TRANSITION_DURATION = 220
 

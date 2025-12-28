@@ -1,8 +1,18 @@
 package com.example.cycles.navigation
 
 // Importa el Enum que necesitas para la función createRoute
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Book
+import androidx.compose.material.icons.filled.LocalMovies
+import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.ui.graphics.vector.ImageVector
 import com.example.cycles.data.ItemType
 
+enum class AppDomain(val title: String, val route: String, val icon: ImageVector) {
+    MOVIES("Películas", Screen.HomeMovies.route, Icons.Filled.LocalMovies),
+    BOOKS("Libros", Screen.HomeBooks.route, Icons.Filled.Book),
+    MUSIC("Música", Screen.HomeMusic.route, Icons.Filled.MusicNote)
+}
 sealed class Screen(val route: String) {
 
     data object Welcome : Screen("welcome")

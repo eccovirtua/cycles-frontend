@@ -12,8 +12,7 @@ sealed class BottomNavItem(
     val label: String,
     val icon: ImageVector
 ) {
-    // 🎯 HOME: La pantalla de selección de dominio (Películas, Libros, Música)
-    object Home : BottomNavItem(Screen.Home.route, "Inicio", Icons.Filled.Tv)
+    object Home : BottomNavItem(Screen.HomeMovies.route, "Inicio", Icons.Filled.Tv)
 
     // 🎯 LISTAS
     object Lists : BottomNavItem("lists_route", "Listas", Icons.Filled.Bookmarks)
