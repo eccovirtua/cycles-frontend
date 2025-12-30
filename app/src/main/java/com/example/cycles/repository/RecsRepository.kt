@@ -7,9 +7,8 @@ import com.example.cycles.data.ItemAddRequest
 import com.example.cycles.data.ItemDetailResponse
 import com.example.cycles.data.ListCreateRequest
 import com.example.cycles.data.ListUpdateRequest
+import com.example.cycles.data.MovieSearchDto
 import com.example.cycles.data.RecommendationItem
-import com.example.cycles.data.SearchResponse
-import com.example.cycles.data.SearchResultItem
 import com.example.cycles.data.SessionCreateResponse
 import com.example.cycles.data.SessionStateResponse
 import com.example.cycles.data.UserDashboardStats
@@ -33,7 +32,7 @@ class RecsRepository @Inject constructor(
         return api.createSession(domain)
     }
 
-    suspend fun sendFeedback(sessionId: String, itemId: String, feedback: Int): RecommendationItem? {
+    suspend fun sendFeedback(sessionId: String, itemId: String, feedback: Int): RecommendationItem {
         val req = FeedbackRequest(item_id = itemId, feedback = feedback)
         return api.sendSessionFeedback(sessionId, req).seed_item
     }
@@ -48,10 +47,6 @@ class RecsRepository @Inject constructor(
 
     suspend fun getDashboardStats(): UserDashboardStats {
         return api.getUserDashboardStats()
-    }
-
-    suspend fun searchItems(query: String, limit: Int = 20): SearchResponse {
-        return api.searchItems(query = query, limit = limit)
     }
 
     suspend fun getItemDetails(itemId: String): ItemDetailResponse {
@@ -98,14 +93,6 @@ class RecsRepository @Inject constructor(
         return api.getUserUsage()
     }
 
-    suspend fun archiveList(listId: String): UserListBasic {
-        return api.archiveList(listId = listId)
-    }
-
-    suspend fun unarchiveList(listId: String): UserListBasic {
-        return api.unarchiveList(listId = listId)
-    }
-
     // --- Favoritos ---
 
     suspend fun addFavorite(itemId: String) {
@@ -122,10 +109,6 @@ class RecsRepository @Inject constructor(
         }
     }
 
-    suspend fun getFavorites(): List<SearchResultItem> {
-        return api.getFavorites()
-    }
-
     suspend fun getFavoriteStatus(itemId: String): Boolean {
         return try {
             api.getFavoriteStatus(itemId = itemId).isFavorite
@@ -137,5 +120,9 @@ class RecsRepository @Inject constructor(
 
     suspend fun randomizeSeed(sessionId: String): RecommendationItem {
         return api.randomizeSeed(sessionId = sessionId).seed_item
+    }
+
+    suspend fun searchMovies(query: String): List<MovieSearchDto> {
+        return api.searchMovies(query)
     }
 }

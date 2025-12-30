@@ -64,12 +64,12 @@ object NetworkModule {
             .build()
     }
 
-    // 3. Retrofit
     @Singleton
     @Provides
     fun provideRecsApiService(okHttpClient: OkHttpClient): RecsApiService {
         return Retrofit.Builder()
-            .baseUrl("https://knn-ann-algorithm-377792293762.southamerica-west1.run.app")
+//            .baseUrl("https://knn-ann-algorithm-377792293762.southamerica-west1.run.app")
+            .baseUrl("http://10.0.2.2:8000/")
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
@@ -85,4 +85,20 @@ object NetworkModule {
     fun provideFirebaseStorage(): FirebaseStorage {
         return FirebaseStorage.getInstance()
     }
+
+//    private const val BASE_URL = "http://10.0.2.2:8000/"
+//    @Provides
+//    @Singleton
+//    fun provideRetrofit(): Retrofit {
+//        return Retrofit.Builder()
+//            .baseUrl(BASE_URL)
+//            .addConverterFactory(GsonConverterFactory.create())
+//            .build()
+//    }
+//
+//    @Provides
+//    @Singleton
+//    fun provideCyclesApi(retrofit: Retrofit): RecsApiService {
+//        return retrofit.create(RecsApiService::class.java)
+//    }
 }

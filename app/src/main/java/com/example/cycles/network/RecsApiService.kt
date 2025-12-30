@@ -7,8 +7,6 @@ import com.example.cycles.data.ItemAddRequest
 import com.example.cycles.data.ItemDetailResponse
 import com.example.cycles.data.ListCreateRequest
 import com.example.cycles.data.ListUpdateRequest
-import com.example.cycles.data.SearchResponse
-import com.example.cycles.data.SearchResultItem
 import com.example.cycles.data.SeedResponse
 import com.example.cycles.data.SessionCreateResponse
 import com.example.cycles.data.SessionStateResponse
@@ -19,6 +17,8 @@ import com.example.cycles.data.UserListDetail
 import com.example.cycles.data.UserLookupResponse
 import com.example.cycles.data.UserUsageStatus
 import com.example.cycles.data.AvailabilityResponse
+import com.example.cycles.data.MovieDetailDto
+import com.example.cycles.data.MovieSearchDto
 import com.example.cycles.data.UserDto
 import com.example.cycles.data.UserExistsResponse
 import com.example.cycles.data.UserUpdateRequest
@@ -60,13 +60,6 @@ interface RecsApiService {
     suspend fun getUserDashboardStats(
     ): UserDashboardStats
 
-    @GET("search")
-    suspend fun searchItems(
-        @Query("query") query: String,
-        @Query("limit") limit: Int = 20 // Parámetro opcional
-    ): SearchResponse // Devuelve la lista de resultados
-
-    // ✨ NUEVO: Endpoint de Detalle de Ítem
     @GET("item/{item_id}")
     suspend fun getItemDetails(
         @Path("item_id") itemId: String
@@ -111,16 +104,6 @@ interface RecsApiService {
         @Path("item_id") itemId: String
     ): UserListBasic
 
-    @PUT("lists/{list_id}/archive")
-    suspend fun archiveList(
-        @Path("list_id") listId: String
-    ): UserListBasic // Devuelve la lista actualizada
-
-    @PUT("lists/{list_id}/unarchive")
-    suspend fun unarchiveList(
-        @Path("list_id") listId: String
-    ): UserListBasic // Devuelve la lista actualizada
-
     @POST("favorites/{item_id}")
     suspend fun addFavorite(
         @Path("item_id") itemId: String
@@ -131,9 +114,6 @@ interface RecsApiService {
         @Path("item_id") itemId: String
     ): Response<Unit> // Devuelve 204 No Content
 
-    @GET("favorites")
-    suspend fun getFavorites(
-    ): List<SearchResultItem>
 
     @GET("favorites/status/{item_id}")
     suspend fun getFavoriteStatus(
@@ -183,6 +163,12 @@ interface RecsApiService {
         @Path("uid") uid: String,
         @Body request: UserUpdateRequest
     ): Response<Map<String, String>>
+
+    @GET("search/movies")
+    suspend fun searchMovies(@Query("q") query: String): List<MovieSearchDto>
+
+    @GET("movies/{id}")
+    suspend fun getMovieDetail(@Path("id") id: Int): MovieDetailDto
 }
 
 
