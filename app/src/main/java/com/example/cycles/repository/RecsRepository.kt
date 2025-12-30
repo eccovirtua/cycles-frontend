@@ -130,4 +130,10 @@ class RecsRepository @Inject constructor(
     suspend fun getMovieDetail(id: Int): MovieDetailDto {
         return api.getMovieDetail(id)
     }
+
+    suspend fun getTopRated() = api.getTopRatedMovies()
+    suspend fun getNewReleases() = api.getNewReleasesMovies()
+    suspend fun getForYou() = api.getForYouMovies()
+
+
 }

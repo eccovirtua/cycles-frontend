@@ -5,56 +5,79 @@ import androidx.lifecycle.viewModelScope
 import com.example.cycles.repository.RecsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.example.cycles.data.SearchResultItem
+import com.example.cycles.utils.TmdbImageUtils
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 
+
+// Estado único para toda la pantalla
 data class HomeUiState(
-    val isLoadingUsage: Boolean = false,
-    val remainingSessions: Int? = null, // null hasta que se cargue
+    val isLoading: Boolean = true,
+    val topRatedList: List<SearchResultItem> = emptyList(),
+    val newReleasesList: List<SearchResultItem> = emptyList(),
+    val forYouList: List<SearchResultItem> = emptyList(),
     val error: String? = null
 )
+
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val repository: RecsRepository
-    ): ViewModel() {
+) : ViewModel() {
+
     private val _uiState = MutableStateFlow(HomeUiState())
-    val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
-
-    private val _isLoading = MutableStateFlow(false)
-    // Estado expuesto al Composable (solo lectura)
-    val isLoading = _isLoading.asStateFlow()
-
-    private val _error = MutableStateFlow("")
-    val error = _error.asStateFlow()
-
-    // Propiedad calculada para la UI
-    val isLimitReached: StateFlow<Boolean> = uiState
-        .map { it.remainingSessions == 0 } // Es true si remaining es 0
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
-
+    val uiState = _uiState.asStateFlow()
 
     init {
-        loadUsageStatus() // Cargar al iniciar
+        loadHomeData()
     }
-    fun loadUsageStatus() {
+
+    fun loadHomeData() {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoadingUsage = true, error = null) }
+            _uiState.update { it.copy(isLoading = true, error = null) }
+
             try {
-                val usage = repository.getUserUsage()
-                _uiState.update { it.copy(isLoadingUsage = false, remainingSessions = usage.remainingToday) }
+
+                coroutineScope {
+                    val topRatedDeferred = async { repository.getTopRated() }
+                    val newReleasesDeferred = async { repository.getNewReleases() }
+                    val forYouDeferred = async { repository.getForYou() }
+
+                    // Esperamos a que lleguen las 3 (await)
+                    val topRated = topRatedDeferred.await()
+                    val newReleases = newReleasesDeferred.await()
+                    val forYou = forYouDeferred.await()
+
+                    // Mapeamos los datos (DTO -> UI Model)
+                    _uiState.update { state ->
+                        state.copy(
+                            isLoading = false,
+                            topRatedList = topRated.map { it.toUiModel() },
+                            newReleasesList = newReleases.map { it.toUiModel() },
+                            forYouList = forYou.map { it.toUiModel() }
+                        )
+                    }
+                }
             } catch (e: Exception) {
-                _uiState.update { it.copy(isLoadingUsage = false, error = "Error al cargar límite: ${e.message}") }
-                // Considera poner remainingSessions a 0 si falla la carga para bloquear por defecto
-                // _uiState.update { it.copy(isLoadingUsage = false, error = "...", remainingSessions = 0) }
+                e.printStackTrace()
+                _uiState.update { it.copy(isLoading = false, error = "Error cargando datos") }
             }
         }
     }
-}
 
+    // Helper para convertir DTO a SearchResultItem (reutilizamos tu clase genérica)
+    private fun com.example.cycles.data.MovieSearchDto.toUiModel(): SearchResultItem {
+        return SearchResultItem(
+            itemId = this.id.toString(),
+            title = this.title,
+            subtitle = this.releaseDate?.take(4) ?: "",
+            imageUrl = TmdbImageUtils.buildPosterUrl(this.posterPath),
+            type = "MOVIE"
+        )
+    }
+}
 

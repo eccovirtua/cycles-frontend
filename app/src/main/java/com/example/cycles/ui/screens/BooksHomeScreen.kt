@@ -46,7 +46,7 @@ fun BooksHomeScreen(
     val lifecycleOwner = LocalLifecycleOwner.current
     LaunchedEffect(lifecycleOwner.lifecycle) {
         lifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-            homeViewModel.loadUsageStatus()
+//            homeViewModel.loadUsageStatus()
         }
     }
 

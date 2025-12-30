@@ -4,20 +4,26 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.automirrored.filled.PlaylistAdd
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
@@ -123,10 +129,128 @@ fun SearchBarWithFilter(
 // --- COMPONENTE 2: FEED DE DESCUBRIMIENTO (Tu código original intacto) ---
 @Composable
 fun DiscoveryFeed() {
-    // ... (Mantén tu código de DiscoveryFeed tal cual lo tenías, solo decorativo) ...
-    // Para no hacer la respuesta gigante, asumo que copias tu DiscoveryFeed aquí
-    // Si quieres que lo repita, avísame.
-    Text("Feed de descubrimiento (Tu código anterior va aquí)", modifier = Modifier.padding(16.dp))
+    // Datos falsos para decorar
+    val randomLists = listOf("Terror 80s", "Cyberpunk Vibes", "Gym Motivation", "Chill Sunday")
+    val recentReviews = listOf(
+        Pair("Inception", 5.0), Pair("Dune Part 2", 4.5), Pair("Metallica - Black", 5.0)
+    )
+
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(24.dp)
+    ) {
+        // SECCIÓN 1: Listas Recomendadas
+        item {
+            Text(
+                "Listas populares hoy",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    DiscoveryListCard(randomLists[0], Color(0xFFEF5350), Modifier.weight(1f))
+                    DiscoveryListCard(randomLists[1], Color(0xFF42A5F5), Modifier.weight(1f))
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    DiscoveryListCard(randomLists[2], Color(0xFF66BB6A), Modifier.weight(1f))
+                    DiscoveryListCard(randomLists[3], Color(0xFFFFA726), Modifier.weight(1f))
+                }
+            }
+        }
+
+        // SECCIÓN 2: Reseñas Recientes
+        item {
+            Text(
+                "Reseñas de la comunidad",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                items(recentReviews) { (title, rating) ->
+                    DiscoveryReviewCard(title, rating)
+                }
+                items(3) {
+                    DiscoveryReviewCard("Item #$it", 4.0)
+                }
+            }
+        }
+
+        // SECCIÓN 3: Categorías Rápidas
+        item {
+            Text("Explorar por categoría", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                CategoryShortcut(Icons.Default.Movie, "Cine")
+                CategoryShortcut(Icons.Default.Book, "Libros")
+                CategoryShortcut(Icons.Default.MusicNote, "Música")
+                CategoryShortcut(Icons.Default.Person, "Usuarios")
+            }
+        }
+    }
+}
+
+// --- SUB-COMPONENTES VISUALES PARA DISCOVERY (RESTAURADOS) ---
+
+@Composable
+fun DiscoveryListCard(title: String, color: Color, modifier: Modifier = Modifier) {
+    Card(
+        modifier = modifier.height(100.dp),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = color.copy(alpha = 0.8f))
+    ) {
+        Box(modifier = Modifier.fillMaxSize().padding(12.dp), contentAlignment = Alignment.BottomStart) {
+            Text(title, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            Icon(
+                Icons.AutoMirrored.Filled.List,
+                contentDescription = null,
+                tint = Color.White.copy(alpha = 0.5f),
+                modifier = Modifier.align(Alignment.TopEnd)
+            )
+        }
+    }
+}
+
+@Composable
+fun DiscoveryReviewCard(title: String, rating: Double) {
+    Card(
+        modifier = Modifier.width(160.dp).height(110.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+    ) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Surface(modifier = Modifier.size(24.dp), shape = CircleShape, color = Color.Gray) {}
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Usuario", style = MaterialTheme.typography.labelSmall)
+            }
+            Spacer(modifier = Modifier.weight(1f))
+            Text(title, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Filled.Star, null, tint = Color(0xFFFFC107), modifier = Modifier.size(14.dp))
+                Text("$rating", style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(start = 4.dp))
+            }
+        }
+    }
+}
+
+@Composable
+fun CategoryShortcut(icon: ImageVector, label: String) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Surface(
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.primaryContainer,
+            modifier = Modifier.size(55.dp)
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(icon, null, tint = MaterialTheme.colorScheme.primary)
+            }
+        }
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(label, style = MaterialTheme.typography.bodySmall)
+    }
 }
 
 

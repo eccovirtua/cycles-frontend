@@ -169,6 +169,15 @@ interface RecsApiService {
 
     @GET("movies/{id}")
     suspend fun getMovieDetail(@Path("id") id: Int): MovieDetailDto
+
+    @GET("movies/lists/top-rated")
+    suspend fun getTopRatedMovies(): List<MovieSearchDto>
+
+    @GET("movies/lists/new-releases")
+    suspend fun getNewReleasesMovies(): List<MovieSearchDto>
+
+    @GET("movies/lists/for-you")
+    suspend fun getForYouMovies(): List<MovieSearchDto>
 }
 
 
