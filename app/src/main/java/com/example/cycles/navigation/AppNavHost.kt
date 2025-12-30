@@ -16,19 +16,20 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.example.cycles.data.ItemType
 import com.example.cycles.ui.screens.BooksHomeScreen
 import com.example.cycles.ui.screens.ChooseUsernameScreen
 import com.example.cycles.ui.screens.DashboardScreen
 import com.example.cycles.ui.screens.FinalRecommendationsScreen
 import com.example.cycles.ui.screens.ForgotPasswordScreen
 import com.example.cycles.ui.screens.InteractiveRecScreen
-import com.example.cycles.ui.screens.ItemDetailScreen
 import com.example.cycles.ui.screens.ListsScreen
 import com.example.cycles.ui.screens.RegisterScreen
 import com.example.cycles.ui.screens.SearchScreen
 import com.example.cycles.ui.screens.UserProfileScreen
 import com.example.cycles.ui.screens.WelcomeScreen
 import com.example.cycles.ui.screens.EditProfileScreen
+import com.example.cycles.ui.screens.MovieDetailScreen
 import com.example.cycles.ui.screens.MoviesHomeScreen
 import com.example.cycles.ui.screens.MusicHomeScreen
 
@@ -82,30 +83,10 @@ fun AppNavHost(
         ) {
             SearchScreen(
                 onItemClick = { itemId, itemType ->
-                    // Navega a la pantalla de detalle, pasando el ID y Tipo
-                    navController.navigate(Screen.ItemDetail.createRoute(itemId, itemType))
+                    if (itemType == ItemType.MOVIE) {
+                        navController.navigate("movie_detail/$itemId")
+                    }
                 }
-            )
-        }
-
-        composable(
-            route = Screen.ItemDetail.route,
-            arguments = listOf(
-                navArgument("itemId") { type = NavType.StringType },
-                navArgument("itemType") { type = NavType.StringType }
-            )
-        ) { backStackEntry ->
-            val itemId = backStackEntry.arguments?.getString("itemId") ?: ""
-            val itemTypeString = backStackEntry.arguments?.getString("itemType") ?: ""
-            val itemType = try {
-                com.example.cycles.data.ItemType.valueOf(itemTypeString)
-            } catch (_: IllegalArgumentException) {
-                com.example.cycles.data.ItemType.BOOK // Fallback
-            }
-            ItemDetailScreen(
-                itemId = itemId,
-                itemType = itemType,
-                onBack = { navController.popBackStack() }
             )
         }
         //dashboard
@@ -246,5 +227,17 @@ fun AppNavHost(
                 }
             )
         }
-    }
+
+        // Definición de la ruta
+        composable(
+            route = "movie_detail/{itemId}",
+            arguments = listOf(navArgument("itemId") { type = NavType.StringType })
+        ) {
+            MovieDetailScreen(
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+
+
+    }//llave que cierra
 }

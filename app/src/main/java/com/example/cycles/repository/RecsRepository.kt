@@ -7,6 +7,7 @@ import com.example.cycles.data.ItemAddRequest
 import com.example.cycles.data.ItemDetailResponse
 import com.example.cycles.data.ListCreateRequest
 import com.example.cycles.data.ListUpdateRequest
+import com.example.cycles.data.MovieDetailDto
 import com.example.cycles.data.MovieSearchDto
 import com.example.cycles.data.RecommendationItem
 import com.example.cycles.data.SessionCreateResponse
@@ -124,5 +125,9 @@ class RecsRepository @Inject constructor(
 
     suspend fun searchMovies(query: String): List<MovieSearchDto> {
         return api.searchMovies(query)
+    }
+
+    suspend fun getMovieDetail(id: Int): MovieDetailDto {
+        return api.getMovieDetail(id)
     }
 }
