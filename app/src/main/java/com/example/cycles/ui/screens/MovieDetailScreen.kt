@@ -127,7 +127,7 @@ fun MovieDetailScreen(
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(text = movie.releaseDate?.take(4) ?: "N/A", style = MaterialTheme.typography.labelLarge)
                             Text(" • ", modifier = Modifier.padding(horizontal = 4.dp))
-                            Text(text = "${movie.runtime} min", style = MaterialTheme.typography.labelLarge)
+                            Text(text = formatRuntime(movie.runtime), style = MaterialTheme.typography.labelLarge)
                             Text(" • ", modifier = Modifier.padding(horizontal = 4.dp))
                             Text(text = "★ ${movie.voteAverage}", color = Color(0xFFFFC107), fontWeight = FontWeight.Bold)
                         }
@@ -181,4 +181,11 @@ fun SmallFloatingBackButton(onClick: () -> Unit) {
             tint = Color.White
         )
     }
+}
+
+fun formatRuntime(minutes: Int): String {
+    if (minutes <= 0) return "Duración desc."
+    val hours = minutes / 60
+    val mins = minutes % 60
+    return if (hours > 0) "${hours}h ${mins}m" else "${mins}m"
 }
